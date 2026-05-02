@@ -1,0 +1,582 @@
+Build a polished production-style SaaS prototype called SpecFlow AI.
+
+You must use spec-driven development. Do not start implementation immediately.
+
+First create these files:
+
+.specify/memory/constitution.md
+/specs/001-specflow-ai/spec.md
+/specs/001-specflow-ai/plan.md
+/specs/001-specflow-ai/tasks.md
+/specs/001-specflow-ai/data-model.md
+/specs/001-specflow-ai/quickstart.md
+/specs/001-specflow-ai/contracts/app-routes.md
+/specs/001-specflow-ai/contracts/data-contracts.md
+
+After creating the spec artifacts, implement the app from tasks.md in order.
+
+Product:
+SpecFlow AI is an AI-guided product breakdown workspace for Product Managers and Product Owners. It turns messy product input into structured PRDs, epics, developer-ready Jira user stories, quality checks, developer review, and Jira-ready export.
+
+Core workflow:
+Intake → Clarification → PRD → Epics → Stories → Quality Review → Developer Review → Jira Export
+
+Primary users:
+- Product Managers
+- Product Owners
+
+Secondary users:
+- Developers
+- Engineering leads
+- QA
+- Designers
+
+Core problem:
+PMs and Product Owners often start from rough product ideas, stakeholder requests, meeting notes, transcripts, or incomplete PRDs. They then struggle to create proper epics and user stories that match business requirements and are actually feasible for developers. This causes repeated developer revisions, unclear backlog handoffs, and delayed story execution.
+
+Core promise:
+Turn messy product requirements into PRDs, epics, and developer-ready Jira stories through a guided workflow with clarification questions, quality scoring, developer review, and export-ready backlog output.
+
+Use this constitution:
+
+# SpecFlow AI Constitution
+
+## Product Purpose
+SpecFlow AI exists to help Product Managers and Product Owners turn messy product input into structured PRDs, epics, developer-ready Jira user stories, quality checks, developer review, and Jira-ready export.
+
+Prioritize backlog clarity, developer readiness, and traceability over generic AI writing.
+
+## Workflow Principle
+The product must follow:
+Intake → Clarification → PRD → Epics → Stories → Quality Review → Developer Review → Jira Export
+
+Each phase must have:
+- visible status
+- editable artifact
+- next action
+- quality or missing-context feedback where relevant
+
+The app must not behave like a generic chatbot.
+
+## Clarification Before Generation
+The app must not blindly generate final Jira-ready stories from incomplete requirements.
+
+When required context is missing, show clarification questions grouped by:
+- business goal
+- target users/personas
+- scope and non-goals
+- UX/design
+- edge cases
+- error handling
+- localization
+- technical constraints
+- dependencies
+- analytics/tracking
+- risks
+
+## Developer Readiness
+Every generated story must include a developer-readiness score out of 100.
+
+Score dimensions:
+- clarity: 20
+- acceptance criteria: 20
+- business alignment: 15
+- technical feasibility: 15
+- testability: 10
+- edge cases/error handling: 10
+- dependencies/design/localization: 10
+
+Score labels:
+- 90-100: Ready for Jira
+- 75-89: Minor review needed
+- 60-74: Needs PM refinement
+- Below 60: Not ready
+
+## Jira-Ready Output
+Every exported story must include:
+- issue type
+- summary
+- description
+- acceptance criteria
+- priority
+- labels
+- components
+- dependencies
+- reviewer status
+- readiness score
+
+Do not implement real Jira API integration. Provide copy-ready Markdown, CSV preview, and JSON preview. “Connect Jira” may appear as disabled/coming soon.
+
+Technical stack:
+Use a modern React + TypeScript app. Prefer Vite if no framework is already selected. Use Tailwind CSS. Use shadcn/ui-inspired components where practical. Use lucide-react icons where useful.
+
+Do not implement real AI API calls yet. Simulate AI behavior with deterministic mock generation functions and realistic sample outputs. Structure the app so real AI can be plugged in later.
+
+Design direction:
+Use Product Ops Console.
+
+The app should feel like:
+Linear/Jira operational clarity + Confluence-style structured artifacts + AI guidance panel + product-quality linting.
+
+It should not feel like:
+ChatGPT wrapper, generic AI dashboard, flashy landing page, roadmap suite, or decorative AI website.
+
+Design qualities:
+- calm
+- information-first
+- structured
+- professional B2B SaaS
+- dense but readable
+- workflow-oriented
+- artifact-driven
+- accessible
+
+Design tokens:
+- background: #F6F7F9
+- surface: #FFFFFF
+- surface muted: #F1F3F5
+- border: #DDE2E7
+- strong border: #C5CCD5
+- primary text: #172033
+- secondary text: #5B6678
+- muted text: #8992A3
+- primary: #2F5BFF
+- primary dark: #2447C7
+- primary soft: #EAF0FF
+- success: #16A34A
+- success soft: #EAF8EF
+- warning: #D97706
+- warning soft: #FFF4DE
+- danger: #DC2626
+- danger soft: #FEECEC
+- info: #0891B2
+- info soft: #E7F8FC
+- radius sm: 4px
+- radius md: 6px
+- radius lg: 8px
+- spacing grid: 8px
+- font: Inter, system-ui, sans-serif
+
+Design system rules:
+- Use an 8px spacing grid.
+- Use max 8px border radius.
+- Use subtle borders and minimal shadows.
+- Use compact tables, tabs, side panels, drawers, editable cards, status badges, score bars/rings, and progress indicators.
+- Use icons inside buttons where useful.
+- Use visible focus states.
+- Use semantic HTML and accessible form labels.
+- Do not rely on color alone for status.
+- Keep UI dense but not cramped.
+- Every screen must have a clear primary action.
+- Every decorative element must support workflow comprehension.
+
+Avoid:
+- marketing landing page as first screen
+- giant hero sections
+- gradient blob backgrounds
+- neon AI/cyber visuals
+- robot imagery
+- decorative fake dashboards
+- oversized cards with little information
+- purple-blue gradient domination
+- deeply rounded pill-heavy UI
+- generic AI sparkle effects
+- excessive motion
+- cards nested inside cards
+
+Global layout:
+- Persistent left sidebar
+- Topbar
+- Main content area
+
+Sidebar:
+- SpecFlow AI logo
+- Dashboard
+- New Breakdown
+- Projects
+- Reviews
+- Exports
+- Settings
+
+Topbar:
+- workspace name
+- search
+- notifications
+- user avatar
+
+Dashboard:
+Show an operational overview, not a landing page.
+
+Include:
+- Active breakdowns
+- Average developer-readiness score
+- Stories awaiting developer review
+- Jira exports ready
+- Active sessions table
+- Review queue panel
+- Recent exports panel
+
+Sample sessions:
+- Team Access Management
+- Subscription Cancellation Flow
+- Multi-language Checkout
+- Admin Reporting Dashboard
+
+New Breakdown:
+Create a structured intake form.
+
+Fields:
+- project/module name
+- input type:
+  - Rough idea
+  - PRD draft
+  - Meeting notes
+  - Stakeholder request
+  - Transcript
+  - Mixed notes
+- output depth:
+  - Quick
+  - Standard
+  - Detailed
+- Jira project key
+- target users
+- business goal
+- known constraints
+- labels/components
+- large messy input text area
+
+Primary action:
+Start Guided Breakdown
+
+The form should feel like a structured intake checklist, not a chat prompt box.
+
+Workflow Workspace:
+Use a phase-based interface.
+
+Phase tracker:
+Intake → Clarification → PRD → Epics → Stories → Quality → Dev Review → Export
+
+Each phase status:
+- Not started
+- In progress
+- Complete
+- Needs attention
+
+Layout:
+- phase tracker at top of main workspace
+- artifact editor in center
+- AI guidance / quality panel on right
+
+Right panel should show:
+- missing information
+- quality warnings
+- suggested next actions
+- readiness state
+
+On mobile:
+- sidebar collapses
+- phase tracker becomes horizontal scroll
+- guidance panel moves below artifact
+
+Clarification phase:
+Generate grouped clarification questions:
+- business goal
+- target users/personas
+- scope and non-goals
+- UX/design needs
+- edge cases
+- error handling
+- localization
+- technical constraints
+- dependencies
+- analytics/tracking
+- risks
+
+Allow inline answers.
+Mark required unanswered questions.
+Allow “skip with risk” for prototype.
+Show missing-context warning before export-ready story generation.
+
+PRD phase:
+Generate an editable structured PRD with:
+- summary
+- problem statement
+- goals
+- non-goals
+- target users/personas
+- user journeys
+- functional requirements
+- non-functional requirements
+- assumptions
+- risks
+- success metrics
+- open questions
+
+PRD should be structured artifact cards with visible completeness, not just one long document.
+
+Epics phase:
+Generate epic cards mapped to business goals.
+
+Each epic includes:
+- title
+- business objective
+- scope summary
+- related PRD requirements
+- priority
+- dependencies
+- risks
+- suggested Jira epic description
+
+Show traceability back to PRD requirements.
+
+Stories phase:
+Generate Jira-ready user stories grouped by epic.
+
+Each story includes:
+- title
+- user story format: “As a [user], I want [goal], so that [benefit].”
+- description
+- acceptance criteria
+- priority
+- labels/components
+- dependencies
+- edge cases
+- error handling
+- localization notes
+- design/UX notes
+- analytics/tracking notes
+- QA notes
+- technical notes
+- open questions
+
+Each story card:
+- editable
+- collapsible
+- readiness score visible
+- warning badges visible
+- review status visible
+
+A story card should look closer to a Jira-ready spec than a pretty note card.
+
+Quality Review:
+Make quality visible like linting/checking for product stories.
+
+Score dimensions:
+- clarity
+- acceptance criteria
+- business alignment
+- technical feasibility
+- testability
+- edge cases/error handling
+- dependencies/design/localization
+
+Warnings:
+- missing acceptance criteria
+- story too large
+- missing error handling
+- missing localization notes
+- missing design dependency
+- weak business alignment
+- unclear user role
+- hidden technical dependency
+- missing analytics/tracking
+- untestable requirement
+
+Actions:
+- Apply suggested fixes
+- Split story
+- Send to developer review
+- Mark as ready
+
+Developer Review:
+Lightweight developer review screen.
+
+Developer statuses:
+- Approved
+- Needs clarification
+- Too large
+- Technically risky
+- Blocked
+- Missing acceptance criteria
+
+Each review item includes:
+- status
+- developer comment
+- reviewer name
+- timestamp
+- PM revision status
+
+Review summary:
+- approved stories
+- stories needing clarification
+- blocked items
+- technical risks
+- overall readiness
+
+Developer review should be fast: status + comment, not a full collaboration suite.
+
+Jira Export:
+Generate copy-ready output.
+
+Formats:
+- Markdown
+- CSV preview
+- JSON preview
+
+Group export by epic.
+
+Each exported story includes:
+- issue type
+- summary
+- description
+- acceptance criteria
+- priority
+- labels
+- components
+- dependencies
+- reviewer status
+- readiness score
+
+Buttons:
+- Copy epic
+- Copy story
+- Copy all Jira-ready output
+- Download JSON
+- Download CSV
+- Connect Jira disabled / Coming soon
+
+Visibly separate:
+- Ready for Jira
+- Needs Review
+
+Reviews page:
+Show all stories awaiting developer review across projects.
+
+Include:
+- story title
+- project/session
+- priority
+- readiness score
+- reviewer status
+- updated time
+
+Exports page:
+Show previous export packages.
+
+Include:
+- project name
+- date
+- number of epics/stories
+- readiness average
+- export format
+- status
+
+Settings page:
+Include prototype settings:
+- workspace name
+- default Jira project key
+- default labels/components
+- story template preferences
+- quality threshold
+- developer review required toggle
+
+Sample data:
+Include a complete sample project called “Team Access Management”.
+
+Messy input:
+“We need users to invite team members to projects, assign roles, and manage access. Admins should be able to remove users. Some roles should only view data. Need to support email invites and handle expired invitations.”
+
+Generated epics:
+- Team invitation management
+- Role-based access control
+- Member administration
+- Invitation lifecycle and error handling
+
+Generate realistic user stories under each epic.
+
+Mock AI behavior:
+Implement local deterministic functions for:
+- input classification
+- clarification question generation
+- PRD generation
+- epic generation
+- story generation
+- story splitting suggestion
+- readiness scoring
+- quality warning detection
+- Jira export formatting
+
+Suggested component structure:
+- AppShell
+- Sidebar
+- Topbar
+- Dashboard
+- NewBreakdown
+- WorkflowWorkspace
+- PhaseTracker
+- IntakePanel
+- ClarificationPanel
+- PRDPanel
+- EpicsPanel
+- StoriesPanel
+- QualityReviewPanel
+- DeveloperReviewPanel
+- JiraExportPanel
+- ReviewsPage
+- ExportsPage
+- SettingsPage
+- StoryCard
+- EpicCard
+- ReadinessScore
+- WarningBadge
+- ExportPreview
+- StatusBadge
+
+Data model should include:
+- Workspace
+- ProjectSession
+- PhaseStatus
+- ClarificationQuestion
+- PRDSection
+- Epic
+- Story
+- ReadinessScore
+- QualityWarning
+- DeveloperReview
+- ExportPackage
+
+Acceptance criteria:
+- User can open dashboard and understand workflow state quickly.
+- User can start a new breakdown from messy input.
+- User can answer clarification questions.
+- User can generate and edit PRD sections.
+- User can generate epics and see business-goal traceability.
+- User can generate and edit Jira-ready stories.
+- User can see readiness scores and quality warnings.
+- User can simulate developer review statuses and comments.
+- User can export copy-ready Markdown, CSV preview, and JSON preview.
+- App is responsive.
+- App uses the Product Ops Console design direction.
+- App creates the required spec files before implementation.
+
+Design self-review checklist:
+Before finishing, review the UI against:
+- philosophy alignment
+- visual hierarchy
+- craft quality
+- functionality
+- originality
+
+Fix obvious issues:
+- inconsistent spacing
+- weak hierarchy
+- unclear primary action
+- too much decoration
+- low contrast
+- text overflow
+- inaccessible controls
+- cramped cards/tables
+- generic AI visual clichés
+
+Final goal:
+A PM should be able to open the app, start from messy product input, answer clarification questions, generate a PRD, generate epics and Jira-ready stories, review quality warnings, simulate developer review, and copy/export a Jira-ready backlog package.

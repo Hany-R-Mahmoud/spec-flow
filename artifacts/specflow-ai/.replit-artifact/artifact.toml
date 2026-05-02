@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "SpecFlow AI"
+version = "1.0.0"
+id = "artifacts/specflow-ai"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 24549
+
+[services.development]
+run = "pnpm --filter @workspace/specflow-ai run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/specflow-ai", "run", "build" ]
+publicDir = "artifacts/specflow-ai/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24549"
+BASE_PATH = "/"
