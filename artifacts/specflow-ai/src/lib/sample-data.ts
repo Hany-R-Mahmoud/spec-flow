@@ -2,9 +2,11 @@ import type {
   ClarificationQuestion,
   Epic,
   ExportPackage,
+  GenerationMode,
   PRDSection,
   ProjectSession,
   Story,
+  WorkflowGenerationState,
   WorkspaceSettings,
 } from './types';
 
@@ -31,6 +33,46 @@ const fallbackPrdSections: PRDSection[] = [
 
 const fallbackEpics: Epic[] = [];
 const fallbackStories: Story[] = [];
+
+function createGeneration(mode: GenerationMode = 'demo'): WorkflowGenerationState {
+  return {
+    clarification: {
+      status: 'idle',
+      mode,
+      promptVersion: 'clarification-v1',
+      updatedAt: null,
+      errorMessage: null,
+    },
+    prd: {
+      status: 'idle',
+      mode,
+      promptVersion: 'prd-v1',
+      updatedAt: null,
+      errorMessage: null,
+    },
+    epics: {
+      status: 'idle',
+      mode,
+      promptVersion: 'epics-v1',
+      updatedAt: null,
+      errorMessage: null,
+    },
+    stories: {
+      status: 'idle',
+      mode,
+      promptVersion: 'stories-v1',
+      updatedAt: null,
+      errorMessage: null,
+    },
+    quality: {
+      status: 'idle',
+      mode,
+      promptVersion: 'quality-v1',
+      updatedAt: null,
+      errorMessage: null,
+    },
+  };
+}
 
 function createFallbackSession(
   id: string,
@@ -67,6 +109,7 @@ function createFallbackSession(
     prdSections: fallbackPrdSections.map((section) => ({ ...section })),
     epics: fallbackEpics,
     stories: fallbackStories,
+    generation: createGeneration(),
   };
 }
 

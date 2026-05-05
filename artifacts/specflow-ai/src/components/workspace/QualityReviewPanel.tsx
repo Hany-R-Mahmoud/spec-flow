@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Story, Epic } from '@/lib/types';
+import { Story, Epic, GenerationStepState } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { ChevronDown, ChevronRight, CheckCircle, AlertTriangle, AlertCircle, Scissors, Send } from 'lucide-react';
 import { PriorityBadge } from '@/components/shared/PriorityBadge';
@@ -12,6 +12,9 @@ import { useSessionStore } from '@/store/session-store';
 interface QualityReviewPanelProps {
   stories: Story[];
   epics: Epic[];
+  generationStep: GenerationStepState;
+  isDemoMode: boolean;
+  onGenerateQuality: () => void;
   onSendToDevReview: () => void;
 }
 
@@ -29,10 +32,18 @@ function scoreBg(value: number) {
   return 'bg-[var(--color-danger-soft)]';
 }
 
-export function QualityReviewPanel({ stories, epics, onSendToDevReview }: QualityReviewPanelProps) {
+export function QualityReviewPanel({
+  stories,
+  epics,
+  generationStep,
+  isDemoMode,
+  onGenerateQuality,
+  onSendToDevReview,
+}: QualityReviewPanelProps) {
   const { toast } = useToast();
   const { dispatch } = useSessionStore();
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+  const isGenerating = generationStep.status === 'running';
 
   const avgScore = stories.length > 0
     ? Math.round(stories.reduce((sum, s) => sum + s.readinessScore.total, 0) / stories.length)
@@ -73,11 +84,31 @@ export function QualityReviewPanel({ stories, epics, onSendToDevReview }: Qualit
             {stories.length} stories · avg {avgScore}/100 · {totalWarnings} warnings
           </p>
         </div>
-        <Button size="sm" onClick={onSendToDevReview} data-testid="button-send-all-review">
-          <Send className="w-3 h-3 mr-1.5" />
-          Send All to Dev Review
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button size="sm" variant="outline" onClick={onGenerateQuality} disabled={isGenerating || stories.length === 0}>
+            Refresh Scores
+          </Button>
+          <Button size="sm" onClick={onSendToDevReview} disabled={isGenerating || stories.length === 0} data-testid="button-send-all-review">
+            <Send className="w-3 h-3 mr-1.5" />
+            Send All to Dev Review
+          </Button>
+        </div>
       </div>
+
+      {(generationStep.status !== 'idle' || generationStep.errorMessage) && (
+        <div className="rounded-md border border-border bg-card px-3 py-2 text-xs text-muted-foreground">
+          {generationStep.status === 'running' && <span>Scoring stories and detecting warnings…</span>}
+          {generationStep.status === 'succeeded' && (
+            <span>{isDemoMode ? 'Demo readiness scoring applied.' : 'Readiness scores refreshed from the API workflow.'}</span>
+          )}
+          {generationStep.status === 'failed' && (
+            <span className="text-[var(--color-danger)]">{generationStep.errorMessage || 'Quality review failed. Retry when ready.'}</span>
+          )}
+          {generationStep.status === 'unavailable' && (
+            <span className="text-[var(--color-warning)]">{generationStep.errorMessage || 'Quality review is unavailable right now.'}</span>
+          )}
+        </div>
+      )}
 
       {/* Summary cards */}
       <div className="grid grid-cols-4 gap-3">

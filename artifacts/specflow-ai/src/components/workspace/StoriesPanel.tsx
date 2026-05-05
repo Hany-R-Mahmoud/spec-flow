@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ChevronDown, ChevronRight, Edit3, Send, X, CheckCircle } from 'lucide-react';
-import { Story, Epic } from '@/lib/types';
+import { Story, Epic, GenerationStepState } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { PriorityBadge } from '@/components/shared/PriorityBadge';
 import { ReviewStatusBadge } from '@/components/shared/StatusBadge';
@@ -15,6 +15,9 @@ interface StoriesPanelProps {
   epics: Epic[];
   stories: Story[];
   onSendToReview: (storyId: string) => void;
+  generationStep: GenerationStepState;
+  isDemoMode: boolean;
+  onGenerateStories: () => void;
   onGenerateQuality: () => void;
 }
 
@@ -254,8 +257,16 @@ function StoryCard({ story }: { story: Story }) {
   );
 }
 
-export function StoriesPanel({ epics, stories, onGenerateQuality }: StoriesPanelProps) {
+export function StoriesPanel({
+  epics,
+  stories,
+  generationStep,
+  isDemoMode,
+  onGenerateStories,
+  onGenerateQuality,
+}: StoriesPanelProps) {
   const [collapsedEpics, setCollapsedEpics] = useState<Set<string>>(new Set());
+  const isGenerating = generationStep.status === 'running';
 
   const toggleEpic = (epicId: string) => {
     setCollapsedEpics(prev => {
@@ -279,10 +290,30 @@ export function StoriesPanel({ epics, stories, onGenerateQuality }: StoriesPanel
             {stories.length} stories across {epics.length} epics · avg readiness {totalScore}/100
           </p>
         </div>
-        <Button size="sm" onClick={onGenerateQuality} data-testid="button-review-quality">
-          Review Quality
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button size="sm" variant="outline" onClick={onGenerateStories} disabled={isGenerating || epics.length === 0}>
+            Regenerate Stories
+          </Button>
+          <Button size="sm" onClick={onGenerateQuality} disabled={isGenerating || stories.length === 0} data-testid="button-review-quality">
+            Review Quality
+          </Button>
+        </div>
       </div>
+
+      {(generationStep.status !== 'idle' || generationStep.errorMessage) && (
+        <div className="rounded-md border border-border bg-card px-3 py-2 text-xs text-muted-foreground">
+          {generationStep.status === 'running' && <span>Generating stories…</span>}
+          {generationStep.status === 'succeeded' && (
+            <span>{isDemoMode ? 'Demo stories generated from the epics.' : 'Stories generated and saved.'}</span>
+          )}
+          {generationStep.status === 'failed' && (
+            <span className="text-[var(--color-danger)]">{generationStep.errorMessage || 'Story generation failed. Retry when ready.'}</span>
+          )}
+          {generationStep.status === 'unavailable' && (
+            <span className="text-[var(--color-warning)]">{generationStep.errorMessage || 'Story generation is unavailable right now.'}</span>
+          )}
+        </div>
+      )}
 
       <div className="space-y-6">
         {epics.map((epic, epicIdx) => {

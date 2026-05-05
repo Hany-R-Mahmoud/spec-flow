@@ -193,6 +193,116 @@ paths:
                 $ref: "#/components/schemas/WorkflowSession"
         default:
           $ref: "#/components/responses/ApiError"
+  /sessions/{sessionId}/generate/clarification:
+    post:
+      operationId: generateClarification
+      tags: [sessions]
+      summary: Generate clarification questions
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateWorkflowStepRequest"
+      responses:
+        "200":
+          description: Updated workflow session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkflowSession"
+        default:
+          $ref: "#/components/responses/ApiError"
+  /sessions/{sessionId}/generate/prd:
+    post:
+      operationId: generatePrd
+      tags: [sessions]
+      summary: Generate PRD sections
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateWorkflowStepRequest"
+      responses:
+        "200":
+          description: Updated workflow session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkflowSession"
+        default:
+          $ref: "#/components/responses/ApiError"
+  /sessions/{sessionId}/generate/epics:
+    post:
+      operationId: generateEpics
+      tags: [sessions]
+      summary: Generate epics
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateWorkflowStepRequest"
+      responses:
+        "200":
+          description: Updated workflow session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkflowSession"
+        default:
+          $ref: "#/components/responses/ApiError"
+  /sessions/{sessionId}/generate/stories:
+    post:
+      operationId: generateStories
+      tags: [sessions]
+      summary: Generate stories
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateWorkflowStepRequest"
+      responses:
+        "200":
+          description: Updated workflow session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkflowSession"
+        default:
+          $ref: "#/components/responses/ApiError"
+  /sessions/{sessionId}/generate/quality:
+    post:
+      operationId: generateQuality
+      tags: [sessions]
+      summary: Score stories and detect warnings
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateWorkflowStepRequest"
+      responses:
+        "200":
+          description: Updated workflow session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkflowSession"
+        default:
+          $ref: "#/components/responses/ApiError"
   /settings:
     get:
       operationId: getSettings
@@ -330,6 +440,45 @@ components:
         - not-started
         - in-progress
         - resolved
+    GenerationMode:
+      type: string
+      enum: [demo, live, unavailable]
+    GenerationStatus:
+      type: string
+      enum: [idle, running, succeeded, failed, unavailable]
+    GenerationStepState:
+      type: object
+      properties:
+        status:
+          $ref: "#/components/schemas/GenerationStatus"
+        mode:
+          $ref: "#/components/schemas/GenerationMode"
+        promptVersion:
+          type: string
+        updatedAt:
+          oneOf:
+            - type: string
+              format: date-time
+            - type: "null"
+        errorMessage:
+          oneOf:
+            - type: string
+            - type: "null"
+      required: [status, mode, promptVersion, updatedAt, errorMessage]
+    WorkflowGenerationState:
+      type: object
+      properties:
+        clarification:
+          $ref: "#/components/schemas/GenerationStepState"
+        prd:
+          $ref: "#/components/schemas/GenerationStepState"
+        epics:
+          $ref: "#/components/schemas/GenerationStepState"
+        stories:
+          $ref: "#/components/schemas/GenerationStepState"
+        quality:
+          $ref: "#/components/schemas/GenerationStepState"
+      required: [clarification, prd, epics, stories, quality]
     PhasesRecord:
       type: object
       additionalProperties:
@@ -682,6 +831,8 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Story"
+        generation:
+          $ref: "#/components/schemas/WorkflowGenerationState"
       required:
         - id
         - projectId
@@ -702,6 +853,7 @@ components:
         - prdSections
         - epics
         - stories
+        - generation
     WorkspaceSettings:
       type: object
       properties:
@@ -832,6 +984,12 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Story"
+      additionalProperties: false
+    GenerateWorkflowStepRequest:
+      type: object
+      properties:
+        force:
+          type: boolean
       additionalProperties: false
     UpdateSettingsRequest:
       type: object

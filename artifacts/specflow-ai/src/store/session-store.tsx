@@ -9,6 +9,11 @@ import {
 } from 'react';
 import {
   createSession as createSessionRequest,
+  generateClarification as generateClarificationRequest,
+  generateEpics as generateEpicsRequest,
+  generatePrd as generatePrdRequest,
+  generateQuality as generateQualityRequest,
+  generateStories as generateStoriesRequest,
   getSettings,
   listExportPackages,
   listSessions,
@@ -20,12 +25,23 @@ import type {
   ClarificationQuestion,
   Epic,
   ExportPackage,
+  GenerationMode,
+  GenerationStatus,
+  GenerationStepState,
   Phase,
   PRDSection,
   ProjectSession,
   Story,
+  WorkflowGenerationState,
   WorkspaceSettings,
 } from '@/lib/types';
+import {
+  applyQualityReview as applyDemoQualityReview,
+  generateClarificationQuestions as generateDemoClarificationQuestions,
+  generateEpics as generateDemoEpics,
+  generatePRD as generateDemoPrd,
+  generateStories as generateDemoStories,
+} from '@/lib/mock-ai';
 import { allSessions, mockExportPackages, mockSettings } from '@/lib/sample-data';
 
 interface State {
@@ -62,6 +78,8 @@ type CreateSessionInput = {
   labels: string[];
   rawInput: string;
 };
+
+type GenerationStepKey = keyof WorkflowGenerationState;
 
 const INITIAL_STATE: State = {
   sessions: [],
@@ -117,11 +135,62 @@ function replaceSession(
   );
 }
 
+function createGenerationState(
+  mode: GenerationMode = 'demo',
+): WorkflowGenerationState {
+  const createStep = (
+    promptVersion: string,
+    status: GenerationStatus = 'idle',
+  ): GenerationStepState => ({
+    status,
+    mode,
+    promptVersion,
+    updatedAt: null,
+    errorMessage: null,
+  });
+
+  return {
+    clarification: createStep('clarification-v1'),
+    prd: createStep('prd-v1'),
+    epics: createStep('epics-v1'),
+    stories: createStep('stories-v1'),
+    quality: createStep('quality-v1'),
+  };
+}
+
+function patchGeneration(
+  generation: WorkflowGenerationState,
+  step: GenerationStepKey,
+  patch: Partial<GenerationStepState>,
+): WorkflowGenerationState {
+  return {
+    ...generation,
+    [step]: {
+      ...generation[step],
+      ...patch,
+    },
+  };
+}
+
+function patchSessionById(
+  sessions: ProjectSession[],
+  sessionId: string,
+  updater: (session: ProjectSession) => ProjectSession,
+): ProjectSession[] {
+  return sessions.map((session) =>
+    session.id === sessionId ? updater(session) : session,
+  );
+}
+
 const SessionContext = createContext<{
   state: State;
   dispatch: (action: Action) => void;
   createSession: (input: CreateSessionInput) => Promise<ProjectSession>;
   saveSettings: (input: WorkspaceSettings) => Promise<WorkspaceSettings>;
+  runGeneration: (
+    sessionId: string,
+    step: GenerationStepKey,
+  ) => Promise<ProjectSession | null>;
   reload: () => Promise<void>;
 } | undefined>(undefined);
 
@@ -501,6 +570,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
           ],
           epics: [],
           stories: [],
+          generation: createGenerationState('demo'),
         };
 
         setState((current) =>
@@ -566,15 +636,227 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     return updatedSettings;
   }, [state.dataSource]);
 
+  const runGeneration = useCallback(
+    async (sessionId: string, step: GenerationStepKey) => {
+      const activeSession = state.sessions.find((session) => session.id === sessionId);
+
+      if (!activeSession) {
+        return null;
+      }
+
+      setState((current) =>
+        deriveState(
+          patchSessionById(current.sessions, sessionId, (session) => ({
+            ...session,
+            generation: patchGeneration(
+              session.generation ?? createGenerationState(current.dataSource === 'api' ? 'live' : 'demo'),
+              step,
+              {
+                status: 'running',
+                errorMessage: null,
+                updatedAt: new Date().toISOString(),
+                mode: current.dataSource === 'api' ? 'live' : 'demo',
+              },
+            ),
+          })),
+          current.activeSessionId,
+          current.settings,
+          current.exportPackages,
+          false,
+          null,
+          current.dataSource,
+        ),
+      );
+
+      if (state.dataSource === 'demo') {
+        let updatedSession: ProjectSession = activeSession;
+
+        if (step === 'clarification') {
+          updatedSession = {
+            ...activeSession,
+            clarificationQuestions: generateDemoClarificationQuestions(activeSession),
+            prdSections: [],
+            epics: [],
+            stories: [],
+            generation: patchGeneration(activeSession.generation, step, {
+              status: 'succeeded',
+              updatedAt: new Date().toISOString(),
+              errorMessage: null,
+              mode: 'demo',
+            }),
+          };
+        }
+
+        if (step === 'prd') {
+          const prdSections = generateDemoPrd(activeSession);
+          updatedSession = {
+            ...activeSession,
+            prdSections,
+            epics: [],
+            stories: [],
+            currentPhase: 'prd',
+            phases: {
+              ...activeSession.phases,
+              clarification: 'complete',
+              prd: 'in-progress',
+            },
+            generation: patchGeneration(activeSession.generation, step, {
+              status: 'succeeded',
+              updatedAt: new Date().toISOString(),
+              errorMessage: null,
+              mode: 'demo',
+            }),
+          };
+        }
+
+        if (step === 'epics') {
+          const epics = generateDemoEpics(activeSession, activeSession.prdSections);
+          updatedSession = {
+            ...activeSession,
+            epics,
+            stories: [],
+            currentPhase: 'epics',
+            phases: {
+              ...activeSession.phases,
+              clarification: 'complete',
+              prd: 'complete',
+              epics: 'in-progress',
+            },
+            generation: patchGeneration(activeSession.generation, step, {
+              status: 'succeeded',
+              updatedAt: new Date().toISOString(),
+              errorMessage: null,
+              mode: 'demo',
+            }),
+          };
+        }
+
+        if (step === 'stories') {
+          const stories = generateDemoStories(activeSession.epics, activeSession);
+          updatedSession = {
+            ...activeSession,
+            stories,
+            currentPhase: 'stories',
+            phases: {
+              ...activeSession.phases,
+              clarification: 'complete',
+              prd: 'complete',
+              epics: 'complete',
+              stories: 'in-progress',
+            },
+            generation: patchGeneration(activeSession.generation, step, {
+              status: 'succeeded',
+              updatedAt: new Date().toISOString(),
+              errorMessage: null,
+              mode: 'demo',
+            }),
+          };
+        }
+
+        if (step === 'quality') {
+          updatedSession = {
+            ...activeSession,
+            stories: applyDemoQualityReview(activeSession.stories),
+            currentPhase: 'quality',
+            phases: {
+              ...activeSession.phases,
+              clarification: 'complete',
+              prd: 'complete',
+              epics: 'complete',
+              stories: 'complete',
+              quality: 'in-progress',
+            },
+            generation: patchGeneration(activeSession.generation, step, {
+              status: 'succeeded',
+              updatedAt: new Date().toISOString(),
+              errorMessage: null,
+              mode: 'demo',
+            }),
+          };
+        }
+
+        setState((current) =>
+          deriveState(
+            replaceSession(current.sessions, updatedSession),
+            current.activeSessionId,
+            current.settings,
+            current.exportPackages,
+            false,
+            current.error,
+            'demo',
+          ),
+        );
+
+        return updatedSession;
+      }
+
+      try {
+        const request = { force: true };
+        const updatedSession =
+          step === 'clarification'
+            ? await generateClarificationRequest(sessionId, request)
+            : step === 'prd'
+              ? await generatePrdRequest(sessionId, request)
+              : step === 'epics'
+                ? await generateEpicsRequest(sessionId, request)
+                : step === 'stories'
+                  ? await generateStoriesRequest(sessionId, request)
+                  : await generateQualityRequest(sessionId, request);
+
+        setState((current) =>
+          deriveState(
+            replaceSession(current.sessions, updatedSession),
+            current.activeSessionId,
+            current.settings,
+            current.exportPackages,
+            false,
+            null,
+            'api',
+          ),
+        );
+
+        return updatedSession;
+      } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : 'Generation failed before valid output could be saved.';
+
+        setState((current) =>
+          deriveState(
+            patchSessionById(current.sessions, sessionId, (session) => ({
+              ...session,
+              generation: patchGeneration(session.generation, step, {
+                status: 'failed',
+                errorMessage: message,
+                updatedAt: new Date().toISOString(),
+              }),
+            })),
+            current.activeSessionId,
+            current.settings,
+            current.exportPackages,
+            false,
+            message,
+            'api',
+          ),
+        );
+
+        return null;
+      }
+    },
+    [state.dataSource, state.sessions],
+  );
+
   const value = useMemo(
     () => ({
       state,
       dispatch,
       createSession,
       saveSettings,
+      runGeneration,
       reload: load,
     }),
-    [state, dispatch, createSession, saveSettings, load],
+    [state, dispatch, createSession, saveSettings, runGeneration, load],
   );
 
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;

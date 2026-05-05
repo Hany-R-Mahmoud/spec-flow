@@ -11,6 +11,7 @@ import type { Phase } from "./phase";
 import type { PhasesRecord } from "./phasesRecord";
 import type { PrdSection } from "./prdSection";
 import type { Story } from "./story";
+import type { WorkflowGenerationState } from "./workflowGenerationState";
 
 export interface WorkflowSession {
   id: string;
@@ -32,4 +33,5 @@ export interface WorkflowSession {
   prdSections: PrdSection[];
   epics: Epic[];
   stories: Story[];
+  generation: WorkflowGenerationState;
 }

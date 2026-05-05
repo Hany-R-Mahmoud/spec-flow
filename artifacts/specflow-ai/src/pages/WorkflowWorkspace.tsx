@@ -108,7 +108,7 @@ export function WorkflowWorkspace() {
   const [, setLocation] = useLocation();
   const [, params] = useRoute('/workspace/:id');
   const sessionId = params?.id;
-  const { state, dispatch } = useSessionStore();
+  const { state, dispatch, runGeneration } = useSessionStore();
   const { toast } = useToast();
 
   const session = state.sessions.find(s => s.id === sessionId);
@@ -184,6 +184,35 @@ export function WorkflowWorkspace() {
     toast({ title: 'Phase advanced', description: `Now in ${nextPhase} phase.` });
   };
 
+  const handleGeneration = async (step: 'clarification' | 'prd' | 'epics' | 'stories' | 'quality') => {
+    const updatedSession = await runGeneration(session.id, step);
+
+    if (!updatedSession) {
+      toast({
+        title: 'Generation failed',
+        description: 'The previous saved output was preserved. Review the status message and retry when ready.',
+      });
+      return;
+    }
+
+    const phaseMap = {
+      clarification: 'clarification',
+      prd: 'prd',
+      epics: 'epics',
+      stories: 'stories',
+      quality: 'quality',
+    } as const;
+
+    setActivePhase(phaseMap[step]);
+    toast({
+      title: step === 'quality' ? 'Quality refreshed' : 'Generation complete',
+      description:
+        state.dataSource === 'demo'
+          ? 'Demo output generated from the session schema.'
+          : 'Workflow output generated and saved.',
+    });
+  };
+
   const completionCount = (() => {
     if (activePhase === 'clarification') {
       const answered = questions.filter(q => q.answer || q.skipped).length;
@@ -205,6 +234,7 @@ export function WorkflowWorkspace() {
   })();
 
   const guidanceItems = buildGuidanceItems(activePhase, session, questions, prdSections, stories);
+  const isDemoMode = state.dataSource === 'demo';
 
   return (
     <div className="flex flex-col h-full -m-4 sm:-m-6 md:-m-8">
@@ -233,21 +263,30 @@ export function WorkflowWorkspace() {
             {activePhase === 'clarification' && (
               <ClarificationPanel
                 questions={questions}
-                onGeneratePRD={() => advancePhase('prd')}
+                generationStep={session.generation.clarification}
+                isDemoMode={isDemoMode}
+                onGenerateClarification={() => void handleGeneration('clarification')}
+                onGeneratePRD={() => void handleGeneration('prd')}
               />
             )}
 
             {activePhase === 'prd' && (
               <PRDPanel
                 sections={prdSections}
-                onGenerateEpics={() => advancePhase('epics')}
+                generationStep={session.generation.prd}
+                isDemoMode={isDemoMode}
+                onGeneratePRD={() => void handleGeneration('prd')}
+                onGenerateEpics={() => void handleGeneration('epics')}
               />
             )}
 
             {activePhase === 'epics' && (
               <EpicsPanel
                 epics={epics}
-                onGenerateStories={() => advancePhase('stories')}
+                generationStep={session.generation.epics}
+                isDemoMode={isDemoMode}
+                onGenerateEpics={() => void handleGeneration('epics')}
+                onGenerateStories={() => void handleGeneration('stories')}
               />
             )}
 
@@ -255,8 +294,11 @@ export function WorkflowWorkspace() {
               <StoriesPanel
                 epics={epics}
                 stories={stories}
+                generationStep={session.generation.stories}
+                isDemoMode={isDemoMode}
                 onSendToReview={(id) => toast({ title: 'Sent', description: `${id} added to review queue.` })}
-                onGenerateQuality={() => advancePhase('quality')}
+                onGenerateStories={() => void handleGeneration('stories')}
+                onGenerateQuality={() => void handleGeneration('quality')}
               />
             )}
 
@@ -264,6 +306,9 @@ export function WorkflowWorkspace() {
               <QualityReviewPanel
                 stories={stories}
                 epics={epics}
+                generationStep={session.generation.quality}
+                isDemoMode={isDemoMode}
+                onGenerateQuality={() => void handleGeneration('quality')}
                 onSendToDevReview={() => advancePhase('devReview')}
               />
             )}

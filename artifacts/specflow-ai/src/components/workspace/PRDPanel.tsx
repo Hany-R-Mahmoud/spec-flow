@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { CheckCircle, Edit3, Save, XCircle } from 'lucide-react';
-import { PRDSection } from '@/lib/types';
+import { GenerationStepState, PRDSection } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -8,13 +8,23 @@ import { useSessionStore } from '@/store/session-store';
 
 interface PRDPanelProps {
   sections: PRDSection[];
+  generationStep: GenerationStepState;
+  isDemoMode: boolean;
+  onGeneratePRD: () => void;
   onGenerateEpics: () => void;
 }
 
-export function PRDPanel({ sections, onGenerateEpics }: PRDPanelProps) {
+export function PRDPanel({
+  sections,
+  generationStep,
+  isDemoMode,
+  onGeneratePRD,
+  onGenerateEpics,
+}: PRDPanelProps) {
   const { dispatch } = useSessionStore();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState('');
+  const isGenerating = generationStep.status === 'running';
 
   const completedCount = sections.filter(s => s.complete).length;
 
@@ -42,14 +52,35 @@ export function PRDPanel({ sections, onGenerateEpics }: PRDPanelProps) {
             {completedCount}/{sections.length} sections complete — review and edit as needed
           </p>
         </div>
-        <Button
-          size="sm"
-          onClick={onGenerateEpics}
-          data-testid="button-generate-epics"
-        >
-          Generate Epics
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button size="sm" variant="outline" onClick={onGeneratePRD} disabled={isGenerating}>
+            Regenerate PRD
+          </Button>
+          <Button
+            size="sm"
+            onClick={onGenerateEpics}
+            disabled={isGenerating || sections.length === 0}
+            data-testid="button-generate-epics"
+          >
+            Generate Epics
+          </Button>
+        </div>
       </div>
+
+      {(generationStep.status !== 'idle' || generationStep.errorMessage) && (
+        <div className="rounded-md border border-border bg-card px-3 py-2 text-xs text-muted-foreground">
+          {generationStep.status === 'running' && <span>Generating PRD sections…</span>}
+          {generationStep.status === 'succeeded' && (
+            <span>{isDemoMode ? 'Demo PRD generated from your answers.' : 'PRD sections generated and saved.'}</span>
+          )}
+          {generationStep.status === 'failed' && (
+            <span className="text-[var(--color-danger)]">{generationStep.errorMessage || 'PRD generation failed. Retry when ready.'}</span>
+          )}
+          {generationStep.status === 'unavailable' && (
+            <span className="text-[var(--color-warning)]">{generationStep.errorMessage || 'PRD generation is unavailable right now.'}</span>
+          )}
+        </div>
+      )}
 
       <div className="space-y-3">
         {sections.sort((a, b) => a.order - b.order).map(section => {

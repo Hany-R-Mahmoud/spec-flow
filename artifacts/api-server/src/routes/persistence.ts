@@ -5,6 +5,8 @@ import {
   type Epic,
   exportPackagesTable,
   type ExportPackage,
+  type GenerationMode,
+  type GenerationStatus,
   type Phase,
   type PhaseStatus,
   projectsTable,
@@ -13,6 +15,7 @@ import {
   settingsTable,
   type Story,
   type WorkflowArtifacts,
+  type WorkflowGeneration,
   workflowArtifactsTable,
   getDb,
   isDatabaseConfigured,
@@ -104,6 +107,101 @@ const DEFAULT_PRD_SECTIONS: PRDSection[] = [
     order: 4,
   },
 ];
+
+export const PROMPT_VERSIONS = {
+  clarification: "clarification-v1",
+  prd: "prd-v1",
+  epics: "epics-v1",
+  stories: "stories-v1",
+  quality: "quality-v1",
+} as const;
+
+type GenerationStepKey = keyof typeof PROMPT_VERSIONS;
+
+function createGenerationStep(
+  promptVersion: string,
+  mode: GenerationMode,
+  status: GenerationStatus = "idle",
+): WorkflowGeneration[GenerationStepKey] {
+  return {
+    status,
+    mode,
+    promptVersion,
+    updatedAt: null,
+    errorMessage: null,
+  };
+}
+
+export function createWorkflowGeneration(
+  mode: GenerationMode = "demo",
+): WorkflowGeneration {
+  return {
+    clarification: createGenerationStep(PROMPT_VERSIONS.clarification, mode),
+    prd: createGenerationStep(PROMPT_VERSIONS.prd, mode),
+    epics: createGenerationStep(PROMPT_VERSIONS.epics, mode),
+    stories: createGenerationStep(PROMPT_VERSIONS.stories, mode),
+    quality: createGenerationStep(PROMPT_VERSIONS.quality, mode),
+  };
+}
+
+export function withGenerationStatus(
+  generation: WorkflowGeneration,
+  step: GenerationStepKey,
+  input: {
+    status: GenerationStatus;
+    mode?: GenerationMode;
+    errorMessage?: string | null;
+    updatedAt?: string | null;
+  },
+): WorkflowGeneration {
+  return {
+    ...generation,
+    [step]: {
+      ...generation[step],
+      status: input.status,
+      mode: input.mode ?? generation[step].mode,
+      errorMessage:
+        input.errorMessage === undefined
+          ? generation[step].errorMessage
+          : input.errorMessage,
+      updatedAt: input.updatedAt ?? new Date().toISOString(),
+    },
+  };
+}
+
+function derivePhaseProgress(
+  phase: Phase,
+  status: PhaseStatus,
+): Record<Phase, PhaseStatus> {
+  const next = { ...DEFAULT_PHASES };
+  const orderedPhases: Phase[] = [
+    "intake",
+    "clarification",
+    "prd",
+    "epics",
+    "stories",
+    "quality",
+    "devReview",
+    "export",
+  ];
+  const currentIndex = orderedPhases.indexOf(phase);
+
+  orderedPhases.forEach((item, index) => {
+    if (index < currentIndex) {
+      next[item] = "complete";
+      return;
+    }
+
+    if (index === currentIndex) {
+      next[item] = status;
+      return;
+    }
+
+    next[item] = "not-started";
+  });
+
+  return next;
+}
 
 function createDemoStory(sessionId: string, epicId: string): Story[] {
   return [
@@ -249,7 +347,35 @@ function createDemoArtifacts(sessionId: string): Pick<
     })),
     epics,
     stories,
-    metadata: {},
+    metadata: {
+      generation: {
+        ...withGenerationStatus(
+          createWorkflowGeneration("demo"),
+          "clarification",
+          { status: "succeeded" },
+        ),
+        prd: {
+          ...createGenerationStep(PROMPT_VERSIONS.prd, "demo", "succeeded"),
+          updatedAt: new Date().toISOString(),
+          errorMessage: null,
+        },
+        epics: {
+          ...createGenerationStep(PROMPT_VERSIONS.epics, "demo", "succeeded"),
+          updatedAt: new Date().toISOString(),
+          errorMessage: null,
+        },
+        stories: {
+          ...createGenerationStep(PROMPT_VERSIONS.stories, "demo", "succeeded"),
+          updatedAt: new Date().toISOString(),
+          errorMessage: null,
+        },
+        quality: {
+          ...createGenerationStep(PROMPT_VERSIONS.quality, "demo", "succeeded"),
+          updatedAt: new Date().toISOString(),
+          errorMessage: null,
+        },
+      },
+    },
   };
 }
 
@@ -359,6 +485,41 @@ type SessionWithArtifactsRow = {
   artifacts: typeof workflowArtifactsTable.$inferSelect | null;
 };
 
+function toResponseGeneration(
+  generation: WorkflowGeneration,
+): WorkflowSession["generation"] {
+  return {
+    clarification: {
+      ...generation.clarification,
+      updatedAt: generation.clarification.updatedAt
+        ? new Date(generation.clarification.updatedAt)
+        : null,
+    },
+    prd: {
+      ...generation.prd,
+      updatedAt: generation.prd.updatedAt ? new Date(generation.prd.updatedAt) : null,
+    },
+    epics: {
+      ...generation.epics,
+      updatedAt: generation.epics.updatedAt
+        ? new Date(generation.epics.updatedAt)
+        : null,
+    },
+    stories: {
+      ...generation.stories,
+      updatedAt: generation.stories.updatedAt
+        ? new Date(generation.stories.updatedAt)
+        : null,
+    },
+    quality: {
+      ...generation.quality,
+      updatedAt: generation.quality.updatedAt
+        ? new Date(generation.quality.updatedAt)
+        : null,
+    },
+  };
+}
+
 export function toProject(project: typeof projectsTable.$inferSelect): Project {
   return {
     id: project.id,
@@ -373,6 +534,10 @@ export function toWorkflowSession({
   session,
   artifacts,
 }: SessionWithArtifactsRow): WorkflowSession {
+  const generation = toResponseGeneration(
+    artifacts?.metadata?.generation ?? createWorkflowGeneration("demo"),
+  );
+
   return {
     id: session.id,
     projectId: session.projectId,
@@ -402,6 +567,7 @@ export function toWorkflowSession({
             }
           : story.developerReview,
       })) ?? [],
+    generation,
   };
 }
 
@@ -449,7 +615,39 @@ export function createSessionDefaults(): Pick<
     prdSections: DEFAULT_PRD_SECTIONS.map((section) => ({ ...section })),
     epics: [],
     stories: [],
-    metadata: {},
+    metadata: {
+      generation: createWorkflowGeneration("demo"),
+    },
+  };
+}
+
+export async function getSessionArtifactsRecord(
+  db: Database,
+  sessionId: string,
+): Promise<SessionWithArtifactsRow | null> {
+  const [row] = await db
+    .select({
+      session: sessionsTable,
+      artifacts: workflowArtifactsTable,
+    })
+    .from(sessionsTable)
+    .leftJoin(
+      workflowArtifactsTable,
+      eq(workflowArtifactsTable.sessionId, sessionsTable.id),
+    )
+    .where(eq(sessionsTable.id, sessionId));
+
+  return row ?? null;
+}
+
+export function buildPhaseUpdate(
+  phase: Phase,
+  status: PhaseStatus,
+): Pick<typeof sessionsTable.$inferInsert, "currentPhase" | "phases" | "updatedAt"> {
+  return {
+    currentPhase: phase,
+    phases: derivePhaseProgress(phase, status),
+    updatedAt: new Date(),
   };
 }
 
@@ -475,18 +673,7 @@ export async function getSessionWithArtifacts(
   db: Database,
   sessionId: string,
 ): Promise<WorkflowSession | null> {
-  const [row] = await db
-    .select({
-      session: sessionsTable,
-      artifacts: workflowArtifactsTable,
-    })
-    .from(sessionsTable)
-    .leftJoin(
-      workflowArtifactsTable,
-      eq(workflowArtifactsTable.sessionId, sessionsTable.id),
-    )
-    .where(eq(sessionsTable.id, sessionId));
-
+  const row = await getSessionArtifactsRecord(db, sessionId);
   return row ? toWorkflowSession(row) : null;
 }
 

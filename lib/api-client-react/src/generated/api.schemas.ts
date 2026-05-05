@@ -108,6 +108,42 @@ export const PmRevisionStatus = {
   resolved: "resolved",
 } as const;
 
+export type GenerationMode =
+  (typeof GenerationMode)[keyof typeof GenerationMode];
+
+export const GenerationMode = {
+  demo: "demo",
+  live: "live",
+  unavailable: "unavailable",
+} as const;
+
+export type GenerationStatus =
+  (typeof GenerationStatus)[keyof typeof GenerationStatus];
+
+export const GenerationStatus = {
+  idle: "idle",
+  running: "running",
+  succeeded: "succeeded",
+  failed: "failed",
+  unavailable: "unavailable",
+} as const;
+
+export interface GenerationStepState {
+  status: GenerationStatus;
+  mode: GenerationMode;
+  promptVersion: string;
+  updatedAt: string | null;
+  errorMessage: string | null;
+}
+
+export interface WorkflowGenerationState {
+  clarification: GenerationStepState;
+  prd: GenerationStepState;
+  epics: GenerationStepState;
+  stories: GenerationStepState;
+  quality: GenerationStepState;
+}
+
 export interface PhasesRecord {
   intake: PhaseStatus;
   clarification: PhaseStatus;
@@ -244,6 +280,7 @@ export interface WorkflowSession {
   prdSections: PrdSection[];
   epics: Epic[];
   stories: Story[];
+  generation: WorkflowGenerationState;
 }
 
 export interface WorkspaceSettings {
@@ -302,6 +339,10 @@ export interface UpdateSessionArtifactsRequest {
   prdSections?: PrdSection[];
   epics?: Epic[];
   stories?: Story[];
+}
+
+export interface GenerateWorkflowStepRequest {
+  force?: boolean;
 }
 
 export interface UpdateSettingsRequest {

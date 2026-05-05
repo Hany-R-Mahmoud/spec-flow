@@ -21,6 +21,7 @@ import type {
   CreateProjectRequest,
   CreateSessionRequest,
   ExportPackageListResponse,
+  GenerateWorkflowStepRequest,
   HealthStatus,
   Project,
   ProjectListResponse,
@@ -874,6 +875,442 @@ export const useUpdateSessionArtifacts = <
   TContext
 > => {
   return useMutation(getUpdateSessionArtifactsMutationOptions(options));
+};
+
+/**
+ * @summary Generate clarification questions
+ */
+export const getGenerateClarificationUrl = (sessionId: string) => {
+  return `/api/sessions/${sessionId}/generate/clarification`;
+};
+
+export const generateClarification = async (
+  sessionId: string,
+  generateWorkflowStepRequest?: GenerateWorkflowStepRequest,
+  options?: RequestInit,
+): Promise<WorkflowSession> => {
+  return customFetch<WorkflowSession>(getGenerateClarificationUrl(sessionId), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(generateWorkflowStepRequest),
+  });
+};
+
+export const getGenerateClarificationMutationOptions = <
+  TError = ErrorType<ApiErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof generateClarification>>,
+    TError,
+    { sessionId: string; data: BodyType<GenerateWorkflowStepRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof generateClarification>>,
+  TError,
+  { sessionId: string; data: BodyType<GenerateWorkflowStepRequest> },
+  TContext
+> => {
+  const mutationKey = ["generateClarification"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof generateClarification>>,
+    { sessionId: string; data: BodyType<GenerateWorkflowStepRequest> }
+  > = (props) => {
+    const { sessionId, data } = props ?? {};
+
+    return generateClarification(sessionId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type GenerateClarificationMutationResult = NonNullable<
+  Awaited<ReturnType<typeof generateClarification>>
+>;
+export type GenerateClarificationMutationBody =
+  BodyType<GenerateWorkflowStepRequest>;
+export type GenerateClarificationMutationError = ErrorType<ApiErrorResponse>;
+
+/**
+ * @summary Generate clarification questions
+ */
+export const useGenerateClarification = <
+  TError = ErrorType<ApiErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof generateClarification>>,
+    TError,
+    { sessionId: string; data: BodyType<GenerateWorkflowStepRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof generateClarification>>,
+  TError,
+  { sessionId: string; data: BodyType<GenerateWorkflowStepRequest> },
+  TContext
+> => {
+  return useMutation(getGenerateClarificationMutationOptions(options));
+};
+
+/**
+ * @summary Generate PRD sections
+ */
+export const getGeneratePrdUrl = (sessionId: string) => {
+  return `/api/sessions/${sessionId}/generate/prd`;
+};
+
+export const generatePrd = async (
+  sessionId: string,
+  generateWorkflowStepRequest?: GenerateWorkflowStepRequest,
+  options?: RequestInit,
+): Promise<WorkflowSession> => {
+  return customFetch<WorkflowSession>(getGeneratePrdUrl(sessionId), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(generateWorkflowStepRequest),
+  });
+};
+
+export const getGeneratePrdMutationOptions = <
+  TError = ErrorType<ApiErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof generatePrd>>,
+    TError,
+    { sessionId: string; data: BodyType<GenerateWorkflowStepRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof generatePrd>>,
+  TError,
+  { sessionId: string; data: BodyType<GenerateWorkflowStepRequest> },
+  TContext
+> => {
+  const mutationKey = ["generatePrd"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof generatePrd>>,
+    { sessionId: string; data: BodyType<GenerateWorkflowStepRequest> }
+  > = (props) => {
+    const { sessionId, data } = props ?? {};
+
+    return generatePrd(sessionId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type GeneratePrdMutationResult = NonNullable<
+  Awaited<ReturnType<typeof generatePrd>>
+>;
+export type GeneratePrdMutationBody = BodyType<GenerateWorkflowStepRequest>;
+export type GeneratePrdMutationError = ErrorType<ApiErrorResponse>;
+
+/**
+ * @summary Generate PRD sections
+ */
+export const useGeneratePrd = <
+  TError = ErrorType<ApiErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof generatePrd>>,
+    TError,
+    { sessionId: string; data: BodyType<GenerateWorkflowStepRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof generatePrd>>,
+  TError,
+  { sessionId: string; data: BodyType<GenerateWorkflowStepRequest> },
+  TContext
+> => {
+  return useMutation(getGeneratePrdMutationOptions(options));
+};
+
+/**
+ * @summary Generate epics
+ */
+export const getGenerateEpicsUrl = (sessionId: string) => {
+  return `/api/sessions/${sessionId}/generate/epics`;
+};
+
+export const generateEpics = async (
+  sessionId: string,
+  generateWorkflowStepRequest?: GenerateWorkflowStepRequest,
+  options?: RequestInit,
+): Promise<WorkflowSession> => {
+  return customFetch<WorkflowSession>(getGenerateEpicsUrl(sessionId), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(generateWorkflowStepRequest),
+  });
+};
+
+export const getGenerateEpicsMutationOptions = <
+  TError = ErrorType<ApiErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof generateEpics>>,
+    TError,
+    { sessionId: string; data: BodyType<GenerateWorkflowStepRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof generateEpics>>,
+  TError,
+  { sessionId: string; data: BodyType<GenerateWorkflowStepRequest> },
+  TContext
+> => {
+  const mutationKey = ["generateEpics"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof generateEpics>>,
+    { sessionId: string; data: BodyType<GenerateWorkflowStepRequest> }
+  > = (props) => {
+    const { sessionId, data } = props ?? {};
+
+    return generateEpics(sessionId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type GenerateEpicsMutationResult = NonNullable<
+  Awaited<ReturnType<typeof generateEpics>>
+>;
+export type GenerateEpicsMutationBody = BodyType<GenerateWorkflowStepRequest>;
+export type GenerateEpicsMutationError = ErrorType<ApiErrorResponse>;
+
+/**
+ * @summary Generate epics
+ */
+export const useGenerateEpics = <
+  TError = ErrorType<ApiErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof generateEpics>>,
+    TError,
+    { sessionId: string; data: BodyType<GenerateWorkflowStepRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof generateEpics>>,
+  TError,
+  { sessionId: string; data: BodyType<GenerateWorkflowStepRequest> },
+  TContext
+> => {
+  return useMutation(getGenerateEpicsMutationOptions(options));
+};
+
+/**
+ * @summary Generate stories
+ */
+export const getGenerateStoriesUrl = (sessionId: string) => {
+  return `/api/sessions/${sessionId}/generate/stories`;
+};
+
+export const generateStories = async (
+  sessionId: string,
+  generateWorkflowStepRequest?: GenerateWorkflowStepRequest,
+  options?: RequestInit,
+): Promise<WorkflowSession> => {
+  return customFetch<WorkflowSession>(getGenerateStoriesUrl(sessionId), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(generateWorkflowStepRequest),
+  });
+};
+
+export const getGenerateStoriesMutationOptions = <
+  TError = ErrorType<ApiErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof generateStories>>,
+    TError,
+    { sessionId: string; data: BodyType<GenerateWorkflowStepRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof generateStories>>,
+  TError,
+  { sessionId: string; data: BodyType<GenerateWorkflowStepRequest> },
+  TContext
+> => {
+  const mutationKey = ["generateStories"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof generateStories>>,
+    { sessionId: string; data: BodyType<GenerateWorkflowStepRequest> }
+  > = (props) => {
+    const { sessionId, data } = props ?? {};
+
+    return generateStories(sessionId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type GenerateStoriesMutationResult = NonNullable<
+  Awaited<ReturnType<typeof generateStories>>
+>;
+export type GenerateStoriesMutationBody = BodyType<GenerateWorkflowStepRequest>;
+export type GenerateStoriesMutationError = ErrorType<ApiErrorResponse>;
+
+/**
+ * @summary Generate stories
+ */
+export const useGenerateStories = <
+  TError = ErrorType<ApiErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof generateStories>>,
+    TError,
+    { sessionId: string; data: BodyType<GenerateWorkflowStepRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof generateStories>>,
+  TError,
+  { sessionId: string; data: BodyType<GenerateWorkflowStepRequest> },
+  TContext
+> => {
+  return useMutation(getGenerateStoriesMutationOptions(options));
+};
+
+/**
+ * @summary Score stories and detect warnings
+ */
+export const getGenerateQualityUrl = (sessionId: string) => {
+  return `/api/sessions/${sessionId}/generate/quality`;
+};
+
+export const generateQuality = async (
+  sessionId: string,
+  generateWorkflowStepRequest?: GenerateWorkflowStepRequest,
+  options?: RequestInit,
+): Promise<WorkflowSession> => {
+  return customFetch<WorkflowSession>(getGenerateQualityUrl(sessionId), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(generateWorkflowStepRequest),
+  });
+};
+
+export const getGenerateQualityMutationOptions = <
+  TError = ErrorType<ApiErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof generateQuality>>,
+    TError,
+    { sessionId: string; data: BodyType<GenerateWorkflowStepRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof generateQuality>>,
+  TError,
+  { sessionId: string; data: BodyType<GenerateWorkflowStepRequest> },
+  TContext
+> => {
+  const mutationKey = ["generateQuality"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof generateQuality>>,
+    { sessionId: string; data: BodyType<GenerateWorkflowStepRequest> }
+  > = (props) => {
+    const { sessionId, data } = props ?? {};
+
+    return generateQuality(sessionId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type GenerateQualityMutationResult = NonNullable<
+  Awaited<ReturnType<typeof generateQuality>>
+>;
+export type GenerateQualityMutationBody = BodyType<GenerateWorkflowStepRequest>;
+export type GenerateQualityMutationError = ErrorType<ApiErrorResponse>;
+
+/**
+ * @summary Score stories and detect warnings
+ */
+export const useGenerateQuality = <
+  TError = ErrorType<ApiErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof generateQuality>>,
+    TError,
+    { sessionId: string; data: BodyType<GenerateWorkflowStepRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof generateQuality>>,
+  TError,
+  { sessionId: string; data: BodyType<GenerateWorkflowStepRequest> },
+  TContext
+> => {
+  return useMutation(getGenerateQualityMutationOptions(options));
 };
 
 /**

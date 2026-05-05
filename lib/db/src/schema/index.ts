@@ -58,6 +58,31 @@ export const pmRevisionStatusSchema = z.enum([
   "in-progress",
   "resolved",
 ]);
+export const generationModeSchema = z.enum(["demo", "live", "unavailable"]);
+export const generationStatusSchema = z.enum([
+  "idle",
+  "running",
+  "succeeded",
+  "failed",
+  "unavailable",
+]);
+export const generationStepSchema = z.object({
+  status: generationStatusSchema,
+  mode: generationModeSchema,
+  promptVersion: z.string(),
+  updatedAt: z.iso.datetime().nullable(),
+  errorMessage: z.string().nullable(),
+});
+export const workflowGenerationSchema = z.object({
+  clarification: generationStepSchema,
+  prd: generationStepSchema,
+  epics: generationStepSchema,
+  stories: generationStepSchema,
+  quality: generationStepSchema,
+});
+export const workflowArtifactsMetadataSchema = z.object({
+  generation: workflowGenerationSchema,
+});
 
 export const clarificationQuestionSchema = z.object({
   id: z.string(),
@@ -210,7 +235,9 @@ export const workflowArtifactsTable = pgTable("workflow_artifacts", {
     .$type<Array<z.infer<typeof storySchema>>>()
     .notNull()
     .default([]),
-  metadata: jsonb("metadata").$type<Record<string, unknown>>().notNull().default({}),
+  metadata: jsonb("metadata")
+    .$type<z.infer<typeof workflowArtifactsMetadataSchema>>()
+    .notNull(),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
@@ -306,6 +333,11 @@ export type DeveloperReview = z.infer<typeof developerReviewSchema>;
 export type Epic = z.infer<typeof epicSchema>;
 export type Story = z.infer<typeof storySchema>;
 export type ExportPackage = z.infer<typeof exportPackageSchema>;
+export type GenerationMode = z.infer<typeof generationModeSchema>;
+export type GenerationStatus = z.infer<typeof generationStatusSchema>;
+export type GenerationStep = z.infer<typeof generationStepSchema>;
+export type WorkflowGeneration = z.infer<typeof workflowGenerationSchema>;
+export type WorkflowArtifactsMetadata = z.infer<typeof workflowArtifactsMetadataSchema>;
 
 export type Project = typeof projectsTable.$inferSelect;
 export type InsertProject = z.infer<typeof insertProjectSchema>;

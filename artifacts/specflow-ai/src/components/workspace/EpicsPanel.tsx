@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ChevronDown, ChevronRight, Copy, ArrowRight } from 'lucide-react';
-import { Epic } from '@/lib/types';
+import { Epic, GenerationStepState } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { PriorityBadge } from '@/components/shared/PriorityBadge';
 import { Button } from '@/components/ui/button';
@@ -8,12 +8,22 @@ import { useToast } from '@/hooks/use-toast';
 
 interface EpicsPanelProps {
   epics: Epic[];
+  generationStep: GenerationStepState;
+  isDemoMode: boolean;
+  onGenerateEpics: () => void;
   onGenerateStories: () => void;
 }
 
-export function EpicsPanel({ epics, onGenerateStories }: EpicsPanelProps) {
+export function EpicsPanel({
+  epics,
+  generationStep,
+  isDemoMode,
+  onGenerateEpics,
+  onGenerateStories,
+}: EpicsPanelProps) {
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set(['epic-1']));
   const { toast } = useToast();
+  const isGenerating = generationStep.status === 'running';
 
   const toggle = (id: string) => {
     setExpandedIds(prev => {
@@ -36,10 +46,30 @@ export function EpicsPanel({ epics, onGenerateStories }: EpicsPanelProps) {
           <h2 className="text-sm font-semibold text-foreground">Epics</h2>
           <p className="text-xs text-muted-foreground mt-0.5">{epics.length} epics mapped to business goals</p>
         </div>
-        <Button size="sm" onClick={onGenerateStories} data-testid="button-generate-stories">
-          Generate Stories
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button size="sm" variant="outline" onClick={onGenerateEpics} disabled={isGenerating}>
+            Regenerate Epics
+          </Button>
+          <Button size="sm" onClick={onGenerateStories} disabled={isGenerating || epics.length === 0} data-testid="button-generate-stories">
+            Generate Stories
+          </Button>
+        </div>
       </div>
+
+      {(generationStep.status !== 'idle' || generationStep.errorMessage) && (
+        <div className="rounded-md border border-border bg-card px-3 py-2 text-xs text-muted-foreground">
+          {generationStep.status === 'running' && <span>Generating epics…</span>}
+          {generationStep.status === 'succeeded' && (
+            <span>{isDemoMode ? 'Demo epics generated from the PRD.' : 'Epics generated and saved.'}</span>
+          )}
+          {generationStep.status === 'failed' && (
+            <span className="text-[var(--color-danger)]">{generationStep.errorMessage || 'Epic generation failed. Retry when ready.'}</span>
+          )}
+          {generationStep.status === 'unavailable' && (
+            <span className="text-[var(--color-warning)]">{generationStep.errorMessage || 'Epic generation is unavailable right now.'}</span>
+          )}
+        </div>
+      )}
 
       <div className="space-y-3">
         {epics.map((epic, idx) => {

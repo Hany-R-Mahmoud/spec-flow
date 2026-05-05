@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ChevronDown, ChevronRight, AlertCircle } from 'lucide-react';
-import { ClarificationQuestion } from '@/lib/types';
+import { ClarificationQuestion, GenerationStepState } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -8,10 +8,19 @@ import { useSessionStore } from '@/store/session-store';
 
 interface ClarificationPanelProps {
   questions: ClarificationQuestion[];
+  generationStep: GenerationStepState;
+  isDemoMode: boolean;
+  onGenerateClarification: () => void;
   onGeneratePRD: () => void;
 }
 
-export function ClarificationPanel({ questions, onGeneratePRD }: ClarificationPanelProps) {
+export function ClarificationPanel({
+  questions,
+  generationStep,
+  isDemoMode,
+  onGenerateClarification,
+  onGeneratePRD,
+}: ClarificationPanelProps) {
   const { dispatch } = useSessionStore();
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(() => {
     const firstGroup = questions[0]?.group;
@@ -31,6 +40,7 @@ export function ClarificationPanel({ questions, onGeneratePRD }: ClarificationPa
 
   const requiredUnanswered = questions.filter(q => q.required && !q.answer && !q.skipped);
   const allRequiredAnswered = requiredUnanswered.length === 0;
+  const isGenerating = generationStep.status === 'running';
 
   const handleAnswer = (id: string, answer: string) => {
     dispatch({ type: 'UPDATE_CLARIFICATION', payload: { id, answer } });
@@ -51,6 +61,15 @@ export function ClarificationPanel({ questions, onGeneratePRD }: ClarificationPa
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={onGenerateClarification}
+            disabled={isGenerating}
+            data-testid="button-generate-clarification"
+          >
+            {questions.length > 0 ? 'Regenerate Questions' : 'Generate Questions'}
+          </Button>
           {!allRequiredAnswered && (
             <span className="text-xs text-[var(--color-danger)] flex items-center gap-1">
               <AlertCircle className="w-3.5 h-3.5" />
@@ -60,13 +79,28 @@ export function ClarificationPanel({ questions, onGeneratePRD }: ClarificationPa
           <Button
             size="sm"
             onClick={onGeneratePRD}
-            disabled={!allRequiredAnswered}
+            disabled={!allRequiredAnswered || isGenerating}
             data-testid="button-generate-prd"
           >
             Generate PRD
           </Button>
         </div>
       </div>
+
+      {(generationStep.status !== 'idle' || generationStep.errorMessage) && (
+        <div className="rounded-md border border-border bg-card px-3 py-2 text-xs text-muted-foreground">
+          {generationStep.status === 'running' && <span>Generating clarification questions…</span>}
+          {generationStep.status === 'succeeded' && (
+            <span>{isDemoMode ? 'Demo questions generated from the session context.' : 'Clarification questions generated and saved.'}</span>
+          )}
+          {generationStep.status === 'failed' && (
+            <span className="text-[var(--color-danger)]">{generationStep.errorMessage || 'Clarification generation failed. Retry when ready.'}</span>
+          )}
+          {generationStep.status === 'unavailable' && (
+            <span className="text-[var(--color-warning)]">{generationStep.errorMessage || 'Clarification generation is unavailable right now.'}</span>
+          )}
+        </div>
+      )}
 
       <div className="space-y-2">
         {groups.map(group => {
