@@ -1,9 +1,10 @@
 # Feature Specification: Product Skeleton Completion
 
-**Feature Branch**: `002-product-skeleton-completion`  
+**Feature Branch**: `003-product-skeleton-completion`  
 **Created**: 2026-05-05  
 **Status**: Draft  
 **Phase**: Phase B from the 2nd phase roadmap  
+**Depends On**: `002-ui-polish-foundation`
 **Input**: Complete the visible product skeleton by fixing missing routes, fake
 affordances, and foundational states before deeper persistence or AI work.
 
@@ -66,6 +67,41 @@ placeholder behavior.
 - **FR-008**: Do not add backend persistence in this spec.
 - **FR-009**: Do not add external integrations in this spec.
 
+## Must Finish
+
+- `/projects` route must exist and must not render NotFound.
+- Projects page must be useful with current in-memory sessions.
+- Command palette must provide actual navigation/session-open behavior.
+- Fake topbar/export/account/notification affordances must be implemented,
+  disabled, or clearly marked coming soon.
+- Empty states must exist for the key list/filter surfaces named in the plan.
+- Low-risk accessibility fixes must remain intact from spec 002.
+
+## May Defer
+
+- Backend persistence.
+- Database schema.
+- AI generation.
+- Real notification backend.
+- Jira/GitHub export.
+
+## Must Not Touch
+
+- API server and DB packages, unless only importing existing client types.
+- AI generation stubs beyond removing misleading UI references.
+- Visual redesign beyond small skeleton/state changes.
+
+## Failure Conditions
+
+Executor must not report complete if:
+
+- `/projects` still shows NotFound.
+- Command palette/search remains visual-only.
+- Any primary sidebar item is broken.
+- Placeholder controls remain clickable with fake success behavior and no
+  honest coming-soon/disabled treatment.
+- Empty states are missing from any touched list surface.
+
 ## Key Files
 
 - `artifacts/specflow-ai/src/App.tsx`
@@ -89,12 +125,23 @@ placeholder behavior.
 - **SC-005**: Baseline accessibility failures from the critique are addressed or
   explicitly deferred with reason.
 
+## Evidence Required
+
+Executor must report:
+
+1. Route list verified.
+2. Command palette actions verified.
+3. Placeholder controls changed or justified.
+4. Empty-state surfaces verified.
+5. Files changed.
+6. Checks run or skipped with reason.
+
 ## Executor Handoff
 
 Prompt example:
 
 ```text
-Execute spec 002-product-skeleton-completion. Read spec.md, plan.md, tasks.md,
+Execute spec 003-product-skeleton-completion. Read spec.md, plan.md, tasks.md,
 and the project constitution first. Preserve unrelated changes. Implement only
 this spec. Report changed files, behavior completed, and checks run or skipped.
 ```

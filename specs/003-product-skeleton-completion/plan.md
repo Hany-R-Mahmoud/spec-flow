@@ -1,6 +1,6 @@
 # Implementation Plan: Product Skeleton Completion
 
-**Branch**: `002-product-skeleton-completion` | **Date**: 2026-05-05 |
+**Branch**: `003-product-skeleton-completion` | **Date**: 2026-05-05 |
 **Spec**: [spec.md](./spec.md)
 
 ## Summary

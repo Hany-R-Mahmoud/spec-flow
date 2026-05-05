@@ -3,8 +3,8 @@
 ## Read First
 
 - `.specify/memory/constitution.md`
-- `specs/002-product-skeleton-completion/spec.md`
-- `specs/002-product-skeleton-completion/plan.md`
+- `specs/003-product-skeleton-completion/spec.md`
+- `specs/003-product-skeleton-completion/plan.md`
 - `specs/001-ui-ux-polish-workflow/2nd-phase-roadmap.md`
 
 ## Tasks

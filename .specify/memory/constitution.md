@@ -1,10 +1,12 @@
 <!--
 Sync Impact Report
-Version change: 1.0.0 -> 1.1.0
+Version change: 1.1.0 -> 1.2.0
 Modified principles:
 - Surgical Workflow -> Surgical Workflow
+- Development Workflow -> Development Workflow
 Added sections:
 - Executor-Ready Spec Handoffs
+- Executor Evidence And Honest Reporting
 Removed sections:
 - None
 Templates requiring updates:
@@ -76,7 +78,9 @@ Specifications MUST describe user value, scenarios, edge cases, and measurable
 success criteria before implementation details. Plans MUST identify the real
 workspace package or file areas affected, the validation approach, and any
 constitution risks. Tasks MUST be independently executable where practical,
-ordered by user-story value, and explicit about file paths.
+ordered by user-story value, and explicit about file paths. Specs MUST separate
+"must finish", "may defer", and "must not touch" work so an executor cannot
+silently broaden scope or claim completion for skipped work.
 
 ## Executor-Ready Spec Handoffs
 
@@ -98,6 +102,16 @@ Specs MUST call out dependencies on prior specs and MUST avoid requiring future
 agents to infer product intent from chat history. Cross-spec work MUST be split
 so each spec has a bounded outcome and can be reviewed independently.
 
+## Executor Evidence And Honest Reporting
+
+Executors MUST report outcomes with evidence, not only completion claims. Each
+implementation spec MUST define objective completion gates and expected proof,
+such as changed files, routes verified, API responses, persisted records,
+screenshots, or command output summaries. If a task is skipped, blocked,
+partially done, or implemented differently, the executor MUST report that status
+explicitly with the reason and the remaining work. A spec is not complete when a
+core success criterion is unverified.
+
 ## Governance
 
 This constitution is the controlling project guidance for Spec Kit specs, plans,
@@ -112,4 +126,4 @@ All future `/speckit.*` work MUST check compliance during planning and again
 before implementation. Any justified violation MUST be documented in the plan's
 Complexity Tracking section with the simpler alternative rejected.
 
-**Version**: 1.1.0 | **Ratified**: 2026-05-05 | **Last Amended**: 2026-05-05
+**Version**: 1.2.0 | **Ratified**: 2026-05-05 | **Last Amended**: 2026-05-05

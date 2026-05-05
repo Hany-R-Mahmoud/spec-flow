@@ -97,26 +97,26 @@ current UI/UX polish workflow.
 ## Proposed Next Phases
 
 1. **Phase A - UI Polish Foundation**
-   - Spec: `001-ui-ux-polish-workflow`
-   - Finish current design-lab workflow.
+   - Spec: `002-ui-polish-foundation`
+   - Execute approved foundation polish from the old `001` design-lab workflow.
    - Apply approved app-shell/dashboard/accessibility polish.
-   - Keep scope bounded to the current UI/UX spec.
+   - Keep scope bounded to frontend UI/accessibility only.
 
 2. **Phase B - Product Skeleton Completion**
-   - Spec: `002-product-skeleton-completion`
+   - Spec: `003-product-skeleton-completion`
    - Add Projects route.
    - Make command palette/search behavior real.
    - Clean fake affordances.
    - Add missing empty/loading/error states.
 
 3. **Phase C - Persistence MVP**
-   - Spec: `003-persistence-mvp`
+   - Spec: `004-persistence-mvp`
    - Define DB schema for sessions, projects, workflow artifacts, settings.
    - Add basic CRUD API.
    - Save sessions and settings beyond refresh.
 
 4. **Phase D - AI Workflow MVP**
-   - Spec: `004-ai-workflow-mvp`
+   - Spec: `005-ai-workflow-mvp`
    - Implement intake to clarification questions.
    - Generate PRD sections.
    - Generate epics.
@@ -124,14 +124,14 @@ current UI/UX polish workflow.
    - Score readiness and warnings.
 
 5. **Phase E - Export Integrations**
-   - Spec: `005-export-integrations`
+   - Spec: `006-export-integrations`
    - Create export packages.
    - Persist export history.
    - Add Jira export.
    - Add GitHub issue export.
 
 6. **Phase F - Collaboration And Review**
-   - Spec: `006-collaboration-review`
+   - Spec: `007-collaboration-review`
    - Persist developer reviews.
    - Add comments/status history.
    - Add activity timeline.
@@ -141,16 +141,17 @@ current UI/UX polish workflow.
 
 Use these prompts with OpenCode or another executor:
 
-1. `execute spec 001-ui-ux-polish-workflow and report the outcome`
-2. `execute spec 002-product-skeleton-completion and report the outcome`
-3. `execute spec 003-persistence-mvp and report the outcome`
-4. `execute spec 004-ai-workflow-mvp and report the outcome`
-5. `execute spec 005-export-integrations and report the outcome`
-6. `execute spec 006-collaboration-review and report the outcome`
+1. `execute spec 002-ui-polish-foundation and report the outcome`
+2. `execute spec 003-product-skeleton-completion and report the outcome`
+3. `execute spec 004-persistence-mvp and report the outcome`
+4. `execute spec 005-ai-workflow-mvp and report the outcome`
+5. `execute spec 006-export-integrations and report the outcome`
+6. `execute spec 007-collaboration-review and report the outcome`
 
-Each spec folder now contains `spec.md`, `plan.md`, and `tasks.md`, except
-`001-ui-ux-polish-workflow`, which already had `spec.md`/`plan.md` and now also
-has `tasks.md`.
+Spec `001-ui-ux-polish-workflow` remains the original design-lab/spec-driven
+workflow track. It is not a Phase 2 implementation spec. Phase 2 starts at
+`002-ui-polish-foundation` and each Phase 2 spec folder contains `spec.md`,
+`plan.md`, and `tasks.md`.
 
 ## Recommended Next Spec
 
