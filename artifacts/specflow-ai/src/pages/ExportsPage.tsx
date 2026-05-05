@@ -21,6 +21,7 @@ export function ExportsPage() {
       <div>
         <h1 className="text-lg font-semibold text-foreground">Exports</h1>
         <p className="text-xs text-muted-foreground mt-0.5">Previous Jira export packages</p>
+        <p className="text-xs text-muted-foreground mt-1">History is currently seeded with local prototype packages until persistence is added.</p>
       </div>
 
       {/* Filter */}
@@ -87,6 +88,7 @@ export function ExportsPage() {
                     onClick={() => download(pkg)}
                     className="text-xs text-primary hover:text-primary/80 flex items-center gap-1 transition-colors"
                     data-testid={`button-download-${pkg.id}`}
+                    aria-label={`Download ${pkg.sessionName} ${pkg.format.toUpperCase()} export package`}
                   >
                     <Download className="w-3.5 h-3.5" />
                     Download
@@ -94,6 +96,13 @@ export function ExportsPage() {
                 </td>
               </tr>
             ))}
+            {filtered.length === 0 && (
+              <tr>
+                <td colSpan={8} className="px-4 py-12 text-center text-xs text-muted-foreground">
+                  No export packages match this filter yet. Switch status filters or finish a workspace export to populate history.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

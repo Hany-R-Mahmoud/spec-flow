@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useRoute } from 'wouter';
+import { useLocation, useRoute } from 'wouter';
 import { useSessionStore } from '@/store/session-store';
 import { Phase } from '@/lib/types';
 import { PhaseTracker } from '@/components/workspace/PhaseTracker';
@@ -105,6 +105,7 @@ function buildGuidanceItems(phase: Phase, session: any, questions: any[], prdSec
 }
 
 export function WorkflowWorkspace() {
+  const [, setLocation] = useLocation();
   const [, params] = useRoute('/workspace/:id');
   const sessionId = params?.id;
   const { state, dispatch } = useSessionStore();
@@ -116,7 +117,28 @@ export function WorkflowWorkspace() {
   if (!session) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-sm text-muted-foreground">Session not found.</div>
+        <div className="max-w-md rounded-md border border-border bg-card p-6 text-center">
+          <div className="text-sm font-semibold text-foreground">Session not found</div>
+          <p className="mt-2 text-xs text-muted-foreground">
+            This workspace no longer exists in local memory. Open another project or start a new breakdown.
+          </p>
+          <div className="mt-4 flex items-center justify-center gap-2">
+            <button
+              type="button"
+              onClick={() => setLocation('/projects')}
+              className="rounded-md border border-border px-3 py-2 text-xs font-medium text-foreground transition-colors hover:bg-muted"
+            >
+              Go to Projects
+            </button>
+            <button
+              type="button"
+              onClick={() => setLocation('/new')}
+              className="rounded-md bg-primary px-3 py-2 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            >
+              New Breakdown
+            </button>
+          </div>
+        </div>
       </div>
     );
   }

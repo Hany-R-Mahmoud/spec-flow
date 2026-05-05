@@ -6,6 +6,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { SessionProvider } from "@/store/session-store";
 import { Dashboard } from "@/pages/Dashboard";
 import { NewBreakdown } from "@/pages/NewBreakdown";
+import { ProjectsPage } from "@/pages/ProjectsPage";
 import { WorkflowWorkspace } from "@/pages/WorkflowWorkspace";
 import { ReviewsPage } from "@/pages/ReviewsPage";
 import { ExportsPage } from "@/pages/ExportsPage";
@@ -20,6 +21,7 @@ function Router() {
       <Switch>
         <Route path="/" component={Dashboard} />
         <Route path="/new" component={NewBreakdown} />
+        <Route path="/projects" component={ProjectsPage} />
         <Route path="/workspace/:id" component={WorkflowWorkspace} />
         <Route path="/reviews" component={ReviewsPage} />
         <Route path="/exports" component={ExportsPage} />

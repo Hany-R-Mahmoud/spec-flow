@@ -159,7 +159,9 @@ export function ReviewsPage() {
 
         {sorted.length === 0 && (
           <div className="px-4 py-12 text-center text-xs text-muted-foreground">
-            No stories match the selected filters.
+            {state.stories.length === 0
+              ? 'No review items yet. Generate stories and send them to developer review to populate this queue.'
+              : 'No stories match the selected filters. Change the project or status filters to widen the queue.'}
           </div>
         )}
       </div>

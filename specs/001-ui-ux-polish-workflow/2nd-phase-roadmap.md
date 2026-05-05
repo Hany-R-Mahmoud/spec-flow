@@ -98,12 +98,14 @@ current UI/UX polish workflow.
 
 1. **Phase A - UI Polish Foundation**
    - Spec: `002-ui-polish-foundation`
+   - Status: Executed in `249307d`
    - Execute approved foundation polish from the old `001` design-lab workflow.
    - Apply approved app-shell/dashboard/accessibility polish.
    - Keep scope bounded to frontend UI/accessibility only.
 
 2. **Phase B - Product Skeleton Completion**
    - Spec: `003-product-skeleton-completion`
+   - Status: Executed locally on 2026-05-05
    - Add Projects route.
    - Make command palette/search behavior real.
    - Clean fake affordances.
