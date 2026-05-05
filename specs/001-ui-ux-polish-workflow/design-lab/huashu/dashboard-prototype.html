@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SpecFlow AI - Precision Ops Dashboard Prototype</title>
+  <style>
+    :root {
+      --canvas: #f6f7f9;
+      --panel: #ffffff;
+      --card: #ffffff;
+      --subtle: #eef2f6;
+      --border: #d7dee8;
+      --border-strong: #a9b7c8;
+      --text: #111827;
+      --text-2: #4b5563;
+      --muted: #6b7280;
+      --primary: #2563eb;
+      --primary-soft: #eff6ff;
+      --sync: #0f766e;
+      --agent: #7c3aed;
+      --success: #15803d;
+      --warning: #b45309;
+      --danger: #b91c1c;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background: var(--canvas);
+      font-size: 14px;
+    }
+    .app {
+      display: grid;
+      grid-template-columns: 264px 1fr;
+      min-height: 100vh;
+    }
+    aside {
+      background: var(--panel);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+    }
+    .brand {
+      height: 60px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 18px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 700;
+    }
+    .mark {
+      width: 28px;
+      height: 28px;
+      border-radius: 7px;
+      display: grid;
+      place-items: center;
+      background: var(--primary);
+      color: #fff;
+      font-weight: 800;
+    }
+    nav { padding: 18px 12px; }
+    .nav-label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin: 0 8px 8px;
+    }
+    .nav-item {
+      position: relative;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 12px;
+      border-radius: 8px;
+      color: var(--text-2);
+      cursor: pointer;
+      margin-bottom: 4px;
+    }
+    .nav-item.active {
+      background: var(--primary-soft);
+      color: var(--primary);
+      font-weight: 700;
+    }
+    .nav-item.active:before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 8px;
+      bottom: 8px;
+      width: 3px;
+      border-radius: 999px;
+      background: var(--primary);
+    }
+    .nav-icon {
+      width: 18px;
+      height: 18px;
+      border: 1.5px solid currentColor;
+      border-radius: 5px;
+      opacity: .9;
+    }
+    .main { min-width: 0; display: flex; flex-direction: column; }
+    header {
+      height: 60px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: 1fr 420px 1fr;
+      align-items: center;
+      gap: 16px;
+      padding: 0 24px;
+    }
+    .workspace { font-weight: 700; }
+    .workspace span { color: var(--muted); font-weight: 500; margin-left: 8px; }
+    .command {
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border: 1px solid var(--border);
+      background: #fbfcfe;
+      border-radius: 8px;
+      color: var(--muted);
+      padding: 0 10px 0 12px;
+    }
+    .kbd {
+      font-size: 12px;
+      color: var(--text-2);
+      border: 1px solid var(--border);
+      background: var(--panel);
+      border-radius: 5px;
+      padding: 2px 6px;
+    }
+    .top-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+    .icon-btn {
+      width: 38px;
+      height: 38px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--panel);
+    }
+    main {
+      padding: 28px;
+      overflow: auto;
+    }
+    .page-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+    h1 {
+      margin: 0 0 4px;
+      font-size: 24px;
+      line-height: 32px;
+    }
+    .sub { margin: 0; color: var(--muted); font-size: 13px; }
+    .primary {
+      height: 38px;
+      border: 0;
+      border-radius: 8px;
+      background: var(--primary);
+      color: white;
+      font-weight: 700;
+      padding: 0 14px;
+    }
+    .kpis {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    .card, .table-card, .queue-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+    .card { padding: 16px; }
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .label {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    .metric {
+      font-size: 28px;
+      line-height: 34px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+    .status {
+      font-size: 12px;
+      margin-top: 4px;
+      color: var(--text-2);
+    }
+    .dot {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      font-size: 13px;
+      font-weight: 800;
+    }
+    .blue { color: var(--primary); background: var(--primary-soft); }
+    .green { color: var(--success); background: #ecfdf3; }
+    .amber { color: var(--warning); background: #fff7ed; }
+    .teal { color: var(--sync); background: #ecfdf5; }
+    .table-head {
+      height: 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 16px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 700;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th {
+      text-align: left;
+      height: 36px;
+      padding: 0 16px;
+      color: var(--muted);
+      font-size: 12px;
+      background: #f9fafb;
+      border-bottom: 1px solid var(--border);
+    }
+    td {
+      height: 56px;
+      padding: 0 16px;
+      border-bottom: 1px solid var(--border);
+      font-variant-numeric: tabular-nums;
+    }
+    tr:hover td { background: #fbfcff; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; color: var(--muted); font-size: 12px; }
+    .bar {
+      height: 7px;
+      width: 110px;
+      background: var(--subtle);
+      border-radius: 999px;
+      overflow: hidden;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+    .bar span { display: block; height: 100%; background: var(--primary); }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      background: var(--primary-soft);
+      color: var(--primary);
+    }
+    .bottom {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 18px;
+    }
+    .queue-card { overflow: hidden; }
+    .queue-row {
+      height: 42px;
+      display: grid;
+      grid-template-columns: 70px 1fr auto;
+      align-items: center;
+      gap: 12px;
+      padding: 0 14px;
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside>
+      <div class="brand"><div class="mark">S</div> SpecFlow AI</div>
+      <nav aria-label="Workspace navigation">
+        <div class="nav-label">Workspace</div>
+        <div class="nav-item active"><span class="nav-icon"></span>Dashboard</div>
+        <div class="nav-item"><span class="nav-icon"></span>New Breakdown</div>
+        <div class="nav-item"><span class="nav-icon"></span>Projects</div>
+        <div class="nav-item"><span class="nav-icon"></span>Reviews</div>
+        <div class="nav-item"><span class="nav-icon"></span>Exports</div>
+        <div class="nav-item"><span class="nav-icon"></span>Settings</div>
+      </nav>
+    </aside>
+    <div class="main">
+      <header>
+        <div class="workspace">Workspace <span>PM</span></div>
+        <button class="command" aria-label="Search commands, specs, and projects">
+          <span>Search commands, specs, projects</span>
+          <span class="kbd">⌘K</span>
+        </button>
+        <div class="top-actions">
+          <button class="icon-btn" aria-label="Notifications"></button>
+          <button class="icon-btn" aria-label="Account menu"></button>
+        </div>
+      </header>
+      <main>
+        <section class="page-head">
+          <div>
+            <h1>Dashboard</h1>
+            <p class="sub">4 active breakdowns · 6 stories awaiting review · 3 exports ready</p>
+          </div>
+          <button class="primary">New breakdown</button>
+        </section>
+        <section class="kpis" aria-label="Workspace metrics">
+          <div class="card"><div class="card-top"><div class="label">Active Breakdowns</div><div class="dot blue">4</div></div><div class="metric">4</div><div class="status">Sessions in progress</div></div>
+          <div class="card"><div class="card-top"><div class="label">Avg Readiness</div><div class="dot green">84</div></div><div class="metric">84/100</div><div class="status">Healthy developer readiness</div></div>
+          <div class="card"><div class="card-top"><div class="label">Awaiting Review</div><div class="dot amber">6</div></div><div class="metric">6</div><div class="status">Stories need developer review</div></div>
+          <div class="card"><div class="card-top"><div class="label">Exports Ready</div><div class="dot teal">3</div></div><div class="metric">3</div><div class="status">Jira packages ready</div></div>
+        </section>
+        <section class="table-card" aria-labelledby="active-sessions-title">
+          <div class="table-head"><span id="active-sessions-title">Active Sessions</span><span class="sub">Click row to open workspace</span></div>
+          <table>
+            <thead><tr><th>Session</th><th>Phase</th><th>Progress</th><th>Readiness</th><th>Status</th><th>Updated</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Team Access Management</strong><div class="mono">TAM</div></td><td>Stories</td><td><span class="bar"><span style="width:63%"></span></span>63%</td><td><strong>85</strong></td><td><span class="badge">In progress</span></td><td>2h ago</td></tr>
+              <tr><td><strong>Subscription Cancellation Flow</strong><div class="mono">SUB</div></td><td>Epics</td><td><span class="bar"><span style="width:50%"></span></span>50%</td><td>—</td><td><span class="badge">In progress</span></td><td>5h ago</td></tr>
+              <tr><td><strong>Multi-language Checkout</strong><div class="mono">I18N</div></td><td>Clarification</td><td><span class="bar"><span style="width:25%"></span></span>25%</td><td>—</td><td><span class="badge">In progress</span></td><td>1d ago</td></tr>
+              <tr><td><strong>Admin Reporting Dashboard</strong><div class="mono">RPT</div></td><td>PRD</td><td><span class="bar"><span style="width:38%"></span></span>38%</td><td>—</td><td><span class="badge">In progress</span></td><td>2d ago</td></tr>
+            </tbody>
+          </table>
+        </section>
+        <section class="bottom">
+          <div class="queue-card"><div class="table-head">Review Queue <span class="sub">View all</span></div><div class="queue-row"><span class="mono">TAM-002</span><strong>Assign role during invitation</strong><span class="badge">Pending</span></div><div class="queue-row"><span class="mono">TAM-005</span><strong>Handle expired invitation</strong><span class="badge">Clarify</span></div></div>
+          <div class="queue-card"><div class="table-head">Recent Exports <span class="sub">View all</span></div><div class="queue-row"><span class="mono">JSON</span><strong>Team Access Management</strong><span class="badge">Ready</span></div><div class="queue-row"><span class="mono">CSV</span><strong>Subscription Cancellation Flow</strong><span class="badge">Partial</span></div></div>
+        </section>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

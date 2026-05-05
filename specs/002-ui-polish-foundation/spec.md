@@ -5,6 +5,7 @@
 **Status**: Draft  
 **Phase**: Phase A of the 2nd phase roadmap  
 **Depends On**: `001-ui-ux-polish-workflow` design-lab artifacts
+**Approved Direction**: Precision Ops
 
 ## Purpose
 
@@ -13,8 +14,27 @@ the current Replit-generated SpecFlow AI app. This spec turns the old
 design-lab roadmap into the first executable Phase 2 implementation slice.
 
 The executor must not invent a new visual direction. It must read the existing
-design-system and critique artifacts, implement only the foundation slice, and
-report exactly what was changed and verified.
+tracked design-lab artifacts, use **Precision Ops** as the source of truth,
+implement only the foundation slice, and report exactly what was changed and
+verified.
+
+## Source Of Truth
+
+The canonical design artifacts are the tracked files under:
+
+```text
+specs/001-ui-ux-polish-workflow/design-lab/
+```
+
+Do not rely on `.local/design-lab/` for execution. `.local/` is scratch space and
+may be ignored by git.
+
+Final decision:
+
+- Direction: **Precision Ops**
+- First implementation target: this spec, `002-ui-polish-foundation`
+- Primary rationale: high fit for current app shape, low implementation risk,
+  strong accessibility/hierarchy payoff, no new dependency required
 
 ## User Scenarios
 
@@ -61,6 +81,8 @@ same workflow tool while becoming clearer and more credible.
 
 ## Must Finish
 
+- Follow the Precision Ops direction from
+  `specs/001-ui-ux-polish-workflow/design-lab/decision-report.md`.
 - Improve app shell separation and hierarchy.
 - Improve sidebar active state and accessibility.
 - Improve command/search trigger affordance and label.
@@ -92,10 +114,15 @@ same workflow tool while becoming clearer and more credible.
 1. `.specify/memory/constitution.md`
 2. `specs/001-ui-ux-polish-workflow/spec.md`
 3. `specs/001-ui-ux-polish-workflow/plan.md`
-4. `.local/design-lab/001-ui-ux-polish-workflow/design-system/MASTER.md`
-5. `.local/design-lab/001-ui-ux-polish-workflow/design-system/pages/dashboard.md`
-6. `.local/design-lab/001-ui-ux-polish-workflow/design-system/checklist.md`
-7. `.local/design-lab/001-ui-ux-polish-workflow/critique-001-current-dashboard.md`
+4. `specs/001-ui-ux-polish-workflow/design-lab/decision-report.md`
+5. `specs/001-ui-ux-polish-workflow/design-lab/design-system/MASTER.md`
+6. `specs/001-ui-ux-polish-workflow/design-lab/design-system/pages/dashboard.md`
+7. `specs/001-ui-ux-polish-workflow/design-lab/design-system/checklist.md`
+8. `specs/001-ui-ux-polish-workflow/design-lab/critique-001-current-dashboard.md`
+9. `specs/001-ui-ux-polish-workflow/design-lab/huashu/visual-directions.md`
+10. `specs/001-ui-ux-polish-workflow/design-lab/huashu/critique-5d.md`
+11. `specs/001-ui-ux-polish-workflow/design-lab/open-design/prototype-comparison.md`
+12. `specs/001-ui-ux-polish-workflow/design-lab/execution-prompt.md`
 
 ## Likely Files
 
@@ -118,6 +145,8 @@ same workflow tool while becoming clearer and more credible.
   product behavior.
 - **SC-006**: No new runtime dependency is added.
 - **SC-007**: Executor reports before/after evidence or exact manual checks.
+- **SC-008**: Executor report explicitly says how the implementation follows
+  Precision Ops and which design-lab recommendations were deferred.
 
 ## Evidence Required
 
@@ -133,7 +162,8 @@ Executor must report:
 
 ```text
 Execute spec 002-ui-polish-foundation and report the outcome. Read spec.md,
-plan.md, tasks.md, the constitution, and the listed design-lab artifacts first.
-Preserve unrelated changes. Implement only the foundation UI/accessibility slice.
-Report changed files, evidence, skipped checks, and deferred recommendations.
+plan.md, tasks.md, the constitution, and the tracked design-lab artifacts under
+specs/001-ui-ux-polish-workflow/design-lab first. Preserve unrelated changes.
+Implement only the Precision Ops foundation UI/accessibility slice. Report
+changed files, evidence, skipped checks, and deferred recommendations.
 ```
