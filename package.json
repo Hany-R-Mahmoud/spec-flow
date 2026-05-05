@@ -4,6 +4,10 @@
   "license": "MIT",
   "scripts": {
     "preinstall": "sh -c 'rm -f package-lock.json yarn.lock; case \"$npm_config_user_agent\" in pnpm/*) ;; *) echo \"Use pnpm instead\" >&2; exit 1 ;; esac'",
+    "dev": "pnpm --filter @workspace/specflow-ai dev",
+    "dev:specflow": "pnpm --filter @workspace/specflow-ai dev",
+    "dev:mockup": "pnpm --filter @workspace/mockup-sandbox dev",
+    "dev:api": "pnpm --filter @workspace/api-server dev",
     "build": "pnpm run typecheck && pnpm -r --if-present run build",
     "typecheck:libs": "tsc --build",
     "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck"

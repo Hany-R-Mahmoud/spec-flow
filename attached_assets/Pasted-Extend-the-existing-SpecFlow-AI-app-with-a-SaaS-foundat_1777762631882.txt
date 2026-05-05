@@ -1,0 +1,378 @@
+Extend the existing SpecFlow AI app with a SaaS foundation layer.
+
+You must use spec-driven development. Do not start implementation immediately.
+
+First create these files:
+
+/specs/002-saas-foundation/spec.md
+/specs/002-saas-foundation/plan.md
+/specs/002-saas-foundation/tasks.md
+/specs/002-saas-foundation/data-model.md
+/specs/002-saas-foundation/quickstart.md
+/specs/002-saas-foundation/contracts/auth-contract.md
+/specs/002-saas-foundation/contracts/i18n-contract.md
+/specs/002-saas-foundation/contracts/theme-contract.md
+/specs/002-saas-foundation/contracts/analytics-contract.md
+
+After creating the spec artifacts, implement the feature from tasks.md in order.
+
+Do not remove or regress the existing SpecFlow AI workflow:
+Intake → Clarification → PRD → Epics → Stories → Quality Review → Developer Review → Jira Export
+
+Preserve the Product Ops Console design direction:
+- calm
+- information-first
+- structured
+- professional B2B SaaS
+- dense but readable
+- workflow-oriented
+- artifact-driven
+- accessible
+
+Feature goal:
+Add real in-app prototype authentication, user profile/preferences, dark/light/system theme, full English/Arabic localization with RTL support, and dashboard graphs/statistics connected to existing app state as much as possible.
+
+Do not require external auth providers, external databases, OAuth, Clerk, Supabase, Firebase, Auth0, email verification, or API keys.
+
+Authentication:
+Implement real in-app authentication for the prototype.
+
+Requirements:
+- Add a login page.
+- Protect app routes.
+- Persist authenticated session locally.
+- Redirect unauthenticated users to login.
+- Redirect authenticated users away from login.
+- Support logout.
+- Include seeded users.
+- Demo credentials must always be visible on the login screen.
+- Include quick-login buttons:
+  - Continue as PM
+  - Continue as Developer
+  - Continue as Admin
+- Developer role should land on Reviews page after login.
+- PM/Admin roles should land on Dashboard after login.
+- Authentication must not lock the tester outside the prototype.
+
+Seeded users:
+1. Product Manager
+   email: pm@specflow.demo
+   password: demo123
+   role: Product Manager
+
+2. Developer
+   email: dev@specflow.demo
+   password: demo123
+   role: Developer
+
+3. Workspace Admin
+   email: admin@specflow.demo
+   password: demo123
+   role: Workspace Admin
+
+Login screen design:
+- Keep it restrained and professional.
+- Do not make it a marketing landing page.
+- Use a clear login form.
+- Show demo credentials in a bordered info panel.
+- Show quick role-login buttons.
+- Optional right-side compact product preview is allowed.
+- Demo access must be impossible to miss.
+
+User profile:
+Add avatar dropdown in the topbar.
+
+Dropdown must show:
+- name
+- email
+- role badge
+- Profile / Settings link
+- theme quick toggle
+- language quick toggle if practical
+- Sign out
+
+Add Profile/Settings page with tabs:
+- Account
+- Workspace
+- Preferences
+- Notifications
+- Workflow Defaults
+- Security
+
+Account:
+- name
+- email
+- role
+- avatar initials
+
+Workspace:
+- workspace name
+- default Jira project key
+- default labels/components
+
+Preferences:
+- language: English / Arabic
+- theme: Light / Dark / System
+- default output depth: Quick / Standard / Detailed
+- compact mode toggle if practical
+
+Notifications:
+- developer review updates
+- stories needing clarification
+- export ready alerts
+
+Workflow Defaults:
+- quality threshold
+- developer review required toggle
+- default story template
+
+Security:
+- current session info
+- demo auth notice
+- change password visual-only or local-only
+
+Persist preferences locally.
+
+Theme:
+Add light, dark, and system theme support.
+
+Requirements:
+- Theme preference persists locally.
+- Theme can be changed from avatar dropdown and settings.
+- Use CSS variables/design tokens.
+- Dark mode must preserve readability of dense tables, cards, charts, story panels, review panels, and export previews.
+- Dark mode must be professional dark slate, not neon/cyber.
+
+Light tokens:
+- background: #F6F7F9
+- surface: #FFFFFF
+- surface muted: #F1F3F5
+- border: #DDE2E7
+- strong border: #C5CCD5
+- primary text: #172033
+- secondary text: #5B6678
+- muted text: #8992A3
+- primary: #2F5BFF
+- primary dark: #2447C7
+- primary soft: #EAF0FF
+- success: #16A34A
+- success soft: #EAF8EF
+- warning: #D97706
+- warning soft: #FFF4DE
+- danger: #DC2626
+- danger soft: #FEECEC
+- info: #0891B2
+- info soft: #E7F8FC
+
+Dark tokens:
+- background: #0F141B
+- surface: #151B24
+- surface muted: #1C2430
+- border: #2A3441
+- strong border: #3A4656
+- primary text: #F4F7FB
+- secondary text: #B8C2D0
+- muted text: #7F8A99
+- primary: #6B8CFF
+- primary soft: #182449
+- success: #4ADE80
+- success soft: #12301D
+- warning: #FBBF24
+- warning soft: #33250B
+- danger: #F87171
+- danger soft: #361616
+- info: #38BDF8
+- info soft: #0D2B38
+
+Localization:
+Add full English and Arabic localization.
+
+Requirements:
+- Use translation keys for all practical user-facing UI text.
+- Do not hardcode visible labels directly in components where avoidable.
+- Language preference persists locally.
+- English uses LTR.
+- Arabic uses RTL.
+- Set document dir based on language.
+- Mirror layout appropriately for RTL.
+- Use logical CSS properties where possible, such as start/end, text-start/text-end, margin-inline, padding-inline, ms/me utility equivalents.
+- Localize navigation, buttons, statuses, empty states, validation messages, settings labels, chart labels, dashboard metrics, workflow phases, story statuses, export labels, and auth UI.
+- Keep emails, Jira keys, JSON, CSV, URLs, and code-like content LTR even inside Arabic UI.
+- Arabic must feel intentionally RTL, not just translated text.
+
+Suggested Arabic labels:
+- Dashboard: لوحة التحكم
+- New Breakdown: تحليل جديد
+- Projects: المشاريع
+- Reviews: المراجعات
+- Exports: التصدير
+- Settings: الإعدادات
+- Sign in: تسجيل الدخول
+- Continue as PM: المتابعة كمدير منتج
+- Continue as Developer: المتابعة كمطور
+- Continue as Admin: المتابعة كمسؤول
+- Developer Review: مراجعة المطور
+- Ready for Jira: جاهز لـ Jira
+- Needs Review: يحتاج مراجعة
+- Quality Review: مراجعة الجودة
+- Stories Awaiting Review: القصص بانتظار المراجعة
+- Average Readiness: متوسط الجاهزية
+
+Dashboard graphs/statistics:
+Upgrade the Dashboard with operational analytics.
+
+Graphs must connect to existing app state as much as possible:
+- project sessions
+- phase statuses
+- stories
+- readiness scores
+- quality warnings
+- developer reviews
+- export packages
+
+Use computed selectors/helper functions instead of hardcoded chart numbers where practical.
+
+Add dashboard metrics:
+- Active breakdowns
+- Average readiness score
+- Stories awaiting developer review
+- Jira exports ready
+- First-pass approval rate
+- Open clarification questions
+
+Add dashboard charts:
+- Readiness Score Trend
+- Stories by Review Status
+- Quality Warnings by Type
+- Phase Distribution
+- Export Readiness
+
+Chart requirements:
+- Use Recharts if available; otherwise implement simple accessible SVG charts.
+- Charts must work in light and dark modes.
+- Chart labels must localize.
+- Use semantic status colors.
+- Use subtle grid lines.
+- Include clear legends.
+- No 3D charts.
+- No decorative chart gradients.
+- Include useful empty states.
+
+Data model additions:
+Use or adapt these types.
+
+type UserRole = "pm" | "developer" | "admin"
+
+type User = {
+  id: string
+  name: string
+  email: string
+  passwordHash?: string
+  role: UserRole
+  avatarInitials: string
+  workspaceId: string
+}
+
+type AuthSession = {
+  userId: string
+  role: UserRole
+  createdAt: string
+  expiresAt?: string
+}
+
+type UserPreferences = {
+  userId: string
+  language: "en" | "ar"
+  direction: "ltr" | "rtl"
+  theme: "light" | "dark" | "system"
+  defaultOutputDepth: "quick" | "standard" | "detailed"
+  compactMode: boolean
+  notifications: {
+    developerReviewUpdates: boolean
+    storiesNeedingClarification: boolean
+    exportReadyAlerts: boolean
+  }
+  workflowDefaults: {
+    qualityThreshold: number
+    developerReviewRequired: boolean
+    defaultStoryTemplate: string
+  }
+}
+
+type AnalyticsSnapshot = {
+  activeBreakdowns: number
+  averageReadinessScore: number
+  storiesAwaitingReview: number
+  jiraExportsReady: number
+  firstPassApprovalRate: number
+  openClarificationQuestions: number
+  readinessTrend: Array<{ label: string; value: number }>
+  reviewStatusCounts: Array<{ status: string; count: number }>
+  warningTypeCounts: Array<{ warningType: string; count: number }>
+  phaseDistribution: Array<{ phase: string; count: number }>
+  exportReadiness: Array<{ status: "ready" | "needsReview"; count: number }>
+}
+
+Implementation order:
+1. Create spec artifacts.
+2. Add auth state, seeded users, and session persistence.
+3. Add login page.
+4. Add route protection and role-based landing behavior.
+5. Add avatar dropdown and logout.
+6. Add Profile/Settings page.
+7. Add theme provider and CSS variables.
+8. Add light/dark/system theme controls.
+9. Add i18n translation dictionaries.
+10. Add language provider and RTL/LTR handling.
+11. Replace visible hardcoded UI labels with translation keys where practical.
+12. Add analytics selectors computed from current app data.
+13. Add chart components.
+14. Update Dashboard cards and graphs.
+15. Verify auth, preferences, theme, localization, RTL, and charts.
+
+Design rules:
+- Keep Product Ops Console direction.
+- Use 8px spacing grid.
+- Use max 8px border radius.
+- Use subtle borders and minimal shadows.
+- Use compact tables, tabs, side panels, editable cards, status badges, score bars/rings, and progress indicators.
+- Use visible focus states.
+- Use semantic HTML and accessible labels.
+- Do not rely on color alone for status.
+- Every screen must have a clear primary action.
+- Avoid nested cards.
+- Avoid giant marketing hero sections.
+- Avoid gradient blob backgrounds.
+- Avoid neon AI/cyber visuals.
+- Avoid robot imagery.
+- Avoid generic AI sparkle effects.
+
+Acceptance criteria:
+- Can I log in with demo credentials without guessing?
+- Can I switch role quickly for testing?
+- Does the app protect routes?
+- Does the developer role land on Reviews?
+- Do PM/Admin roles land on Dashboard?
+- Can I log out?
+- Can I find profile/settings from the avatar?
+- Are profile preferences persisted?
+- Can I change language globally?
+- Does Arabic feel intentionally RTL?
+- Are key UI labels translated across the app?
+- Can I switch light/dark/system theme?
+- Are dense tables readable in dark mode?
+- Do dashboard graphs reflect workflow data as much as possible?
+- Do chart labels localize?
+- Does the original SpecFlow workflow still work?
+- Does demo access remain visible and reliable?
+
+Before finishing:
+Run a self-review against:
+- route protection
+- demo login reliability
+- preference persistence
+- full UI localization coverage
+- RTL layout quality
+- dark mode readability
+- chart/data connection
+- no regression to the core workflow
