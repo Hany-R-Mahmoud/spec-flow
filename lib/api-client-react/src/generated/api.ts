@@ -5,18 +5,36 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import type {
+  MutationFunction,
   QueryFunction,
   QueryKey,
+  UseMutationOptions,
+  UseMutationResult,
   UseQueryOptions,
   UseQueryResult,
 } from "@tanstack/react-query";
 
-import type { HealthStatus } from "./api.schemas";
+import type {
+  ApiErrorResponse,
+  CreateProjectRequest,
+  CreateSessionRequest,
+  ExportPackageListResponse,
+  HealthStatus,
+  Project,
+  ProjectListResponse,
+  SessionListResponse,
+  UpdateProjectRequest,
+  UpdateSessionArtifactsRequest,
+  UpdateSessionRequest,
+  UpdateSettingsRequest,
+  WorkflowSession,
+  WorkspaceSettings,
+} from "./api.schemas";
 
 import { customFetch } from "../custom-fetch";
-import type { ErrorType } from "../custom-fetch";
+import type { ErrorType, BodyType } from "../custom-fetch";
 
 type AwaitedInput<T> = PromiseLike<T> | T;
 
@@ -92,6 +110,1000 @@ export function useHealthCheck<
   request?: SecondParameter<typeof customFetch>;
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getHealthCheckQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary List projects
+ */
+export const getListProjectsUrl = () => {
+  return `/api/projects`;
+};
+
+export const listProjects = async (
+  options?: RequestInit,
+): Promise<ProjectListResponse> => {
+  return customFetch<ProjectListResponse>(getListProjectsUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getListProjectsQueryKey = () => {
+  return [`/api/projects`] as const;
+};
+
+export const getListProjectsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listProjects>>,
+  TError = ErrorType<ApiErrorResponse>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listProjects>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getListProjectsQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listProjects>>> = ({
+    signal,
+  }) => listProjects({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listProjects>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListProjectsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listProjects>>
+>;
+export type ListProjectsQueryError = ErrorType<ApiErrorResponse>;
+
+/**
+ * @summary List projects
+ */
+
+export function useListProjects<
+  TData = Awaited<ReturnType<typeof listProjects>>,
+  TError = ErrorType<ApiErrorResponse>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listProjects>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListProjectsQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Create project
+ */
+export const getCreateProjectUrl = () => {
+  return `/api/projects`;
+};
+
+export const createProject = async (
+  createProjectRequest: CreateProjectRequest,
+  options?: RequestInit,
+): Promise<Project> => {
+  return customFetch<Project>(getCreateProjectUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(createProjectRequest),
+  });
+};
+
+export const getCreateProjectMutationOptions = <
+  TError = ErrorType<ApiErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createProject>>,
+    TError,
+    { data: BodyType<CreateProjectRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createProject>>,
+  TError,
+  { data: BodyType<CreateProjectRequest> },
+  TContext
+> => {
+  const mutationKey = ["createProject"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createProject>>,
+    { data: BodyType<CreateProjectRequest> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return createProject(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateProjectMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createProject>>
+>;
+export type CreateProjectMutationBody = BodyType<CreateProjectRequest>;
+export type CreateProjectMutationError = ErrorType<ApiErrorResponse>;
+
+/**
+ * @summary Create project
+ */
+export const useCreateProject = <
+  TError = ErrorType<ApiErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createProject>>,
+    TError,
+    { data: BodyType<CreateProjectRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof createProject>>,
+  TError,
+  { data: BodyType<CreateProjectRequest> },
+  TContext
+> => {
+  return useMutation(getCreateProjectMutationOptions(options));
+};
+
+/**
+ * @summary Get project
+ */
+export const getGetProjectUrl = (projectId: string) => {
+  return `/api/projects/${projectId}`;
+};
+
+export const getProject = async (
+  projectId: string,
+  options?: RequestInit,
+): Promise<Project> => {
+  return customFetch<Project>(getGetProjectUrl(projectId), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetProjectQueryKey = (projectId: string) => {
+  return [`/api/projects/${projectId}`] as const;
+};
+
+export const getGetProjectQueryOptions = <
+  TData = Awaited<ReturnType<typeof getProject>>,
+  TError = ErrorType<ApiErrorResponse>,
+>(
+  projectId: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getProject>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetProjectQueryKey(projectId);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getProject>>> = ({
+    signal,
+  }) => getProject(projectId, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!projectId,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getProject>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetProjectQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getProject>>
+>;
+export type GetProjectQueryError = ErrorType<ApiErrorResponse>;
+
+/**
+ * @summary Get project
+ */
+
+export function useGetProject<
+  TData = Awaited<ReturnType<typeof getProject>>,
+  TError = ErrorType<ApiErrorResponse>,
+>(
+  projectId: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getProject>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetProjectQueryOptions(projectId, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Update project
+ */
+export const getUpdateProjectUrl = (projectId: string) => {
+  return `/api/projects/${projectId}`;
+};
+
+export const updateProject = async (
+  projectId: string,
+  updateProjectRequest: UpdateProjectRequest,
+  options?: RequestInit,
+): Promise<Project> => {
+  return customFetch<Project>(getUpdateProjectUrl(projectId), {
+    ...options,
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(updateProjectRequest),
+  });
+};
+
+export const getUpdateProjectMutationOptions = <
+  TError = ErrorType<ApiErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateProject>>,
+    TError,
+    { projectId: string; data: BodyType<UpdateProjectRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateProject>>,
+  TError,
+  { projectId: string; data: BodyType<UpdateProjectRequest> },
+  TContext
+> => {
+  const mutationKey = ["updateProject"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateProject>>,
+    { projectId: string; data: BodyType<UpdateProjectRequest> }
+  > = (props) => {
+    const { projectId, data } = props ?? {};
+
+    return updateProject(projectId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateProjectMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateProject>>
+>;
+export type UpdateProjectMutationBody = BodyType<UpdateProjectRequest>;
+export type UpdateProjectMutationError = ErrorType<ApiErrorResponse>;
+
+/**
+ * @summary Update project
+ */
+export const useUpdateProject = <
+  TError = ErrorType<ApiErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateProject>>,
+    TError,
+    { projectId: string; data: BodyType<UpdateProjectRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof updateProject>>,
+  TError,
+  { projectId: string; data: BodyType<UpdateProjectRequest> },
+  TContext
+> => {
+  return useMutation(getUpdateProjectMutationOptions(options));
+};
+
+/**
+ * @summary List workflow sessions
+ */
+export const getListSessionsUrl = () => {
+  return `/api/sessions`;
+};
+
+export const listSessions = async (
+  options?: RequestInit,
+): Promise<SessionListResponse> => {
+  return customFetch<SessionListResponse>(getListSessionsUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getListSessionsQueryKey = () => {
+  return [`/api/sessions`] as const;
+};
+
+export const getListSessionsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listSessions>>,
+  TError = ErrorType<ApiErrorResponse>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listSessions>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getListSessionsQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listSessions>>> = ({
+    signal,
+  }) => listSessions({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listSessions>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListSessionsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listSessions>>
+>;
+export type ListSessionsQueryError = ErrorType<ApiErrorResponse>;
+
+/**
+ * @summary List workflow sessions
+ */
+
+export function useListSessions<
+  TData = Awaited<ReturnType<typeof listSessions>>,
+  TError = ErrorType<ApiErrorResponse>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listSessions>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListSessionsQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Create workflow session
+ */
+export const getCreateSessionUrl = () => {
+  return `/api/sessions`;
+};
+
+export const createSession = async (
+  createSessionRequest: CreateSessionRequest,
+  options?: RequestInit,
+): Promise<WorkflowSession> => {
+  return customFetch<WorkflowSession>(getCreateSessionUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(createSessionRequest),
+  });
+};
+
+export const getCreateSessionMutationOptions = <
+  TError = ErrorType<ApiErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createSession>>,
+    TError,
+    { data: BodyType<CreateSessionRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createSession>>,
+  TError,
+  { data: BodyType<CreateSessionRequest> },
+  TContext
+> => {
+  const mutationKey = ["createSession"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createSession>>,
+    { data: BodyType<CreateSessionRequest> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return createSession(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateSessionMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createSession>>
+>;
+export type CreateSessionMutationBody = BodyType<CreateSessionRequest>;
+export type CreateSessionMutationError = ErrorType<ApiErrorResponse>;
+
+/**
+ * @summary Create workflow session
+ */
+export const useCreateSession = <
+  TError = ErrorType<ApiErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createSession>>,
+    TError,
+    { data: BodyType<CreateSessionRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof createSession>>,
+  TError,
+  { data: BodyType<CreateSessionRequest> },
+  TContext
+> => {
+  return useMutation(getCreateSessionMutationOptions(options));
+};
+
+/**
+ * @summary Get workflow session
+ */
+export const getGetSessionUrl = (sessionId: string) => {
+  return `/api/sessions/${sessionId}`;
+};
+
+export const getSession = async (
+  sessionId: string,
+  options?: RequestInit,
+): Promise<WorkflowSession> => {
+  return customFetch<WorkflowSession>(getGetSessionUrl(sessionId), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetSessionQueryKey = (sessionId: string) => {
+  return [`/api/sessions/${sessionId}`] as const;
+};
+
+export const getGetSessionQueryOptions = <
+  TData = Awaited<ReturnType<typeof getSession>>,
+  TError = ErrorType<ApiErrorResponse>,
+>(
+  sessionId: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getSession>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetSessionQueryKey(sessionId);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getSession>>> = ({
+    signal,
+  }) => getSession(sessionId, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!sessionId,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getSession>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetSessionQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getSession>>
+>;
+export type GetSessionQueryError = ErrorType<ApiErrorResponse>;
+
+/**
+ * @summary Get workflow session
+ */
+
+export function useGetSession<
+  TData = Awaited<ReturnType<typeof getSession>>,
+  TError = ErrorType<ApiErrorResponse>,
+>(
+  sessionId: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getSession>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetSessionQueryOptions(sessionId, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Update workflow session summary
+ */
+export const getUpdateSessionUrl = (sessionId: string) => {
+  return `/api/sessions/${sessionId}`;
+};
+
+export const updateSession = async (
+  sessionId: string,
+  updateSessionRequest: UpdateSessionRequest,
+  options?: RequestInit,
+): Promise<WorkflowSession> => {
+  return customFetch<WorkflowSession>(getUpdateSessionUrl(sessionId), {
+    ...options,
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(updateSessionRequest),
+  });
+};
+
+export const getUpdateSessionMutationOptions = <
+  TError = ErrorType<ApiErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateSession>>,
+    TError,
+    { sessionId: string; data: BodyType<UpdateSessionRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateSession>>,
+  TError,
+  { sessionId: string; data: BodyType<UpdateSessionRequest> },
+  TContext
+> => {
+  const mutationKey = ["updateSession"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateSession>>,
+    { sessionId: string; data: BodyType<UpdateSessionRequest> }
+  > = (props) => {
+    const { sessionId, data } = props ?? {};
+
+    return updateSession(sessionId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateSessionMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateSession>>
+>;
+export type UpdateSessionMutationBody = BodyType<UpdateSessionRequest>;
+export type UpdateSessionMutationError = ErrorType<ApiErrorResponse>;
+
+/**
+ * @summary Update workflow session summary
+ */
+export const useUpdateSession = <
+  TError = ErrorType<ApiErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateSession>>,
+    TError,
+    { sessionId: string; data: BodyType<UpdateSessionRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof updateSession>>,
+  TError,
+  { sessionId: string; data: BodyType<UpdateSessionRequest> },
+  TContext
+> => {
+  return useMutation(getUpdateSessionMutationOptions(options));
+};
+
+/**
+ * @summary Update workflow session artifacts
+ */
+export const getUpdateSessionArtifactsUrl = (sessionId: string) => {
+  return `/api/sessions/${sessionId}/artifacts`;
+};
+
+export const updateSessionArtifacts = async (
+  sessionId: string,
+  updateSessionArtifactsRequest: UpdateSessionArtifactsRequest,
+  options?: RequestInit,
+): Promise<WorkflowSession> => {
+  return customFetch<WorkflowSession>(getUpdateSessionArtifactsUrl(sessionId), {
+    ...options,
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(updateSessionArtifactsRequest),
+  });
+};
+
+export const getUpdateSessionArtifactsMutationOptions = <
+  TError = ErrorType<ApiErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateSessionArtifacts>>,
+    TError,
+    { sessionId: string; data: BodyType<UpdateSessionArtifactsRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateSessionArtifacts>>,
+  TError,
+  { sessionId: string; data: BodyType<UpdateSessionArtifactsRequest> },
+  TContext
+> => {
+  const mutationKey = ["updateSessionArtifacts"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateSessionArtifacts>>,
+    { sessionId: string; data: BodyType<UpdateSessionArtifactsRequest> }
+  > = (props) => {
+    const { sessionId, data } = props ?? {};
+
+    return updateSessionArtifacts(sessionId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateSessionArtifactsMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateSessionArtifacts>>
+>;
+export type UpdateSessionArtifactsMutationBody =
+  BodyType<UpdateSessionArtifactsRequest>;
+export type UpdateSessionArtifactsMutationError = ErrorType<ApiErrorResponse>;
+
+/**
+ * @summary Update workflow session artifacts
+ */
+export const useUpdateSessionArtifacts = <
+  TError = ErrorType<ApiErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateSessionArtifacts>>,
+    TError,
+    { sessionId: string; data: BodyType<UpdateSessionArtifactsRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof updateSessionArtifacts>>,
+  TError,
+  { sessionId: string; data: BodyType<UpdateSessionArtifactsRequest> },
+  TContext
+> => {
+  return useMutation(getUpdateSessionArtifactsMutationOptions(options));
+};
+
+/**
+ * @summary Get workspace settings
+ */
+export const getGetSettingsUrl = () => {
+  return `/api/settings`;
+};
+
+export const getSettings = async (
+  options?: RequestInit,
+): Promise<WorkspaceSettings> => {
+  return customFetch<WorkspaceSettings>(getGetSettingsUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetSettingsQueryKey = () => {
+  return [`/api/settings`] as const;
+};
+
+export const getGetSettingsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getSettings>>,
+  TError = ErrorType<ApiErrorResponse>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getSettings>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetSettingsQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getSettings>>> = ({
+    signal,
+  }) => getSettings({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getSettings>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetSettingsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getSettings>>
+>;
+export type GetSettingsQueryError = ErrorType<ApiErrorResponse>;
+
+/**
+ * @summary Get workspace settings
+ */
+
+export function useGetSettings<
+  TData = Awaited<ReturnType<typeof getSettings>>,
+  TError = ErrorType<ApiErrorResponse>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getSettings>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetSettingsQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Update workspace settings
+ */
+export const getUpdateSettingsUrl = () => {
+  return `/api/settings`;
+};
+
+export const updateSettings = async (
+  updateSettingsRequest: UpdateSettingsRequest,
+  options?: RequestInit,
+): Promise<WorkspaceSettings> => {
+  return customFetch<WorkspaceSettings>(getUpdateSettingsUrl(), {
+    ...options,
+    method: "PUT",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(updateSettingsRequest),
+  });
+};
+
+export const getUpdateSettingsMutationOptions = <
+  TError = ErrorType<ApiErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateSettings>>,
+    TError,
+    { data: BodyType<UpdateSettingsRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateSettings>>,
+  TError,
+  { data: BodyType<UpdateSettingsRequest> },
+  TContext
+> => {
+  const mutationKey = ["updateSettings"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateSettings>>,
+    { data: BodyType<UpdateSettingsRequest> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return updateSettings(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateSettingsMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateSettings>>
+>;
+export type UpdateSettingsMutationBody = BodyType<UpdateSettingsRequest>;
+export type UpdateSettingsMutationError = ErrorType<ApiErrorResponse>;
+
+/**
+ * @summary Update workspace settings
+ */
+export const useUpdateSettings = <
+  TError = ErrorType<ApiErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateSettings>>,
+    TError,
+    { data: BodyType<UpdateSettingsRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof updateSettings>>,
+  TError,
+  { data: BodyType<UpdateSettingsRequest> },
+  TContext
+> => {
+  return useMutation(getUpdateSettingsMutationOptions(options));
+};
+
+/**
+ * @summary List export packages
+ */
+export const getListExportPackagesUrl = () => {
+  return `/api/export-packages`;
+};
+
+export const listExportPackages = async (
+  options?: RequestInit,
+): Promise<ExportPackageListResponse> => {
+  return customFetch<ExportPackageListResponse>(getListExportPackagesUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getListExportPackagesQueryKey = () => {
+  return [`/api/export-packages`] as const;
+};
+
+export const getListExportPackagesQueryOptions = <
+  TData = Awaited<ReturnType<typeof listExportPackages>>,
+  TError = ErrorType<ApiErrorResponse>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listExportPackages>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getListExportPackagesQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof listExportPackages>>
+  > = ({ signal }) => listExportPackages({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listExportPackages>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListExportPackagesQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listExportPackages>>
+>;
+export type ListExportPackagesQueryError = ErrorType<ApiErrorResponse>;
+
+/**
+ * @summary List export packages
+ */
+
+export function useListExportPackages<
+  TData = Awaited<ReturnType<typeof listExportPackages>>,
+  TError = ErrorType<ApiErrorResponse>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listExportPackages>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListExportPackagesQueryOptions(options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;

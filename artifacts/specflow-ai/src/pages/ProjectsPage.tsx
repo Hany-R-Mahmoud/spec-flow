@@ -17,6 +17,24 @@ export function ProjectsPage() {
   const [, setLocation] = useLocation();
   const { state, dispatch } = useSessionStore();
 
+  if (state.isLoading) {
+    return (
+      <div className="space-y-3">
+        <h1 className="text-lg font-semibold text-foreground">Projects</h1>
+        <p className="text-xs text-muted-foreground">Loading persisted project sessions…</p>
+      </div>
+    );
+  }
+
+  if (state.error && state.dataSource === 'api') {
+    return (
+      <div className="space-y-3">
+        <h1 className="text-lg font-semibold text-foreground">Projects</h1>
+        <p className="text-xs text-[var(--color-danger)]">{state.error}</p>
+      </div>
+    );
+  }
+
   const openSession = (sessionId: string) => {
     dispatch({ type: 'SET_ACTIVE_SESSION', payload: sessionId });
     setLocation(`/workspace/${sessionId}`);
@@ -28,8 +46,11 @@ export function ProjectsPage() {
         <div>
           <h1 className="text-lg font-semibold text-foreground">Projects</h1>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            Current in-memory project sessions with their workflow health and handoff readiness.
+            Project sessions with their workflow health and handoff readiness.
           </p>
+          {state.error && state.dataSource === 'demo' && (
+            <p className="mt-1 text-xs text-[var(--color-warning)]">{state.error}</p>
+          )}
         </div>
         <Button size="sm" onClick={() => setLocation('/new')}>
           <Plus className="mr-1.5 h-4 w-4" />

@@ -8,3 +8,333 @@
 export interface HealthStatus {
   status: string;
 }
+
+export interface ApiError {
+  message: string;
+}
+
+export type Phase = (typeof Phase)[keyof typeof Phase];
+
+export const Phase = {
+  intake: "intake",
+  clarification: "clarification",
+  prd: "prd",
+  epics: "epics",
+  stories: "stories",
+  quality: "quality",
+  devReview: "devReview",
+  export: "export",
+} as const;
+
+export type PhaseStatus = (typeof PhaseStatus)[keyof typeof PhaseStatus];
+
+export const PhaseStatus = {
+  "not-started": "not-started",
+  "in-progress": "in-progress",
+  complete: "complete",
+  "needs-attention": "needs-attention",
+} as const;
+
+export type ReviewStatus = (typeof ReviewStatus)[keyof typeof ReviewStatus];
+
+export const ReviewStatus = {
+  pending: "pending",
+  approved: "approved",
+  "needs-clarification": "needs-clarification",
+  "too-large": "too-large",
+  "technically-risky": "technically-risky",
+  blocked: "blocked",
+  "missing-ac": "missing-ac",
+} as const;
+
+export type EpicPriority = (typeof EpicPriority)[keyof typeof EpicPriority];
+
+export const EpicPriority = {
+  P0: "P0",
+  P1: "P1",
+  P2: "P2",
+} as const;
+
+export type StoryPriority = (typeof StoryPriority)[keyof typeof StoryPriority];
+
+export const StoryPriority = {
+  P0: "P0",
+  P1: "P1",
+  P2: "P2",
+  P3: "P3",
+} as const;
+
+export type ReadinessLabel =
+  (typeof ReadinessLabel)[keyof typeof ReadinessLabel];
+
+export const ReadinessLabel = {
+  Ready_for_Jira: "Ready for Jira",
+  Minor_review_needed: "Minor review needed",
+  Needs_PM_refinement: "Needs PM refinement",
+  Not_ready: "Not ready",
+} as const;
+
+export type WarningSeverity =
+  (typeof WarningSeverity)[keyof typeof WarningSeverity];
+
+export const WarningSeverity = {
+  error: "error",
+  warning: "warning",
+  info: "info",
+} as const;
+
+export type ExportFormat = (typeof ExportFormat)[keyof typeof ExportFormat];
+
+export const ExportFormat = {
+  markdown: "markdown",
+  csv: "csv",
+  json: "json",
+} as const;
+
+export type ExportStatus = (typeof ExportStatus)[keyof typeof ExportStatus];
+
+export const ExportStatus = {
+  complete: "complete",
+  partial: "partial",
+  draft: "draft",
+} as const;
+
+export type PmRevisionStatus =
+  (typeof PmRevisionStatus)[keyof typeof PmRevisionStatus];
+
+export const PmRevisionStatus = {
+  "not-started": "not-started",
+  "in-progress": "in-progress",
+  resolved: "resolved",
+} as const;
+
+export interface PhasesRecord {
+  intake: PhaseStatus;
+  clarification: PhaseStatus;
+  prd: PhaseStatus;
+  epics: PhaseStatus;
+  stories: PhaseStatus;
+  quality: PhaseStatus;
+  devReview: PhaseStatus;
+  export: PhaseStatus;
+  [key: string]: PhaseStatus;
+}
+
+export interface ClarificationQuestion {
+  id: string;
+  group: string;
+  text: string;
+  required: boolean;
+  answer: string;
+  skipped: boolean;
+}
+
+export interface PrdSection {
+  id: string;
+  title: string;
+  content: string;
+  complete: boolean;
+  order: number;
+}
+
+export interface ReadinessScore {
+  total: number;
+  clarity: number;
+  acceptanceCriteria: number;
+  businessAlignment: number;
+  technicalFeasibility: number;
+  testability: number;
+  edgeCasesErrorHandling: number;
+  dependenciesDesignLocalization: number;
+  label: ReadinessLabel;
+}
+
+export interface QualityWarning {
+  id: string;
+  type: string;
+  message: string;
+  severity: WarningSeverity;
+}
+
+export interface DeveloperReview {
+  status: ReviewStatus;
+  comment: string;
+  reviewerName: string;
+  timestamp: string;
+  pmRevisionStatus: PmRevisionStatus;
+}
+
+export interface Epic {
+  id: string;
+  sessionId: string;
+  title: string;
+  businessObjective: string;
+  scopeSummary: string;
+  prdRequirements: string[];
+  priority: EpicPriority;
+  dependencies: string[];
+  risks: string[];
+  jiraEpicDescription: string;
+  storyCount: number;
+}
+
+export interface Story {
+  id: string;
+  epicId: string;
+  sessionId: string;
+  title: string;
+  userStory: string;
+  description: string;
+  acceptanceCriteria: string[];
+  priority: StoryPriority;
+  labels: string[];
+  components: string[];
+  dependencies: string[];
+  edgeCases: string[];
+  errorHandling: string;
+  localizationNotes: string;
+  designNotes: string;
+  analyticsNotes: string;
+  qaNotes: string;
+  technicalNotes: string;
+  openQuestions: string[];
+  readinessScore: ReadinessScore;
+  warnings: QualityWarning[];
+  reviewStatus: ReviewStatus;
+  developerReview?: DeveloperReview | null;
+}
+
+export interface ExportPackage {
+  id: string;
+  sessionId: string;
+  sessionName: string;
+  date: string;
+  epicCount: number;
+  storyCount: number;
+  avgReadiness: number;
+  format: ExportFormat;
+  status: ExportStatus;
+}
+
+export interface Project {
+  id: string;
+  name: string;
+  jiraKey: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface WorkflowSession {
+  id: string;
+  projectId: string;
+  name: string;
+  inputType: string;
+  outputDepth: string;
+  jiraKey: string;
+  targetUsers: string[];
+  businessGoal: string;
+  knownConstraints: string;
+  labels: string[];
+  rawInput: string;
+  currentPhase: Phase;
+  phases: PhasesRecord;
+  createdAt: string;
+  updatedAt: string;
+  clarificationQuestions: ClarificationQuestion[];
+  prdSections: PrdSection[];
+  epics: Epic[];
+  stories: Story[];
+}
+
+export interface WorkspaceSettings {
+  id: string;
+  workspaceName: string;
+  jiraKey: string;
+  defaultLabels: string[];
+  defaultComponents: string[];
+  templatePreference: string;
+  qualityThreshold: number;
+  devReviewRequired: boolean;
+  autoGenerateQuestions: boolean;
+  showReadinessWarnings: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateProjectRequest {
+  /** @minLength 2 */
+  name: string;
+  jiraKey?: string;
+}
+
+export interface UpdateProjectRequest {
+  /** @minLength 2 */
+  name?: string;
+  jiraKey?: string;
+}
+
+export interface CreateSessionRequest {
+  /** @minLength 2 */
+  name: string;
+  /** @minLength 1 */
+  inputType: string;
+  /** @minLength 1 */
+  outputDepth: string;
+  jiraKey?: string;
+  targetUsers?: string[];
+  businessGoal?: string;
+  knownConstraints?: string;
+  labels?: string[];
+  /** @minLength 10 */
+  rawInput: string;
+}
+
+export interface UpdateSessionRequest {
+  /** @minLength 2 */
+  name?: string;
+  jiraKey?: string;
+  currentPhase?: Phase;
+  phases?: PhasesRecord;
+}
+
+export interface UpdateSessionArtifactsRequest {
+  clarificationQuestions?: ClarificationQuestion[];
+  prdSections?: PrdSection[];
+  epics?: Epic[];
+  stories?: Story[];
+}
+
+export interface UpdateSettingsRequest {
+  /** @minLength 1 */
+  workspaceName: string;
+  jiraKey: string;
+  defaultLabels: string[];
+  defaultComponents: string[];
+  /** @minLength 1 */
+  templatePreference: string;
+  /**
+   * @minimum 0
+   * @maximum 100
+   */
+  qualityThreshold: number;
+  devReviewRequired: boolean;
+  autoGenerateQuestions: boolean;
+  showReadinessWarnings: boolean;
+}
+
+export interface ProjectListResponse {
+  projects: Project[];
+}
+
+export interface SessionListResponse {
+  sessions: WorkflowSession[];
+}
+
+export interface ExportPackageListResponse {
+  exportPackages: ExportPackage[];
+}
+
+/**
+ * API error
+ */
+export type ApiErrorResponse = ApiError;

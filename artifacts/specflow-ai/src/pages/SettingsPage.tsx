@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
@@ -8,7 +8,7 @@ import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { X } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { useSessionStore } from '@/store/session-store';
 
 function ChipsInput({ value, onChange, placeholder }: { value: string[]; onChange: (v: string[]) => void; placeholder: string }) {
   const [input, setInput] = useState('');
@@ -38,7 +38,7 @@ function ChipsInput({ value, onChange, placeholder }: { value: string[]; onChang
   );
 }
 
-function SettingsSection({ title, children, onSave }: { title: string; children: React.ReactNode; onSave: () => void }) {
+function SettingsSection({ title, children, onSave }: { title: string; children: React.ReactNode; onSave: () => void | Promise<void> }) {
   return (
     <div className="bg-card border border-border rounded-md overflow-hidden">
       <div className="px-4 py-3 border-b border-border bg-muted flex items-center justify-between">
@@ -54,7 +54,7 @@ function SettingsSection({ title, children, onSave }: { title: string; children:
 
 export function SettingsPage() {
   const { toast } = useToast();
-  const save = (section: string) => toast({ title: 'Saved', description: `${section} settings saved.` });
+  const { saveSettings, state } = useSessionStore();
 
   const [workspaceName, setWorkspaceName] = useState('Acme Corp Workspace');
   const [jiraKey, setJiraKey] = useState('ACME');
@@ -65,6 +65,69 @@ export function SettingsPage() {
   const [devReviewRequired, setDevReviewRequired] = useState(true);
   const [autoGenerateQuestions, setAutoGenerateQuestions] = useState(true);
   const [showReadinessWarnings, setShowReadinessWarnings] = useState(true);
+
+  useEffect(() => {
+    if (!state.settings) {
+      return;
+    }
+
+    setWorkspaceName(state.settings.workspaceName);
+    setJiraKey(state.settings.jiraKey);
+    setDefaultLabels(state.settings.defaultLabels);
+    setDefaultComponents(state.settings.defaultComponents);
+    setTemplatePreference(state.settings.templatePreference);
+    setQualityThreshold([state.settings.qualityThreshold]);
+    setDevReviewRequired(state.settings.devReviewRequired);
+    setAutoGenerateQuestions(state.settings.autoGenerateQuestions);
+    setShowReadinessWarnings(state.settings.showReadinessWarnings);
+  }, [state.settings]);
+
+  const save = async (section: string) => {
+    if (!state.settings) {
+      return;
+    }
+
+    try {
+      await saveSettings({
+        ...state.settings,
+        workspaceName,
+        jiraKey,
+        defaultLabels,
+        defaultComponents,
+        templatePreference,
+        qualityThreshold: qualityThreshold[0] ?? 75,
+        devReviewRequired,
+        autoGenerateQuestions,
+        showReadinessWarnings,
+      });
+
+      toast({ title: 'Saved', description: `${section} settings saved.` });
+    } catch (error) {
+      toast({
+        title: 'Save failed',
+        description:
+          error instanceof Error ? error.message : 'Could not save settings.',
+      });
+    }
+  };
+
+  if (state.isLoading && !state.settings) {
+    return (
+      <div className="max-w-2xl space-y-3">
+        <h1 className="text-lg font-semibold text-foreground">Settings</h1>
+        <p className="text-xs text-muted-foreground">Loading persisted workspace settings…</p>
+      </div>
+    );
+  }
+
+  if (state.error && !state.settings) {
+    return (
+      <div className="max-w-2xl space-y-3">
+        <h1 className="text-lg font-semibold text-foreground">Settings</h1>
+        <p className="text-xs text-[var(--color-danger)]">{state.error}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-2xl space-y-6">

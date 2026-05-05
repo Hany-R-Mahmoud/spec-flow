@@ -1,27 +1,49 @@
 import { useState } from 'react';
-import { mockExportPackages } from '@/lib/sample-data';
 import { cn } from '@/lib/utils';
 import { Download, FileText } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useSessionStore } from '@/store/session-store';
 
 export function ExportsPage() {
   const { toast } = useToast();
+  const { state } = useSessionStore();
   const [filterStatus, setFilterStatus] = useState<'all' | 'complete' | 'partial' | 'draft'>('all');
 
-  const filtered = mockExportPackages.filter(pkg =>
+  const filtered = state.exportPackages.filter(pkg =>
     filterStatus === 'all' || pkg.status === filterStatus
   );
 
-  const download = (pkg: typeof mockExportPackages[0]) => {
+  const download = (pkg: typeof state.exportPackages[number]) => {
     toast({ title: 'Download started', description: `${pkg.sessionName} export (${pkg.format.toUpperCase()})` });
   };
+
+  if (state.isLoading) {
+    return (
+      <div className="space-y-3">
+        <h1 className="text-lg font-semibold text-foreground">Exports</h1>
+        <p className="text-xs text-muted-foreground">Loading persisted export history…</p>
+      </div>
+    );
+  }
+
+  if (state.error && state.dataSource === 'api') {
+    return (
+      <div className="space-y-3">
+        <h1 className="text-lg font-semibold text-foreground">Exports</h1>
+        <p className="text-xs text-[var(--color-danger)]">{state.error}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-lg font-semibold text-foreground">Exports</h1>
         <p className="text-xs text-muted-foreground mt-0.5">Previous Jira export packages</p>
-        <p className="text-xs text-muted-foreground mt-1">History is currently seeded with local prototype packages until persistence is added.</p>
+        <p className="text-xs text-muted-foreground mt-1">History now loads from persisted export package records.</p>
+        {state.error && state.dataSource === 'demo' && (
+          <p className="text-xs text-[var(--color-warning)] mt-1">{state.error}</p>
+        )}
       </div>
 
       {/* Filter */}
@@ -34,7 +56,7 @@ export function ExportsPage() {
               filterStatus === s ? 'border-primary bg-[var(--color-primary-soft)] text-primary' : 'border-border bg-card text-muted-foreground hover:bg-muted'
             )}
           >
-            {s} ({s === 'all' ? mockExportPackages.length : mockExportPackages.filter(p => p.status === s).length})
+            {s} ({s === 'all' ? state.exportPackages.length : state.exportPackages.filter(p => p.status === s).length})
           </button>
         ))}
       </div>

@@ -5,6 +5,7 @@ import path from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 
 const rawPort = process.env.PORT ?? "8080";
+const apiTarget = process.env.API_SERVER_URL ?? "http://127.0.0.1:24549";
 
 const port = Number(rawPort);
 
@@ -51,6 +52,12 @@ export default defineConfig({
     strictPort: true,
     host: "0.0.0.0",
     allowedHosts: true,
+    proxy: {
+      "/api": {
+        target: apiTarget,
+        changeOrigin: true,
+      },
+    },
     fs: {
       strict: true,
     },

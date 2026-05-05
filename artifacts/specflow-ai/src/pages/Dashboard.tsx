@@ -1,6 +1,5 @@
 import { useLocation } from 'wouter';
 import { useSessionStore } from '@/store/session-store';
-import { mockExportPackages } from '@/lib/sample-data';
 import { PhaseStatusBadge, ReviewStatusBadge } from '@/components/shared/StatusBadge';
 import { cn } from '@/lib/utils';
 import { Plus, TrendingUp, Clock, FileDown, ArrowRight } from 'lucide-react';
@@ -18,19 +17,37 @@ export function Dashboard() {
   const { state } = useSessionStore();
   const [, setLocation] = useLocation();
 
-  const { sessions, stories } = state;
+  const { sessions, stories, exportPackages, isLoading, error } = state;
 
   const avgScore = stories.length > 0
     ? Math.round(stories.reduce((sum, s) => sum + s.readinessScore.total, 0) / stories.length)
     : 0;
   const awaitingReview = stories.filter(s => s.reviewStatus === 'pending' || s.reviewStatus === 'needs-clarification').length;
-  const exportsReady = mockExportPackages.filter(e => e.status === 'complete').length;
+  const exportsReady = exportPackages.filter(e => e.status === 'complete').length;
 
   const reviewQueueStories = stories.filter(s =>
     ['pending', 'needs-clarification', 'technically-risky', 'blocked'].includes(s.reviewStatus)
   ).slice(0, 5);
 
-  const recentExports = mockExportPackages.slice(0, 3);
+  const recentExports = exportPackages.slice(0, 3);
+
+  if (isLoading) {
+    return (
+      <div className="space-y-3">
+        <h1 className="text-2xl font-semibold text-foreground">Dashboard</h1>
+        <p className="text-sm text-muted-foreground">Loading persisted sessions and export history…</p>
+      </div>
+    );
+  }
+
+  if (error && state.dataSource === 'api') {
+    return (
+      <div className="space-y-3">
+        <h1 className="text-2xl font-semibold text-foreground">Dashboard</h1>
+        <p className="text-sm text-[var(--color-danger)]">{error}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -41,6 +58,9 @@ export function Dashboard() {
           <p className="text-sm text-muted-foreground mt-1">
             {sessions.length} active breakdowns · {awaitingReview} stories awaiting review · {exportsReady} exports ready
           </p>
+          {error && state.dataSource === 'demo' && (
+            <p className="text-xs text-[var(--color-warning)] mt-1">{error}</p>
+          )}
         </div>
         <Button size="sm" onClick={() => setLocation('/new')} data-testid="button-new-breakdown">
           <Plus className="w-4 h-4 mr-1.5" />
@@ -97,7 +117,7 @@ export function Dashboard() {
               const sessionScore = sessionStories.length > 0
                 ? Math.round(sessionStories.reduce((sum, s) => sum + s.readinessScore.total, 0) / sessionStories.length)
                 : 0;
-              const updatedAgo = session.id === 'session-1' ? '2h ago' : session.id === 'session-2' ? '5h ago' : session.id === 'session-3' ? '1d ago' : '2d ago';
+              const updatedAgo = new Date(session.updatedAt).toLocaleDateString();
 
               return (
                 <tr

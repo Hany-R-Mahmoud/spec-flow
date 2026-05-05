@@ -14,3 +14,1142 @@ import * as zod from "zod";
 export const HealthCheckResponse = zod.object({
   status: zod.string(),
 });
+
+/**
+ * @summary List projects
+ */
+export const ListProjectsResponse = zod.object({
+  projects: zod.array(
+    zod.object({
+      id: zod.string(),
+      name: zod.string(),
+      jiraKey: zod.string(),
+      createdAt: zod.coerce.date(),
+      updatedAt: zod.coerce.date(),
+    }),
+  ),
+});
+
+/**
+ * @summary Create project
+ */
+export const createProjectBodyNameMin = 2;
+
+export const CreateProjectBody = zod.object({
+  name: zod.string().min(createProjectBodyNameMin),
+  jiraKey: zod.string().optional(),
+});
+
+/**
+ * @summary Get project
+ */
+export const GetProjectParams = zod.object({
+  projectId: zod.coerce.string(),
+});
+
+export const GetProjectResponse = zod.object({
+  id: zod.string(),
+  name: zod.string(),
+  jiraKey: zod.string(),
+  createdAt: zod.coerce.date(),
+  updatedAt: zod.coerce.date(),
+});
+
+/**
+ * @summary Update project
+ */
+export const UpdateProjectParams = zod.object({
+  projectId: zod.coerce.string(),
+});
+
+export const updateProjectBodyNameMin = 2;
+
+export const UpdateProjectBody = zod.object({
+  name: zod.string().min(updateProjectBodyNameMin).optional(),
+  jiraKey: zod.string().optional(),
+});
+
+export const UpdateProjectResponse = zod.object({
+  id: zod.string(),
+  name: zod.string(),
+  jiraKey: zod.string(),
+  createdAt: zod.coerce.date(),
+  updatedAt: zod.coerce.date(),
+});
+
+/**
+ * @summary List workflow sessions
+ */
+export const ListSessionsResponse = zod.object({
+  sessions: zod.array(
+    zod.object({
+      id: zod.string(),
+      projectId: zod.string(),
+      name: zod.string(),
+      inputType: zod.string(),
+      outputDepth: zod.string(),
+      jiraKey: zod.string(),
+      targetUsers: zod.array(zod.string()),
+      businessGoal: zod.string(),
+      knownConstraints: zod.string(),
+      labels: zod.array(zod.string()),
+      rawInput: zod.string(),
+      currentPhase: zod.enum([
+        "intake",
+        "clarification",
+        "prd",
+        "epics",
+        "stories",
+        "quality",
+        "devReview",
+        "export",
+      ]),
+      phases: zod.object({
+        intake: zod.enum([
+          "not-started",
+          "in-progress",
+          "complete",
+          "needs-attention",
+        ]),
+        clarification: zod.enum([
+          "not-started",
+          "in-progress",
+          "complete",
+          "needs-attention",
+        ]),
+        prd: zod.enum([
+          "not-started",
+          "in-progress",
+          "complete",
+          "needs-attention",
+        ]),
+        epics: zod.enum([
+          "not-started",
+          "in-progress",
+          "complete",
+          "needs-attention",
+        ]),
+        stories: zod.enum([
+          "not-started",
+          "in-progress",
+          "complete",
+          "needs-attention",
+        ]),
+        quality: zod.enum([
+          "not-started",
+          "in-progress",
+          "complete",
+          "needs-attention",
+        ]),
+        devReview: zod.enum([
+          "not-started",
+          "in-progress",
+          "complete",
+          "needs-attention",
+        ]),
+        export: zod.enum([
+          "not-started",
+          "in-progress",
+          "complete",
+          "needs-attention",
+        ]),
+      }),
+      createdAt: zod.coerce.date(),
+      updatedAt: zod.coerce.date(),
+      clarificationQuestions: zod.array(
+        zod.object({
+          id: zod.string(),
+          group: zod.string(),
+          text: zod.string(),
+          required: zod.boolean(),
+          answer: zod.string(),
+          skipped: zod.boolean(),
+        }),
+      ),
+      prdSections: zod.array(
+        zod.object({
+          id: zod.string(),
+          title: zod.string(),
+          content: zod.string(),
+          complete: zod.boolean(),
+          order: zod.number(),
+        }),
+      ),
+      epics: zod.array(
+        zod.object({
+          id: zod.string(),
+          sessionId: zod.string(),
+          title: zod.string(),
+          businessObjective: zod.string(),
+          scopeSummary: zod.string(),
+          prdRequirements: zod.array(zod.string()),
+          priority: zod.enum(["P0", "P1", "P2"]),
+          dependencies: zod.array(zod.string()),
+          risks: zod.array(zod.string()),
+          jiraEpicDescription: zod.string(),
+          storyCount: zod.number(),
+        }),
+      ),
+      stories: zod.array(
+        zod.object({
+          id: zod.string(),
+          epicId: zod.string(),
+          sessionId: zod.string(),
+          title: zod.string(),
+          userStory: zod.string(),
+          description: zod.string(),
+          acceptanceCriteria: zod.array(zod.string()),
+          priority: zod.enum(["P0", "P1", "P2", "P3"]),
+          labels: zod.array(zod.string()),
+          components: zod.array(zod.string()),
+          dependencies: zod.array(zod.string()),
+          edgeCases: zod.array(zod.string()),
+          errorHandling: zod.string(),
+          localizationNotes: zod.string(),
+          designNotes: zod.string(),
+          analyticsNotes: zod.string(),
+          qaNotes: zod.string(),
+          technicalNotes: zod.string(),
+          openQuestions: zod.array(zod.string()),
+          readinessScore: zod.object({
+            total: zod.number(),
+            clarity: zod.number(),
+            acceptanceCriteria: zod.number(),
+            businessAlignment: zod.number(),
+            technicalFeasibility: zod.number(),
+            testability: zod.number(),
+            edgeCasesErrorHandling: zod.number(),
+            dependenciesDesignLocalization: zod.number(),
+            label: zod.enum([
+              "Ready for Jira",
+              "Minor review needed",
+              "Needs PM refinement",
+              "Not ready",
+            ]),
+          }),
+          warnings: zod.array(
+            zod.object({
+              id: zod.string(),
+              type: zod.string(),
+              message: zod.string(),
+              severity: zod.enum(["error", "warning", "info"]),
+            }),
+          ),
+          reviewStatus: zod.enum([
+            "pending",
+            "approved",
+            "needs-clarification",
+            "too-large",
+            "technically-risky",
+            "blocked",
+            "missing-ac",
+          ]),
+          developerReview: zod
+            .union([
+              zod.object({
+                status: zod.enum([
+                  "pending",
+                  "approved",
+                  "needs-clarification",
+                  "too-large",
+                  "technically-risky",
+                  "blocked",
+                  "missing-ac",
+                ]),
+                comment: zod.string(),
+                reviewerName: zod.string(),
+                timestamp: zod.coerce.date(),
+                pmRevisionStatus: zod.enum([
+                  "not-started",
+                  "in-progress",
+                  "resolved",
+                ]),
+              }),
+              zod.null(),
+            ])
+            .optional(),
+        }),
+      ),
+    }),
+  ),
+});
+
+/**
+ * @summary Create workflow session
+ */
+export const createSessionBodyNameMin = 2;
+
+export const createSessionBodyRawInputMin = 10;
+
+export const CreateSessionBody = zod.object({
+  name: zod.string().min(createSessionBodyNameMin),
+  inputType: zod.string().min(1),
+  outputDepth: zod.string().min(1),
+  jiraKey: zod.string().optional(),
+  targetUsers: zod.array(zod.string()).optional(),
+  businessGoal: zod.string().optional(),
+  knownConstraints: zod.string().optional(),
+  labels: zod.array(zod.string()).optional(),
+  rawInput: zod.string().min(createSessionBodyRawInputMin),
+});
+
+/**
+ * @summary Get workflow session
+ */
+export const GetSessionParams = zod.object({
+  sessionId: zod.coerce.string(),
+});
+
+export const GetSessionResponse = zod.object({
+  id: zod.string(),
+  projectId: zod.string(),
+  name: zod.string(),
+  inputType: zod.string(),
+  outputDepth: zod.string(),
+  jiraKey: zod.string(),
+  targetUsers: zod.array(zod.string()),
+  businessGoal: zod.string(),
+  knownConstraints: zod.string(),
+  labels: zod.array(zod.string()),
+  rawInput: zod.string(),
+  currentPhase: zod.enum([
+    "intake",
+    "clarification",
+    "prd",
+    "epics",
+    "stories",
+    "quality",
+    "devReview",
+    "export",
+  ]),
+  phases: zod.object({
+    intake: zod.enum([
+      "not-started",
+      "in-progress",
+      "complete",
+      "needs-attention",
+    ]),
+    clarification: zod.enum([
+      "not-started",
+      "in-progress",
+      "complete",
+      "needs-attention",
+    ]),
+    prd: zod.enum([
+      "not-started",
+      "in-progress",
+      "complete",
+      "needs-attention",
+    ]),
+    epics: zod.enum([
+      "not-started",
+      "in-progress",
+      "complete",
+      "needs-attention",
+    ]),
+    stories: zod.enum([
+      "not-started",
+      "in-progress",
+      "complete",
+      "needs-attention",
+    ]),
+    quality: zod.enum([
+      "not-started",
+      "in-progress",
+      "complete",
+      "needs-attention",
+    ]),
+    devReview: zod.enum([
+      "not-started",
+      "in-progress",
+      "complete",
+      "needs-attention",
+    ]),
+    export: zod.enum([
+      "not-started",
+      "in-progress",
+      "complete",
+      "needs-attention",
+    ]),
+  }),
+  createdAt: zod.coerce.date(),
+  updatedAt: zod.coerce.date(),
+  clarificationQuestions: zod.array(
+    zod.object({
+      id: zod.string(),
+      group: zod.string(),
+      text: zod.string(),
+      required: zod.boolean(),
+      answer: zod.string(),
+      skipped: zod.boolean(),
+    }),
+  ),
+  prdSections: zod.array(
+    zod.object({
+      id: zod.string(),
+      title: zod.string(),
+      content: zod.string(),
+      complete: zod.boolean(),
+      order: zod.number(),
+    }),
+  ),
+  epics: zod.array(
+    zod.object({
+      id: zod.string(),
+      sessionId: zod.string(),
+      title: zod.string(),
+      businessObjective: zod.string(),
+      scopeSummary: zod.string(),
+      prdRequirements: zod.array(zod.string()),
+      priority: zod.enum(["P0", "P1", "P2"]),
+      dependencies: zod.array(zod.string()),
+      risks: zod.array(zod.string()),
+      jiraEpicDescription: zod.string(),
+      storyCount: zod.number(),
+    }),
+  ),
+  stories: zod.array(
+    zod.object({
+      id: zod.string(),
+      epicId: zod.string(),
+      sessionId: zod.string(),
+      title: zod.string(),
+      userStory: zod.string(),
+      description: zod.string(),
+      acceptanceCriteria: zod.array(zod.string()),
+      priority: zod.enum(["P0", "P1", "P2", "P3"]),
+      labels: zod.array(zod.string()),
+      components: zod.array(zod.string()),
+      dependencies: zod.array(zod.string()),
+      edgeCases: zod.array(zod.string()),
+      errorHandling: zod.string(),
+      localizationNotes: zod.string(),
+      designNotes: zod.string(),
+      analyticsNotes: zod.string(),
+      qaNotes: zod.string(),
+      technicalNotes: zod.string(),
+      openQuestions: zod.array(zod.string()),
+      readinessScore: zod.object({
+        total: zod.number(),
+        clarity: zod.number(),
+        acceptanceCriteria: zod.number(),
+        businessAlignment: zod.number(),
+        technicalFeasibility: zod.number(),
+        testability: zod.number(),
+        edgeCasesErrorHandling: zod.number(),
+        dependenciesDesignLocalization: zod.number(),
+        label: zod.enum([
+          "Ready for Jira",
+          "Minor review needed",
+          "Needs PM refinement",
+          "Not ready",
+        ]),
+      }),
+      warnings: zod.array(
+        zod.object({
+          id: zod.string(),
+          type: zod.string(),
+          message: zod.string(),
+          severity: zod.enum(["error", "warning", "info"]),
+        }),
+      ),
+      reviewStatus: zod.enum([
+        "pending",
+        "approved",
+        "needs-clarification",
+        "too-large",
+        "technically-risky",
+        "blocked",
+        "missing-ac",
+      ]),
+      developerReview: zod
+        .union([
+          zod.object({
+            status: zod.enum([
+              "pending",
+              "approved",
+              "needs-clarification",
+              "too-large",
+              "technically-risky",
+              "blocked",
+              "missing-ac",
+            ]),
+            comment: zod.string(),
+            reviewerName: zod.string(),
+            timestamp: zod.coerce.date(),
+            pmRevisionStatus: zod.enum([
+              "not-started",
+              "in-progress",
+              "resolved",
+            ]),
+          }),
+          zod.null(),
+        ])
+        .optional(),
+    }),
+  ),
+});
+
+/**
+ * @summary Update workflow session summary
+ */
+export const UpdateSessionParams = zod.object({
+  sessionId: zod.coerce.string(),
+});
+
+export const updateSessionBodyNameMin = 2;
+
+export const UpdateSessionBody = zod.object({
+  name: zod.string().min(updateSessionBodyNameMin).optional(),
+  jiraKey: zod.string().optional(),
+  currentPhase: zod
+    .enum([
+      "intake",
+      "clarification",
+      "prd",
+      "epics",
+      "stories",
+      "quality",
+      "devReview",
+      "export",
+    ])
+    .optional(),
+  phases: zod
+    .object({
+      intake: zod.enum([
+        "not-started",
+        "in-progress",
+        "complete",
+        "needs-attention",
+      ]),
+      clarification: zod.enum([
+        "not-started",
+        "in-progress",
+        "complete",
+        "needs-attention",
+      ]),
+      prd: zod.enum([
+        "not-started",
+        "in-progress",
+        "complete",
+        "needs-attention",
+      ]),
+      epics: zod.enum([
+        "not-started",
+        "in-progress",
+        "complete",
+        "needs-attention",
+      ]),
+      stories: zod.enum([
+        "not-started",
+        "in-progress",
+        "complete",
+        "needs-attention",
+      ]),
+      quality: zod.enum([
+        "not-started",
+        "in-progress",
+        "complete",
+        "needs-attention",
+      ]),
+      devReview: zod.enum([
+        "not-started",
+        "in-progress",
+        "complete",
+        "needs-attention",
+      ]),
+      export: zod.enum([
+        "not-started",
+        "in-progress",
+        "complete",
+        "needs-attention",
+      ]),
+    })
+    .optional(),
+});
+
+export const UpdateSessionResponse = zod.object({
+  id: zod.string(),
+  projectId: zod.string(),
+  name: zod.string(),
+  inputType: zod.string(),
+  outputDepth: zod.string(),
+  jiraKey: zod.string(),
+  targetUsers: zod.array(zod.string()),
+  businessGoal: zod.string(),
+  knownConstraints: zod.string(),
+  labels: zod.array(zod.string()),
+  rawInput: zod.string(),
+  currentPhase: zod.enum([
+    "intake",
+    "clarification",
+    "prd",
+    "epics",
+    "stories",
+    "quality",
+    "devReview",
+    "export",
+  ]),
+  phases: zod.object({
+    intake: zod.enum([
+      "not-started",
+      "in-progress",
+      "complete",
+      "needs-attention",
+    ]),
+    clarification: zod.enum([
+      "not-started",
+      "in-progress",
+      "complete",
+      "needs-attention",
+    ]),
+    prd: zod.enum([
+      "not-started",
+      "in-progress",
+      "complete",
+      "needs-attention",
+    ]),
+    epics: zod.enum([
+      "not-started",
+      "in-progress",
+      "complete",
+      "needs-attention",
+    ]),
+    stories: zod.enum([
+      "not-started",
+      "in-progress",
+      "complete",
+      "needs-attention",
+    ]),
+    quality: zod.enum([
+      "not-started",
+      "in-progress",
+      "complete",
+      "needs-attention",
+    ]),
+    devReview: zod.enum([
+      "not-started",
+      "in-progress",
+      "complete",
+      "needs-attention",
+    ]),
+    export: zod.enum([
+      "not-started",
+      "in-progress",
+      "complete",
+      "needs-attention",
+    ]),
+  }),
+  createdAt: zod.coerce.date(),
+  updatedAt: zod.coerce.date(),
+  clarificationQuestions: zod.array(
+    zod.object({
+      id: zod.string(),
+      group: zod.string(),
+      text: zod.string(),
+      required: zod.boolean(),
+      answer: zod.string(),
+      skipped: zod.boolean(),
+    }),
+  ),
+  prdSections: zod.array(
+    zod.object({
+      id: zod.string(),
+      title: zod.string(),
+      content: zod.string(),
+      complete: zod.boolean(),
+      order: zod.number(),
+    }),
+  ),
+  epics: zod.array(
+    zod.object({
+      id: zod.string(),
+      sessionId: zod.string(),
+      title: zod.string(),
+      businessObjective: zod.string(),
+      scopeSummary: zod.string(),
+      prdRequirements: zod.array(zod.string()),
+      priority: zod.enum(["P0", "P1", "P2"]),
+      dependencies: zod.array(zod.string()),
+      risks: zod.array(zod.string()),
+      jiraEpicDescription: zod.string(),
+      storyCount: zod.number(),
+    }),
+  ),
+  stories: zod.array(
+    zod.object({
+      id: zod.string(),
+      epicId: zod.string(),
+      sessionId: zod.string(),
+      title: zod.string(),
+      userStory: zod.string(),
+      description: zod.string(),
+      acceptanceCriteria: zod.array(zod.string()),
+      priority: zod.enum(["P0", "P1", "P2", "P3"]),
+      labels: zod.array(zod.string()),
+      components: zod.array(zod.string()),
+      dependencies: zod.array(zod.string()),
+      edgeCases: zod.array(zod.string()),
+      errorHandling: zod.string(),
+      localizationNotes: zod.string(),
+      designNotes: zod.string(),
+      analyticsNotes: zod.string(),
+      qaNotes: zod.string(),
+      technicalNotes: zod.string(),
+      openQuestions: zod.array(zod.string()),
+      readinessScore: zod.object({
+        total: zod.number(),
+        clarity: zod.number(),
+        acceptanceCriteria: zod.number(),
+        businessAlignment: zod.number(),
+        technicalFeasibility: zod.number(),
+        testability: zod.number(),
+        edgeCasesErrorHandling: zod.number(),
+        dependenciesDesignLocalization: zod.number(),
+        label: zod.enum([
+          "Ready for Jira",
+          "Minor review needed",
+          "Needs PM refinement",
+          "Not ready",
+        ]),
+      }),
+      warnings: zod.array(
+        zod.object({
+          id: zod.string(),
+          type: zod.string(),
+          message: zod.string(),
+          severity: zod.enum(["error", "warning", "info"]),
+        }),
+      ),
+      reviewStatus: zod.enum([
+        "pending",
+        "approved",
+        "needs-clarification",
+        "too-large",
+        "technically-risky",
+        "blocked",
+        "missing-ac",
+      ]),
+      developerReview: zod
+        .union([
+          zod.object({
+            status: zod.enum([
+              "pending",
+              "approved",
+              "needs-clarification",
+              "too-large",
+              "technically-risky",
+              "blocked",
+              "missing-ac",
+            ]),
+            comment: zod.string(),
+            reviewerName: zod.string(),
+            timestamp: zod.coerce.date(),
+            pmRevisionStatus: zod.enum([
+              "not-started",
+              "in-progress",
+              "resolved",
+            ]),
+          }),
+          zod.null(),
+        ])
+        .optional(),
+    }),
+  ),
+});
+
+/**
+ * @summary Update workflow session artifacts
+ */
+export const UpdateSessionArtifactsParams = zod.object({
+  sessionId: zod.coerce.string(),
+});
+
+export const UpdateSessionArtifactsBody = zod.object({
+  clarificationQuestions: zod
+    .array(
+      zod.object({
+        id: zod.string(),
+        group: zod.string(),
+        text: zod.string(),
+        required: zod.boolean(),
+        answer: zod.string(),
+        skipped: zod.boolean(),
+      }),
+    )
+    .optional(),
+  prdSections: zod
+    .array(
+      zod.object({
+        id: zod.string(),
+        title: zod.string(),
+        content: zod.string(),
+        complete: zod.boolean(),
+        order: zod.number(),
+      }),
+    )
+    .optional(),
+  epics: zod
+    .array(
+      zod.object({
+        id: zod.string(),
+        sessionId: zod.string(),
+        title: zod.string(),
+        businessObjective: zod.string(),
+        scopeSummary: zod.string(),
+        prdRequirements: zod.array(zod.string()),
+        priority: zod.enum(["P0", "P1", "P2"]),
+        dependencies: zod.array(zod.string()),
+        risks: zod.array(zod.string()),
+        jiraEpicDescription: zod.string(),
+        storyCount: zod.number(),
+      }),
+    )
+    .optional(),
+  stories: zod
+    .array(
+      zod.object({
+        id: zod.string(),
+        epicId: zod.string(),
+        sessionId: zod.string(),
+        title: zod.string(),
+        userStory: zod.string(),
+        description: zod.string(),
+        acceptanceCriteria: zod.array(zod.string()),
+        priority: zod.enum(["P0", "P1", "P2", "P3"]),
+        labels: zod.array(zod.string()),
+        components: zod.array(zod.string()),
+        dependencies: zod.array(zod.string()),
+        edgeCases: zod.array(zod.string()),
+        errorHandling: zod.string(),
+        localizationNotes: zod.string(),
+        designNotes: zod.string(),
+        analyticsNotes: zod.string(),
+        qaNotes: zod.string(),
+        technicalNotes: zod.string(),
+        openQuestions: zod.array(zod.string()),
+        readinessScore: zod.object({
+          total: zod.number(),
+          clarity: zod.number(),
+          acceptanceCriteria: zod.number(),
+          businessAlignment: zod.number(),
+          technicalFeasibility: zod.number(),
+          testability: zod.number(),
+          edgeCasesErrorHandling: zod.number(),
+          dependenciesDesignLocalization: zod.number(),
+          label: zod.enum([
+            "Ready for Jira",
+            "Minor review needed",
+            "Needs PM refinement",
+            "Not ready",
+          ]),
+        }),
+        warnings: zod.array(
+          zod.object({
+            id: zod.string(),
+            type: zod.string(),
+            message: zod.string(),
+            severity: zod.enum(["error", "warning", "info"]),
+          }),
+        ),
+        reviewStatus: zod.enum([
+          "pending",
+          "approved",
+          "needs-clarification",
+          "too-large",
+          "technically-risky",
+          "blocked",
+          "missing-ac",
+        ]),
+        developerReview: zod
+          .union([
+            zod.object({
+              status: zod.enum([
+                "pending",
+                "approved",
+                "needs-clarification",
+                "too-large",
+                "technically-risky",
+                "blocked",
+                "missing-ac",
+              ]),
+              comment: zod.string(),
+              reviewerName: zod.string(),
+              timestamp: zod.coerce.date(),
+              pmRevisionStatus: zod.enum([
+                "not-started",
+                "in-progress",
+                "resolved",
+              ]),
+            }),
+            zod.null(),
+          ])
+          .optional(),
+      }),
+    )
+    .optional(),
+});
+
+export const UpdateSessionArtifactsResponse = zod.object({
+  id: zod.string(),
+  projectId: zod.string(),
+  name: zod.string(),
+  inputType: zod.string(),
+  outputDepth: zod.string(),
+  jiraKey: zod.string(),
+  targetUsers: zod.array(zod.string()),
+  businessGoal: zod.string(),
+  knownConstraints: zod.string(),
+  labels: zod.array(zod.string()),
+  rawInput: zod.string(),
+  currentPhase: zod.enum([
+    "intake",
+    "clarification",
+    "prd",
+    "epics",
+    "stories",
+    "quality",
+    "devReview",
+    "export",
+  ]),
+  phases: zod.object({
+    intake: zod.enum([
+      "not-started",
+      "in-progress",
+      "complete",
+      "needs-attention",
+    ]),
+    clarification: zod.enum([
+      "not-started",
+      "in-progress",
+      "complete",
+      "needs-attention",
+    ]),
+    prd: zod.enum([
+      "not-started",
+      "in-progress",
+      "complete",
+      "needs-attention",
+    ]),
+    epics: zod.enum([
+      "not-started",
+      "in-progress",
+      "complete",
+      "needs-attention",
+    ]),
+    stories: zod.enum([
+      "not-started",
+      "in-progress",
+      "complete",
+      "needs-attention",
+    ]),
+    quality: zod.enum([
+      "not-started",
+      "in-progress",
+      "complete",
+      "needs-attention",
+    ]),
+    devReview: zod.enum([
+      "not-started",
+      "in-progress",
+      "complete",
+      "needs-attention",
+    ]),
+    export: zod.enum([
+      "not-started",
+      "in-progress",
+      "complete",
+      "needs-attention",
+    ]),
+  }),
+  createdAt: zod.coerce.date(),
+  updatedAt: zod.coerce.date(),
+  clarificationQuestions: zod.array(
+    zod.object({
+      id: zod.string(),
+      group: zod.string(),
+      text: zod.string(),
+      required: zod.boolean(),
+      answer: zod.string(),
+      skipped: zod.boolean(),
+    }),
+  ),
+  prdSections: zod.array(
+    zod.object({
+      id: zod.string(),
+      title: zod.string(),
+      content: zod.string(),
+      complete: zod.boolean(),
+      order: zod.number(),
+    }),
+  ),
+  epics: zod.array(
+    zod.object({
+      id: zod.string(),
+      sessionId: zod.string(),
+      title: zod.string(),
+      businessObjective: zod.string(),
+      scopeSummary: zod.string(),
+      prdRequirements: zod.array(zod.string()),
+      priority: zod.enum(["P0", "P1", "P2"]),
+      dependencies: zod.array(zod.string()),
+      risks: zod.array(zod.string()),
+      jiraEpicDescription: zod.string(),
+      storyCount: zod.number(),
+    }),
+  ),
+  stories: zod.array(
+    zod.object({
+      id: zod.string(),
+      epicId: zod.string(),
+      sessionId: zod.string(),
+      title: zod.string(),
+      userStory: zod.string(),
+      description: zod.string(),
+      acceptanceCriteria: zod.array(zod.string()),
+      priority: zod.enum(["P0", "P1", "P2", "P3"]),
+      labels: zod.array(zod.string()),
+      components: zod.array(zod.string()),
+      dependencies: zod.array(zod.string()),
+      edgeCases: zod.array(zod.string()),
+      errorHandling: zod.string(),
+      localizationNotes: zod.string(),
+      designNotes: zod.string(),
+      analyticsNotes: zod.string(),
+      qaNotes: zod.string(),
+      technicalNotes: zod.string(),
+      openQuestions: zod.array(zod.string()),
+      readinessScore: zod.object({
+        total: zod.number(),
+        clarity: zod.number(),
+        acceptanceCriteria: zod.number(),
+        businessAlignment: zod.number(),
+        technicalFeasibility: zod.number(),
+        testability: zod.number(),
+        edgeCasesErrorHandling: zod.number(),
+        dependenciesDesignLocalization: zod.number(),
+        label: zod.enum([
+          "Ready for Jira",
+          "Minor review needed",
+          "Needs PM refinement",
+          "Not ready",
+        ]),
+      }),
+      warnings: zod.array(
+        zod.object({
+          id: zod.string(),
+          type: zod.string(),
+          message: zod.string(),
+          severity: zod.enum(["error", "warning", "info"]),
+        }),
+      ),
+      reviewStatus: zod.enum([
+        "pending",
+        "approved",
+        "needs-clarification",
+        "too-large",
+        "technically-risky",
+        "blocked",
+        "missing-ac",
+      ]),
+      developerReview: zod
+        .union([
+          zod.object({
+            status: zod.enum([
+              "pending",
+              "approved",
+              "needs-clarification",
+              "too-large",
+              "technically-risky",
+              "blocked",
+              "missing-ac",
+            ]),
+            comment: zod.string(),
+            reviewerName: zod.string(),
+            timestamp: zod.coerce.date(),
+            pmRevisionStatus: zod.enum([
+              "not-started",
+              "in-progress",
+              "resolved",
+            ]),
+          }),
+          zod.null(),
+        ])
+        .optional(),
+    }),
+  ),
+});
+
+/**
+ * @summary Get workspace settings
+ */
+export const GetSettingsResponse = zod.object({
+  id: zod.string(),
+  workspaceName: zod.string(),
+  jiraKey: zod.string(),
+  defaultLabels: zod.array(zod.string()),
+  defaultComponents: zod.array(zod.string()),
+  templatePreference: zod.string(),
+  qualityThreshold: zod.number(),
+  devReviewRequired: zod.boolean(),
+  autoGenerateQuestions: zod.boolean(),
+  showReadinessWarnings: zod.boolean(),
+  createdAt: zod.coerce.date(),
+  updatedAt: zod.coerce.date(),
+});
+
+/**
+ * @summary Update workspace settings
+ */
+
+export const updateSettingsBodyQualityThresholdMin = 0;
+export const updateSettingsBodyQualityThresholdMax = 100;
+
+export const UpdateSettingsBody = zod.object({
+  workspaceName: zod.string().min(1),
+  jiraKey: zod.string(),
+  defaultLabels: zod.array(zod.string()),
+  defaultComponents: zod.array(zod.string()),
+  templatePreference: zod.string().min(1),
+  qualityThreshold: zod
+    .number()
+    .min(updateSettingsBodyQualityThresholdMin)
+    .max(updateSettingsBodyQualityThresholdMax),
+  devReviewRequired: zod.boolean(),
+  autoGenerateQuestions: zod.boolean(),
+  showReadinessWarnings: zod.boolean(),
+});
+
+export const UpdateSettingsResponse = zod.object({
+  id: zod.string(),
+  workspaceName: zod.string(),
+  jiraKey: zod.string(),
+  defaultLabels: zod.array(zod.string()),
+  defaultComponents: zod.array(zod.string()),
+  templatePreference: zod.string(),
+  qualityThreshold: zod.number(),
+  devReviewRequired: zod.boolean(),
+  autoGenerateQuestions: zod.boolean(),
+  showReadinessWarnings: zod.boolean(),
+  createdAt: zod.coerce.date(),
+  updatedAt: zod.coerce.date(),
+});
+
+/**
+ * @summary List export packages
+ */
+export const ListExportPackagesResponse = zod.object({
+  exportPackages: zod.array(
+    zod.object({
+      id: zod.string(),
+      sessionId: zod.string(),
+      sessionName: zod.string(),
+      date: zod.coerce.date(),
+      epicCount: zod.number(),
+      storyCount: zod.number(),
+      avgReadiness: zod.number(),
+      format: zod.enum(["markdown", "csv", "json"]),
+      status: zod.enum(["complete", "partial", "draft"]),
+    }),
+  ),
+});

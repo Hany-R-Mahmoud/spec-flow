@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation } from 'wouter';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { useSessionStore } from '@/store/session-store';
-import { ProjectSession, Phase } from '@/lib/types';
+import { useToast } from '@/hooks/use-toast';
 import { ArrowRight, X, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -73,7 +73,8 @@ function ChipsInput({ value, onChange, placeholder }: { value: string[]; onChang
 }
 
 export function NewBreakdown() {
-  const { dispatch } = useSessionStore();
+  const { createSession, state } = useSessionStore();
+  const { toast } = useToast();
   const [, setLocation] = useLocation();
   const [targetUsers, setTargetUsers] = useState<string[]>([]);
   const [labels, setLabels] = useState<string[]>([]);
@@ -92,38 +93,39 @@ export function NewBreakdown() {
     },
   });
 
-  const onSubmit = (data: FormValues) => {
-    const id = `session-${Date.now()}`;
-    const phaseStatuses = {
-      intake: 'complete' as const,
-      clarification: 'in-progress' as const,
-      prd: 'not-started' as const,
-      epics: 'not-started' as const,
-      stories: 'not-started' as const,
-      quality: 'not-started' as const,
-      devReview: 'not-started' as const,
-      export: 'not-started' as const,
-    };
+  useEffect(() => {
+    const jiraKey = form.getValues('jiraKey');
+    if (!jiraKey && state.settings?.jiraKey) {
+      form.setValue('jiraKey', state.settings.jiraKey);
+    }
 
-    const session: ProjectSession = {
-      id,
-      name: data.name,
-      inputType: data.inputType,
-      outputDepth: data.outputDepth,
-      jiraKey: (data.jiraKey || '').toUpperCase(),
-      targetUsers,
-      businessGoal: data.businessGoal || '',
-      knownConstraints: data.knownConstraints || '',
-      labels,
-      rawInput: data.rawInput,
-      currentPhase: 'clarification',
-      phases: phaseStatuses,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+    if (labels.length === 0 && state.settings?.defaultLabels.length) {
+      setLabels(state.settings.defaultLabels);
+    }
+  }, [form, labels.length, state.settings]);
 
-    dispatch({ type: 'ADD_SESSION', payload: session });
-    setLocation(`/workspace/${id}`);
+  const onSubmit = async (data: FormValues) => {
+    try {
+      const session = await createSession({
+        name: data.name,
+        inputType: data.inputType,
+        outputDepth: data.outputDepth,
+        jiraKey: data.jiraKey || '',
+        targetUsers,
+        businessGoal: data.businessGoal || '',
+        knownConstraints: data.knownConstraints || '',
+        labels,
+        rawInput: data.rawInput,
+      });
+
+      setLocation(`/workspace/${session.id}`);
+    } catch (error) {
+      toast({
+        title: 'Create failed',
+        description:
+          error instanceof Error ? error.message : 'Could not create session.',
+      });
+    }
   };
 
   return (

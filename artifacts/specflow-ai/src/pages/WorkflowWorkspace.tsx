@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation, useRoute } from 'wouter';
 import { useSessionStore } from '@/store/session-store';
 import { Phase } from '@/lib/types';
@@ -114,6 +114,36 @@ export function WorkflowWorkspace() {
   const session = state.sessions.find(s => s.id === sessionId);
   const [activePhase, setActivePhase] = useState<Phase>(session?.currentPhase || 'clarification');
 
+  useEffect(() => {
+    if (!sessionId) {
+      return;
+    }
+
+    dispatch({ type: 'SET_ACTIVE_SESSION', payload: sessionId });
+  }, [sessionId]);
+
+  useEffect(() => {
+    if (session?.currentPhase) {
+      setActivePhase(session.currentPhase);
+    }
+  }, [session?.currentPhase]);
+
+  if (state.isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <p className="text-xs text-muted-foreground">Loading persisted workspace…</p>
+      </div>
+    );
+  }
+
+  if (state.error && !session) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <p className="text-xs text-[var(--color-danger)]">{state.error}</p>
+      </div>
+    );
+  }
+
   if (!session) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -151,13 +181,6 @@ export function WorkflowWorkspace() {
   const advancePhase = (nextPhase: Phase) => {
     setActivePhase(nextPhase);
     dispatch({ type: 'SET_PHASE', payload: { sessionId: session.id, phase: nextPhase } });
-    dispatch({
-      type: 'UPDATE_SESSION', payload: {
-        id: session.id,
-        currentPhase: nextPhase,
-        phases: { ...session.phases, [nextPhase]: 'in-progress' as const }
-      }
-    });
     toast({ title: 'Phase advanced', description: `Now in ${nextPhase} phase.` });
   };
 

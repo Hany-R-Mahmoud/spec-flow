@@ -1,6 +1,5 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
   description: API specification
@@ -10,6 +9,14 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: projects
+    description: Project persistence operations
+  - name: sessions
+    description: Workflow session persistence operations
+  - name: settings
+    description: Workspace settings operations
+  - name: exports
+    description: Export package history operations
 paths:
   /healthz:
     get:
@@ -24,13 +31,868 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /projects:
+    get:
+      operationId: listProjects
+      tags: [projects]
+      summary: List projects
+      responses:
+        "200":
+          description: Project list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectListResponse"
+        default:
+          $ref: "#/components/responses/ApiError"
+    post:
+      operationId: createProject
+      tags: [projects]
+      summary: Create project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateProjectRequest"
+      responses:
+        "201":
+          description: Created project
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+        default:
+          $ref: "#/components/responses/ApiError"
+  /projects/{projectId}:
+    get:
+      operationId: getProject
+      tags: [projects]
+      summary: Get project
+      parameters:
+        - $ref: "#/components/parameters/ProjectId"
+      responses:
+        "200":
+          description: Project detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+        default:
+          $ref: "#/components/responses/ApiError"
+    patch:
+      operationId: updateProject
+      tags: [projects]
+      summary: Update project
+      parameters:
+        - $ref: "#/components/parameters/ProjectId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProjectRequest"
+      responses:
+        "200":
+          description: Updated project
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+        default:
+          $ref: "#/components/responses/ApiError"
+  /sessions:
+    get:
+      operationId: listSessions
+      tags: [sessions]
+      summary: List workflow sessions
+      responses:
+        "200":
+          description: Session list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionListResponse"
+        default:
+          $ref: "#/components/responses/ApiError"
+    post:
+      operationId: createSession
+      tags: [sessions]
+      summary: Create workflow session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateSessionRequest"
+      responses:
+        "201":
+          description: Created workflow session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkflowSession"
+        default:
+          $ref: "#/components/responses/ApiError"
+  /sessions/{sessionId}:
+    get:
+      operationId: getSession
+      tags: [sessions]
+      summary: Get workflow session
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+      responses:
+        "200":
+          description: Workflow session detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkflowSession"
+        default:
+          $ref: "#/components/responses/ApiError"
+    patch:
+      operationId: updateSession
+      tags: [sessions]
+      summary: Update workflow session summary
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateSessionRequest"
+      responses:
+        "200":
+          description: Updated workflow session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkflowSession"
+        default:
+          $ref: "#/components/responses/ApiError"
+  /sessions/{sessionId}/artifacts:
+    patch:
+      operationId: updateSessionArtifacts
+      tags: [sessions]
+      summary: Update workflow session artifacts
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateSessionArtifactsRequest"
+      responses:
+        "200":
+          description: Updated workflow session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkflowSession"
+        default:
+          $ref: "#/components/responses/ApiError"
+  /settings:
+    get:
+      operationId: getSettings
+      tags: [settings]
+      summary: Get workspace settings
+      responses:
+        "200":
+          description: Workspace settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkspaceSettings"
+        default:
+          $ref: "#/components/responses/ApiError"
+    put:
+      operationId: updateSettings
+      tags: [settings]
+      summary: Update workspace settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateSettingsRequest"
+      responses:
+        "200":
+          description: Updated workspace settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkspaceSettings"
+        default:
+          $ref: "#/components/responses/ApiError"
+  /export-packages:
+    get:
+      operationId: listExportPackages
+      tags: [exports]
+      summary: List export packages
+      responses:
+        "200":
+          description: Export package list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExportPackageListResponse"
+        default:
+          $ref: "#/components/responses/ApiError"
 components:
+  parameters:
+    ProjectId:
+      name: projectId
+      in: path
+      required: true
+      schema:
+        type: string
+    SessionId:
+      name: sessionId
+      in: path
+      required: true
+      schema:
+        type: string
+  responses:
+    ApiError:
+      description: API error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
   schemas:
     HealthStatus:
       type: object
       properties:
         status:
           type: string
+      required: [status]
+    ApiError:
+      type: object
+      properties:
+        message:
+          type: string
+      required: [message]
+    Phase:
+      type: string
+      enum:
+        - intake
+        - clarification
+        - prd
+        - epics
+        - stories
+        - quality
+        - devReview
+        - export
+    PhaseStatus:
+      type: string
+      enum:
+        - not-started
+        - in-progress
+        - complete
+        - needs-attention
+    ReviewStatus:
+      type: string
+      enum:
+        - pending
+        - approved
+        - needs-clarification
+        - too-large
+        - technically-risky
+        - blocked
+        - missing-ac
+    EpicPriority:
+      type: string
+      enum: [P0, P1, P2]
+    StoryPriority:
+      type: string
+      enum: [P0, P1, P2, P3]
+    ReadinessLabel:
+      type: string
+      enum:
+        - Ready for Jira
+        - Minor review needed
+        - Needs PM refinement
+        - Not ready
+    WarningSeverity:
+      type: string
+      enum: [error, warning, info]
+    ExportFormat:
+      type: string
+      enum: [markdown, csv, json]
+    ExportStatus:
+      type: string
+      enum: [complete, partial, draft]
+    PmRevisionStatus:
+      type: string
+      enum:
+        - not-started
+        - in-progress
+        - resolved
+    PhasesRecord:
+      type: object
+      additionalProperties:
+        $ref: "#/components/schemas/PhaseStatus"
       required:
+        - intake
+        - clarification
+        - prd
+        - epics
+        - stories
+        - quality
+        - devReview
+        - export
+      properties:
+        intake:
+          $ref: "#/components/schemas/PhaseStatus"
+        clarification:
+          $ref: "#/components/schemas/PhaseStatus"
+        prd:
+          $ref: "#/components/schemas/PhaseStatus"
+        epics:
+          $ref: "#/components/schemas/PhaseStatus"
+        stories:
+          $ref: "#/components/schemas/PhaseStatus"
+        quality:
+          $ref: "#/components/schemas/PhaseStatus"
+        devReview:
+          $ref: "#/components/schemas/PhaseStatus"
+        export:
+          $ref: "#/components/schemas/PhaseStatus"
+    ClarificationQuestion:
+      type: object
+      properties:
+        id:
+          type: string
+        group:
+          type: string
+        text:
+          type: string
+        required:
+          type: boolean
+        answer:
+          type: string
+        skipped:
+          type: boolean
+      required: [id, group, text, required, answer, skipped]
+    PrdSection:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        content:
+          type: string
+        complete:
+          type: boolean
+        order:
+          type: integer
+      required: [id, title, content, complete, order]
+    ReadinessScore:
+      type: object
+      properties:
+        total:
+          type: integer
+        clarity:
+          type: integer
+        acceptanceCriteria:
+          type: integer
+        businessAlignment:
+          type: integer
+        technicalFeasibility:
+          type: integer
+        testability:
+          type: integer
+        edgeCasesErrorHandling:
+          type: integer
+        dependenciesDesignLocalization:
+          type: integer
+        label:
+          $ref: "#/components/schemas/ReadinessLabel"
+      required:
+        - total
+        - clarity
+        - acceptanceCriteria
+        - businessAlignment
+        - technicalFeasibility
+        - testability
+        - edgeCasesErrorHandling
+        - dependenciesDesignLocalization
+        - label
+    QualityWarning:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        message:
+          type: string
+        severity:
+          $ref: "#/components/schemas/WarningSeverity"
+      required: [id, type, message, severity]
+    DeveloperReview:
+      type: object
+      properties:
+        status:
+          $ref: "#/components/schemas/ReviewStatus"
+        comment:
+          type: string
+        reviewerName:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        pmRevisionStatus:
+          $ref: "#/components/schemas/PmRevisionStatus"
+      required: [status, comment, reviewerName, timestamp, pmRevisionStatus]
+    Epic:
+      type: object
+      properties:
+        id:
+          type: string
+        sessionId:
+          type: string
+        title:
+          type: string
+        businessObjective:
+          type: string
+        scopeSummary:
+          type: string
+        prdRequirements:
+          type: array
+          items:
+            type: string
+        priority:
+          $ref: "#/components/schemas/EpicPriority"
+        dependencies:
+          type: array
+          items:
+            type: string
+        risks:
+          type: array
+          items:
+            type: string
+        jiraEpicDescription:
+          type: string
+        storyCount:
+          type: integer
+      required:
+        - id
+        - sessionId
+        - title
+        - businessObjective
+        - scopeSummary
+        - prdRequirements
+        - priority
+        - dependencies
+        - risks
+        - jiraEpicDescription
+        - storyCount
+    Story:
+      type: object
+      properties:
+        id:
+          type: string
+        epicId:
+          type: string
+        sessionId:
+          type: string
+        title:
+          type: string
+        userStory:
+          type: string
+        description:
+          type: string
+        acceptanceCriteria:
+          type: array
+          items:
+            type: string
+        priority:
+          $ref: "#/components/schemas/StoryPriority"
+        labels:
+          type: array
+          items:
+            type: string
+        components:
+          type: array
+          items:
+            type: string
+        dependencies:
+          type: array
+          items:
+            type: string
+        edgeCases:
+          type: array
+          items:
+            type: string
+        errorHandling:
+          type: string
+        localizationNotes:
+          type: string
+        designNotes:
+          type: string
+        analyticsNotes:
+          type: string
+        qaNotes:
+          type: string
+        technicalNotes:
+          type: string
+        openQuestions:
+          type: array
+          items:
+            type: string
+        readinessScore:
+          $ref: "#/components/schemas/ReadinessScore"
+        warnings:
+          type: array
+          items:
+            $ref: "#/components/schemas/QualityWarning"
+        reviewStatus:
+          $ref: "#/components/schemas/ReviewStatus"
+        developerReview:
+          oneOf:
+            - $ref: "#/components/schemas/DeveloperReview"
+            - type: "null"
+      required:
+        - id
+        - epicId
+        - sessionId
+        - title
+        - userStory
+        - description
+        - acceptanceCriteria
+        - priority
+        - labels
+        - components
+        - dependencies
+        - edgeCases
+        - errorHandling
+        - localizationNotes
+        - designNotes
+        - analyticsNotes
+        - qaNotes
+        - technicalNotes
+        - openQuestions
+        - readinessScore
+        - warnings
+        - reviewStatus
+    ExportPackage:
+      type: object
+      properties:
+        id:
+          type: string
+        sessionId:
+          type: string
+        sessionName:
+          type: string
+        date:
+          type: string
+          format: date-time
+        epicCount:
+          type: integer
+        storyCount:
+          type: integer
+        avgReadiness:
+          type: integer
+        format:
+          $ref: "#/components/schemas/ExportFormat"
+        status:
+          $ref: "#/components/schemas/ExportStatus"
+      required:
+        - id
+        - sessionId
+        - sessionName
+        - date
+        - epicCount
+        - storyCount
+        - avgReadiness
+        - format
         - status
-
+    Project:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        jiraKey:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required: [id, name, jiraKey, createdAt, updatedAt]
+    WorkflowSession:
+      type: object
+      properties:
+        id:
+          type: string
+        projectId:
+          type: string
+        name:
+          type: string
+        inputType:
+          type: string
+        outputDepth:
+          type: string
+        jiraKey:
+          type: string
+        targetUsers:
+          type: array
+          items:
+            type: string
+        businessGoal:
+          type: string
+        knownConstraints:
+          type: string
+        labels:
+          type: array
+          items:
+            type: string
+        rawInput:
+          type: string
+        currentPhase:
+          $ref: "#/components/schemas/Phase"
+        phases:
+          $ref: "#/components/schemas/PhasesRecord"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        clarificationQuestions:
+          type: array
+          items:
+            $ref: "#/components/schemas/ClarificationQuestion"
+        prdSections:
+          type: array
+          items:
+            $ref: "#/components/schemas/PrdSection"
+        epics:
+          type: array
+          items:
+            $ref: "#/components/schemas/Epic"
+        stories:
+          type: array
+          items:
+            $ref: "#/components/schemas/Story"
+      required:
+        - id
+        - projectId
+        - name
+        - inputType
+        - outputDepth
+        - jiraKey
+        - targetUsers
+        - businessGoal
+        - knownConstraints
+        - labels
+        - rawInput
+        - currentPhase
+        - phases
+        - createdAt
+        - updatedAt
+        - clarificationQuestions
+        - prdSections
+        - epics
+        - stories
+    WorkspaceSettings:
+      type: object
+      properties:
+        id:
+          type: string
+        workspaceName:
+          type: string
+        jiraKey:
+          type: string
+        defaultLabels:
+          type: array
+          items:
+            type: string
+        defaultComponents:
+          type: array
+          items:
+            type: string
+        templatePreference:
+          type: string
+        qualityThreshold:
+          type: integer
+        devReviewRequired:
+          type: boolean
+        autoGenerateQuestions:
+          type: boolean
+        showReadinessWarnings:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - workspaceName
+        - jiraKey
+        - defaultLabels
+        - defaultComponents
+        - templatePreference
+        - qualityThreshold
+        - devReviewRequired
+        - autoGenerateQuestions
+        - showReadinessWarnings
+        - createdAt
+        - updatedAt
+    CreateProjectRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 2
+        jiraKey:
+          type: string
+      required: [name]
+    UpdateProjectRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 2
+        jiraKey:
+          type: string
+      additionalProperties: false
+    CreateSessionRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 2
+        inputType:
+          type: string
+          minLength: 1
+        outputDepth:
+          type: string
+          minLength: 1
+        jiraKey:
+          type: string
+        targetUsers:
+          type: array
+          items:
+            type: string
+        businessGoal:
+          type: string
+        knownConstraints:
+          type: string
+        labels:
+          type: array
+          items:
+            type: string
+        rawInput:
+          type: string
+          minLength: 10
+      required:
+        - name
+        - inputType
+        - outputDepth
+        - rawInput
+    UpdateSessionRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 2
+        jiraKey:
+          type: string
+        currentPhase:
+          $ref: "#/components/schemas/Phase"
+        phases:
+          $ref: "#/components/schemas/PhasesRecord"
+      additionalProperties: false
+    UpdateSessionArtifactsRequest:
+      type: object
+      properties:
+        clarificationQuestions:
+          type: array
+          items:
+            $ref: "#/components/schemas/ClarificationQuestion"
+        prdSections:
+          type: array
+          items:
+            $ref: "#/components/schemas/PrdSection"
+        epics:
+          type: array
+          items:
+            $ref: "#/components/schemas/Epic"
+        stories:
+          type: array
+          items:
+            $ref: "#/components/schemas/Story"
+      additionalProperties: false
+    UpdateSettingsRequest:
+      type: object
+      properties:
+        workspaceName:
+          type: string
+          minLength: 1
+        jiraKey:
+          type: string
+        defaultLabels:
+          type: array
+          items:
+            type: string
+        defaultComponents:
+          type: array
+          items:
+            type: string
+        templatePreference:
+          type: string
+          minLength: 1
+        qualityThreshold:
+          type: integer
+          minimum: 0
+          maximum: 100
+        devReviewRequired:
+          type: boolean
+        autoGenerateQuestions:
+          type: boolean
+        showReadinessWarnings:
+          type: boolean
+      required:
+        - workspaceName
+        - jiraKey
+        - defaultLabels
+        - defaultComponents
+        - templatePreference
+        - qualityThreshold
+        - devReviewRequired
+        - autoGenerateQuestions
+        - showReadinessWarnings
+    ProjectListResponse:
+      type: object
+      properties:
+        projects:
+          type: array
+          items:
+            $ref: "#/components/schemas/Project"
+      required: [projects]
+    SessionListResponse:
+      type: object
+      properties:
+        sessions:
+          type: array
+          items:
+            $ref: "#/components/schemas/WorkflowSession"
+      required: [sessions]
+    ExportPackageListResponse:
+      type: object
+      properties:
+        exportPackages:
+          type: array
+          items:
+            $ref: "#/components/schemas/ExportPackage"
+      required: [exportPackages]
