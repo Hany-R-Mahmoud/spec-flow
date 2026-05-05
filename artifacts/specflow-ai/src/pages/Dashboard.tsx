@@ -2,7 +2,6 @@ import { useLocation } from 'wouter';
 import { useSessionStore } from '@/store/session-store';
 import { mockExportPackages } from '@/lib/sample-data';
 import { PhaseStatusBadge, ReviewStatusBadge } from '@/components/shared/StatusBadge';
-import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import { Plus, TrendingUp, Clock, FileDown, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -38,8 +37,10 @@ export function Dashboard() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-lg font-semibold text-foreground">Dashboard</h1>
-          <p className="text-xs text-muted-foreground mt-0.5">Workspace overview and active sessions</p>
+          <h1 className="text-2xl font-semibold text-foreground">Dashboard</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            {sessions.length} active breakdowns · {awaitingReview} stories awaiting review · {exportsReady} exports ready
+          </p>
         </div>
         <Button size="sm" onClick={() => setLocation('/new')} data-testid="button-new-breakdown">
           <Plus className="w-4 h-4 mr-1.5" />
@@ -51,15 +52,15 @@ export function Dashboard() {
       <div className="grid grid-cols-4 gap-4">
         {[
           { label: 'Active Breakdowns', value: sessions.length, sub: 'sessions in progress', icon: TrendingUp, color: 'text-primary', bg: 'bg-[var(--color-primary-soft)]' },
-          { label: 'Avg Readiness Score', value: `${avgScore}/100`, sub: 'developer readiness', icon: TrendingUp, color: avgScore >= 75 ? 'text-[var(--color-success)]' : 'text-[var(--color-warning)]', bg: avgScore >= 75 ? 'bg-[var(--color-success-soft)]' : 'bg-[var(--color-warning-soft)]' },
-          { label: 'Awaiting Dev Review', value: awaitingReview, sub: 'stories in queue', icon: Clock, color: 'text-[var(--color-warning)]', bg: 'bg-[var(--color-warning-soft)]' },
-          { label: 'Jira Exports Ready', value: exportsReady, sub: 'packages ready', icon: FileDown, color: 'text-[var(--color-success)]', bg: 'bg-[var(--color-success-soft)]' },
+          { label: 'Avg Readiness Score', value: `${avgScore}/100`, sub: avgScore >= 75 ? 'healthy developer readiness' : 'needs quality attention', icon: TrendingUp, color: avgScore >= 75 ? 'text-[var(--color-success)]' : 'text-[var(--color-warning)]', bg: avgScore >= 75 ? 'bg-[var(--color-success-soft)]' : 'bg-[var(--color-warning-soft)]' },
+          { label: 'Awaiting Dev Review', value: awaitingReview, sub: 'stories need attention', icon: Clock, color: 'text-[var(--color-warning)]', bg: 'bg-[var(--color-warning-soft)]' },
+          { label: 'Jira Exports Ready', value: exportsReady, sub: 'packages ready to sync', icon: FileDown, color: 'text-[var(--color-info)]', bg: 'bg-[var(--color-info-soft)]' },
         ].map(({ label, value, sub, icon: Icon, color, bg }) => (
-          <div key={label} className="bg-card border border-border rounded-md p-4">
+          <div key={label} className="bg-card border border-border rounded-md p-4 shadow-sm">
             <div className="flex items-start justify-between mb-3">
-              <span className="text-xs font-medium text-muted-foreground">{label}</span>
+              <span className="text-xs font-semibold text-muted-foreground">{label}</span>
               <div className={cn('w-7 h-7 rounded flex items-center justify-center flex-shrink-0', bg)}>
-                <Icon className={cn('w-3.5 h-3.5', color)} />
+                <Icon className={cn('w-3.5 h-3.5', color)} aria-hidden="true" />
               </div>
             </div>
             <div className={cn('text-2xl font-bold mb-0.5', color)}>{value}</div>
@@ -71,19 +72,26 @@ export function Dashboard() {
       {/* Active Sessions Table */}
       <div className="bg-card border border-border rounded-md overflow-hidden">
         <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-          <span className="text-sm font-semibold text-foreground">Active Sessions</span>
+          <span id="active-sessions-title" className="text-sm font-semibold text-foreground">Active Sessions</span>
           <span className="text-xs text-muted-foreground">{sessions.length} sessions</span>
         </div>
-        <table className="w-full">
+        <table className="w-full" aria-labelledby="active-sessions-title">
+          <caption className="sr-only">Active breakdown sessions with phase, progress, readiness, status, and last updated time.</caption>
           <thead>
             <tr className="bg-muted border-b border-border">
               {['Session Name', 'Phase', 'Progress', 'Readiness', 'Status', 'Updated'].map(h => (
-                <th key={h} className="text-left px-4 py-2 text-xs font-semibold text-muted-foreground">{h}</th>
+                <th key={h} scope="col" className="text-left px-4 py-2 text-xs font-semibold text-muted-foreground">{h}</th>
               ))}
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
-            {sessions.map(session => {
+            {sessions.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="px-4 py-10 text-center text-xs text-muted-foreground">
+                  No active breakdowns yet. Start a new breakdown to create your first workflow session.
+                </td>
+              </tr>
+            ) : sessions.map(session => {
               const progress = phaseProgress(session.currentPhase);
               const sessionStories = state.stories.filter(s => s.sessionId === session.id);
               const sessionScore = sessionStories.length > 0
@@ -188,6 +196,9 @@ export function Dashboard() {
                 </span>
               </div>
             ))}
+            {recentExports.length === 0 && (
+              <div className="px-4 py-6 text-center text-xs text-muted-foreground">No export packages yet</div>
+            )}
           </div>
         </div>
       </div>

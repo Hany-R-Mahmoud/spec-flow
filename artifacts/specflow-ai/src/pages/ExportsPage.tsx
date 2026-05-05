@@ -39,11 +39,12 @@ export function ExportsPage() {
       </div>
 
       <div className="bg-card border border-border rounded-md overflow-hidden">
-        <table className="w-full">
+        <table className="w-full" aria-label="Export packages">
+          <caption className="sr-only">Export packages with project, date, counts, readiness, format, status, and download action.</caption>
           <thead>
             <tr className="bg-muted border-b border-border">
               {['Project Name', 'Date', 'Epics', 'Stories', 'Avg Readiness', 'Format', 'Status', ''].map(h => (
-                <th key={h} className="text-left px-4 py-2 text-xs font-semibold text-muted-foreground">{h}</th>
+                <th key={h} scope="col" className="text-left px-4 py-2 text-xs font-semibold text-muted-foreground">{h}</th>
               ))}
             </tr>
           </thead>

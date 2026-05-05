@@ -21,25 +21,26 @@ export function Sidebar() {
         <Boxes className="w-5 h-5 text-primary" />
         <span className="font-semibold text-sidebar-foreground">SpecFlow AI</span>
       </div>
-      
+
       <div className="p-4">
         <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Workspace</div>
-        <nav className="flex flex-col gap-1">
+        <nav className="flex flex-col gap-1" aria-label="Workspace navigation">
           {navItems.map((item) => {
             const isActive = location === item.href;
             return (
-              <Link key={item.href} href={item.href}>
-                <div
-                  className={cn(
-                    "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer",
-                    isActive
-                      ? "bg-primary-soft text-primary border-l-2 border-primary"
-                      : "text-secondary-foreground hover:bg-surface-muted"
-                  )}
-                >
-                  <item.icon className="w-4 h-4" />
-                  {item.label}
-                </div>
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-current={isActive ? 'page' : undefined}
+                className={cn(
+                  "relative flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                  isActive
+                    ? "bg-[var(--color-primary-soft)] text-primary shadow-[inset_3px_0_0_hsl(var(--primary))]"
+                    : "text-secondary-foreground hover:bg-surface-muted hover:text-foreground"
+                )}
+              >
+                <item.icon className="w-4 h-4" aria-hidden="true" />
+                {item.label}
               </Link>
             );
           })}

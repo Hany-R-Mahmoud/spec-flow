@@ -102,11 +102,12 @@ export function ReviewsPage() {
 
       {/* Table */}
       <div className="bg-card border border-border rounded-md overflow-hidden">
-        <table className="w-full">
+        <table className="w-full" aria-label="Developer review stories">
+          <caption className="sr-only">Stories with project, priority, readiness, reviewer status, comment, and last updated time.</caption>
           <thead>
             <tr className="bg-muted border-b border-border">
               {['Story', 'Project / Session', 'Priority', 'Readiness', 'Reviewer Status', 'Comment', 'Updated'].map(h => (
-                <th key={h} className="text-left px-4 py-2 text-xs font-semibold text-muted-foreground whitespace-nowrap">{h}</th>
+                <th key={h} scope="col" className="text-left px-4 py-2 text-xs font-semibold text-muted-foreground whitespace-nowrap">{h}</th>
               ))}
             </tr>
           </thead>
