@@ -1,15 +1,10 @@
 <!--
 Sync Impact Report
-Version change: template -> 1.0.0
+Version change: 1.0.0 -> 1.1.0
 Modified principles:
-- Template placeholders -> Simplicity and Maintainability
-- Template placeholders -> TypeScript and Schema Discipline
-- Template placeholders -> Accessible Product Quality
-- Template placeholders -> Security and Trust Boundaries
-- Template placeholders -> Surgical Workflow
+- Surgical Workflow -> Surgical Workflow
 Added sections:
-- Workspace Standards
-- Development Workflow
+- Executor-Ready Spec Handoffs
 Removed sections:
 - None
 Templates requiring updates:
@@ -63,7 +58,8 @@ reformat, or clean adjacent code unless required to complete the work safely.
 Generated plans and tasks MUST reference real repository files and commands,
 preserve existing workspace structure, and use `pnpm` for package commands.
 Tests, lint, and type checks are not run by default; run them only when requested
-or when needed to diagnose a failure.
+or when needed to diagnose a failure. Each implementation spec MUST be executable
+by an AI agent from the spec folder alone, without requiring hidden chat context.
 
 ## Workspace Standards
 
@@ -82,6 +78,26 @@ workspace package or file areas affected, the validation approach, and any
 constitution risks. Tasks MUST be independently executable where practical,
 ordered by user-story value, and explicit about file paths.
 
+## Executor-Ready Spec Handoffs
+
+Every implementation-ready Spec Kit feature MUST include enough context for a
+separate executor to run from a prompt such as "execute spec-00X and report the
+outcome." At minimum, the spec folder MUST include:
+
+- `spec.md` with user value, scope, acceptance scenarios, edge cases, and
+  non-goals.
+- `plan.md` with real file/package boundaries, architecture decisions,
+  sequencing, and validation expectations.
+- `tasks.md` with ordered, checkable tasks grouped by independently useful
+  slices.
+- An "Executor Handoff" section naming the exact files to read first, files
+  likely to change, allowed commands, reporting expectations, and preservation
+  rules.
+
+Specs MUST call out dependencies on prior specs and MUST avoid requiring future
+agents to infer product intent from chat history. Cross-spec work MUST be split
+so each spec has a bounded outcome and can be reviewed independently.
+
 ## Governance
 
 This constitution is the controlling project guidance for Spec Kit specs, plans,
@@ -96,4 +112,4 @@ All future `/speckit.*` work MUST check compliance during planning and again
 before implementation. Any justified violation MUST be documented in the plan's
 Complexity Tracking section with the simpler alternative rejected.
 
-**Version**: 1.0.0 | **Ratified**: 2026-05-05 | **Last Amended**: 2026-05-05
+**Version**: 1.1.0 | **Ratified**: 2026-05-05 | **Last Amended**: 2026-05-05
