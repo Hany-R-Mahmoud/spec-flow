@@ -9,7 +9,6 @@ import { useSessionStore } from '@/store/session-store';
 interface ClarificationPanelProps {
   questions: ClarificationQuestion[];
   generationStep: GenerationStepState;
-  isDemoMode: boolean;
   onGenerateClarification: () => void;
   onGeneratePRD: () => void;
 }
@@ -17,7 +16,6 @@ interface ClarificationPanelProps {
 export function ClarificationPanel({
   questions,
   generationStep,
-  isDemoMode,
   onGenerateClarification,
   onGeneratePRD,
 }: ClarificationPanelProps) {
@@ -91,7 +89,7 @@ export function ClarificationPanel({
         <div className="rounded-md border border-border bg-card px-3 py-2 text-xs text-muted-foreground">
           {generationStep.status === 'running' && <span>Generating clarification questions…</span>}
           {generationStep.status === 'succeeded' && (
-            <span>{isDemoMode ? 'Demo questions generated from the session context.' : 'Clarification questions generated and saved.'}</span>
+            <span>Clarification questions generated and saved.</span>
           )}
           {generationStep.status === 'failed' && (
             <span className="text-[var(--color-danger)]">{generationStep.errorMessage || 'Clarification generation failed. Retry when ready.'}</span>

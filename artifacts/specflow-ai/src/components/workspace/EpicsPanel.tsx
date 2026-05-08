@@ -9,7 +9,6 @@ import { useToast } from '@/hooks/use-toast';
 interface EpicsPanelProps {
   epics: Epic[];
   generationStep: GenerationStepState;
-  isDemoMode: boolean;
   onGenerateEpics: () => void;
   onGenerateStories: () => void;
 }
@@ -17,7 +16,6 @@ interface EpicsPanelProps {
 export function EpicsPanel({
   epics,
   generationStep,
-  isDemoMode,
   onGenerateEpics,
   onGenerateStories,
 }: EpicsPanelProps) {
@@ -60,7 +58,7 @@ export function EpicsPanel({
         <div className="rounded-md border border-border bg-card px-3 py-2 text-xs text-muted-foreground">
           {generationStep.status === 'running' && <span>Generating epics…</span>}
           {generationStep.status === 'succeeded' && (
-            <span>{isDemoMode ? 'Demo epics generated from the PRD.' : 'Epics generated and saved.'}</span>
+            <span>Epics generated and saved.</span>
           )}
           {generationStep.status === 'failed' && (
             <span className="text-[var(--color-danger)]">{generationStep.errorMessage || 'Epic generation failed. Retry when ready.'}</span>

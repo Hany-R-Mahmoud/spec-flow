@@ -16,13 +16,16 @@ export function Sidebar() {
   ];
 
   return (
-    <aside className="w-64 border-r border-border bg-sidebar flex-shrink-0 flex flex-col h-full hidden md:flex">
-      <div className="p-4 flex items-center gap-2 border-b border-border h-12">
+    <aside
+      className="w-64 border-r border-border bg-sidebar flex-shrink-0 flex flex-col h-full hidden md:flex"
+      style={{ paddingInline: 'var(--shell-sidebar-padding)' }}
+    >
+      <div className="flex h-12 items-center gap-2 border-b border-border">
         <Boxes className="w-5 h-5 text-primary" />
         <span className="font-semibold text-sidebar-foreground">SpecFlow AI</span>
       </div>
 
-      <div className="p-4">
+      <div className="py-4">
         <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Workspace</div>
         <nav className="flex flex-col gap-1" aria-label="Workspace navigation">
           {navItems.map((item) => {

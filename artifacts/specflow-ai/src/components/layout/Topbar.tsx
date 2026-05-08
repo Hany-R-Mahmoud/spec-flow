@@ -5,6 +5,10 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator, CommandShortcut } from '@/components/ui/command';
 import { useSessionStore } from '@/store/session-store';
+import { ThemeModeToggle } from '@/components/shared/ThemeModeToggle';
+import { DensityToggle } from '@/components/shared/DensityToggle';
+import { useAuth } from '@/components/providers/auth-provider';
+import { getAuthInitials } from '@/lib/supabase-auth';
 
 const NAV_COMMANDS = [
   { label: 'Dashboard', href: '/', icon: LayoutDashboard, shortcut: 'G D' },
@@ -18,7 +22,11 @@ const NAV_COMMANDS = [
 export function Topbar() {
   const [, setLocation] = useLocation();
   const { state, dispatch } = useSessionStore();
+  const { user, displayName, signOut } = useAuth();
   const [open, setOpen] = useState(false);
+  const currentWorkspace = state.settings?.workspaceName ?? 'Workspace';
+  const currentSession = state.sessions.find((session) => session.id === state.activeSessionId) ?? null;
+  const userInitials = getAuthInitials(user);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -46,15 +54,33 @@ export function Topbar() {
     setLocation(href);
   };
 
+  const openProjects = () => {
+    navigate('/projects');
+  };
+
   const openSession = (sessionId: string) => {
     dispatch({ type: 'SET_ACTIVE_SESSION', payload: sessionId });
     navigate(`/workspace/${sessionId}`);
   };
 
   return (
-    <header className="h-14 border-b border-border bg-card flex items-center justify-between px-4 flex-shrink-0">
-      <div className="flex-1">
-        <h1 className="text-sm font-semibold text-foreground">Workspace</h1>
+    <header
+      className="h-14 border-b border-border bg-card flex items-center justify-between flex-shrink-0"
+      style={{ paddingInline: 'var(--shell-header-padding)' }}
+    >
+      <div className="flex-1 min-w-0">
+        <button
+          type="button"
+          onClick={openProjects}
+          className="flex min-w-0 flex-col items-start rounded-md px-2 py-1 text-left transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          aria-label="Open project switcher"
+        >
+          <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Workspace</span>
+          <span className="truncate text-sm font-semibold text-foreground">{currentWorkspace}</span>
+          <span className="truncate text-[11px] text-muted-foreground">
+            {state.sessions.length} sessions · {currentSession?.name ?? 'No active session selected'}
+          </span>
+        </button>
       </div>
 
       <div className="flex-1 flex justify-center">
@@ -63,11 +89,11 @@ export function Topbar() {
           onClick={() => setOpen(true)}
           aria-label="Search commands, specs, and projects"
           title="Open command menu"
-          className="flex h-9 w-80 items-center justify-between gap-3 rounded-md border border-input bg-background px-3 text-sm text-muted-foreground shadow-sm transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="flex h-9 w-full max-w-xl items-center justify-between gap-3 rounded-md border border-input bg-background px-3 text-sm text-muted-foreground shadow-sm transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <span className="flex min-w-0 items-center gap-2">
             <Search className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
-            <span className="truncate">Search commands, specs, projects</span>
+            <span className="truncate">Search sessions, projects, actions</span>
           </span>
           <kbd className="rounded border border-border bg-card px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground">
             ⌘K
@@ -76,6 +102,8 @@ export function Topbar() {
       </div>
 
       <div className="flex-1 flex justify-end items-center gap-3">
+        <DensityToggle className="hidden xl:flex" />
+        <ThemeModeToggle className="hidden xl:flex" />
         <button
           type="button"
           aria-label="Notifications coming soon"
@@ -95,16 +123,22 @@ export function Topbar() {
               className="flex h-9 w-9 items-center justify-center rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <Avatar className="h-7 w-7">
-                <AvatarFallback className="bg-primary text-primary-foreground text-xs">PM</AvatarFallback>
+                <AvatarFallback className="bg-primary text-primary-foreground text-xs">{userInitials}</AvatarFallback>
               </Avatar>
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuLabel>My Account</DropdownMenuLabel>
+            <DropdownMenuLabel>
+              <div className="space-y-0.5">
+                <div className="text-sm font-medium text-foreground">{displayName}</div>
+                <div className="text-xs text-muted-foreground">{user?.email ?? 'Signed in user'}</div>
+              </div>
+            </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem onSelect={() => navigate('/settings')}>Workspace Settings</DropdownMenuItem>
-            <DropdownMenuItem disabled>Profile (Coming Soon)</DropdownMenuItem>
-            <DropdownMenuItem disabled>Sign out (Coming Soon)</DropdownMenuItem>
+            <DropdownMenuItem onSelect={(event) => { event.preventDefault(); void signOut(); }}>
+              Sign out
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

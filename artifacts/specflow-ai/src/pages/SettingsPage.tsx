@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { X } from 'lucide-react';
 import { useSessionStore } from '@/store/session-store';
+import { ThemeModeToggle } from '@/components/shared/ThemeModeToggle';
+import { DensityToggle } from '@/components/shared/DensityToggle';
 
 function ChipsInput({ value, onChange, placeholder }: { value: string[]; onChange: (v: string[]) => void; placeholder: string }) {
   const [input, setInput] = useState('');
@@ -38,14 +40,24 @@ function ChipsInput({ value, onChange, placeholder }: { value: string[]; onChang
   );
 }
 
-function SettingsSection({ title, children, onSave }: { title: string; children: React.ReactNode; onSave: () => void | Promise<void> }) {
+function SettingsSection({
+  title,
+  children,
+  onSave,
+}: {
+  title: string;
+  children: React.ReactNode;
+  onSave?: () => void | Promise<void>;
+}) {
   return (
     <div className="bg-card border border-border rounded-md overflow-hidden">
       <div className="px-4 py-3 border-b border-border bg-muted flex items-center justify-between">
         <span className="text-sm font-semibold text-foreground">{title}</span>
-        <Button size="sm" variant="outline" onClick={onSave} className="text-xs h-7">
-          Save
-        </Button>
+        {onSave ? (
+          <Button size="sm" variant="outline" onClick={onSave} className="text-xs h-7">
+            Save
+          </Button>
+        ) : null}
       </div>
       <div className="p-4 space-y-4">{children}</div>
     </div>
@@ -135,6 +147,19 @@ export function SettingsPage() {
         <h1 className="text-lg font-semibold text-foreground">Settings</h1>
         <p className="text-xs text-muted-foreground mt-0.5">Configure your workspace and story generation preferences</p>
       </div>
+
+      <SettingsSection title="Appearance">
+        <div className="space-y-2">
+          <Label className="text-xs font-medium block">Theme</Label>
+          <p className="text-xs text-muted-foreground">Choose light, dark, or system mode for the whole app.</p>
+          <ThemeModeToggle className="w-full justify-start" />
+        </div>
+        <div className="space-y-2">
+          <Label className="text-xs font-medium block">Density</Label>
+          <p className="text-xs text-muted-foreground">Switch between comfortable and compact spacing.</p>
+          <DensityToggle className="w-full justify-start" />
+        </div>
+      </SettingsSection>
 
       <SettingsSection title="Workspace" onSave={() => save('Workspace')}>
         <div>

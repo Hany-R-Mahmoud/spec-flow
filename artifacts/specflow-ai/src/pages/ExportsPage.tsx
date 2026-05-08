@@ -41,9 +41,7 @@ export function ExportsPage() {
         <h1 className="text-lg font-semibold text-foreground">Exports</h1>
         <p className="text-xs text-muted-foreground mt-0.5">Previous Jira export packages</p>
         <p className="text-xs text-muted-foreground mt-1">History now loads from persisted export package records.</p>
-        {state.error && state.dataSource === 'demo' && (
-          <p className="text-xs text-[var(--color-warning)] mt-1">{state.error}</p>
-        )}
+        {state.error && <p className="text-xs text-[var(--color-warning)] mt-1">{state.error}</p>}
       </div>
 
       {/* Filter */}

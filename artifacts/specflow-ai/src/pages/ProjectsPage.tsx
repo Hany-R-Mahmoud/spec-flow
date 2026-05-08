@@ -48,7 +48,7 @@ export function ProjectsPage() {
           <p className="mt-0.5 text-xs text-muted-foreground">
             Project sessions with their workflow health and handoff readiness.
           </p>
-          {state.error && state.dataSource === 'demo' && (
+          {state.error && (
             <p className="mt-1 text-xs text-[var(--color-warning)]">{state.error}</p>
           )}
         </div>

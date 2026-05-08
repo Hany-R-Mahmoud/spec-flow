@@ -7,6 +7,15 @@ Local run instructions for the Replit-exported workspace.
 - Node.js 24
 - pnpm 10
 
+## Environment
+
+Create a local `.env` file from `.env.example` and set:
+
+- `SUPABASE_URL`
+- `SUPABASE_ANON_KEY`
+- `DATABASE_URL`
+- optional `API_SERVER_URL`
+
 ## Run the app
 
 ```bash

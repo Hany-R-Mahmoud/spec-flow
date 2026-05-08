@@ -134,6 +134,18 @@
   --app-font-mono: Menlo, monospace;
 }
 
+:root {
+  --shell-main-padding: 1.5rem;
+  --shell-header-padding: 1rem;
+  --shell-sidebar-padding: 1rem;
+}
+
+:root[data-density='compact'] {
+  --shell-main-padding: 1rem;
+  --shell-header-padding: 0.75rem;
+  --shell-sidebar-padding: 0.75rem;
+}
+
 .dark {
   --button-outline: rgba(255,255,255, .10);
   --badge-outline: rgba(255,255,255, .05);
@@ -176,6 +188,12 @@
   --chart-3: 38 85% 55%;
   --chart-4: 0 72% 60%;
   --chart-5: 191 75% 48%;
+}
+
+.dark[data-density='compact'] {
+  --shell-main-padding: 1rem;
+  --shell-header-padding: 0.75rem;
+  --shell-sidebar-padding: 0.75rem;
 }
 
 @layer base {

@@ -9,7 +9,6 @@ import { useSessionStore } from '@/store/session-store';
 interface PRDPanelProps {
   sections: PRDSection[];
   generationStep: GenerationStepState;
-  isDemoMode: boolean;
   onGeneratePRD: () => void;
   onGenerateEpics: () => void;
 }
@@ -17,7 +16,6 @@ interface PRDPanelProps {
 export function PRDPanel({
   sections,
   generationStep,
-  isDemoMode,
   onGeneratePRD,
   onGenerateEpics,
 }: PRDPanelProps) {
@@ -71,7 +69,7 @@ export function PRDPanel({
         <div className="rounded-md border border-border bg-card px-3 py-2 text-xs text-muted-foreground">
           {generationStep.status === 'running' && <span>Generating PRD sections…</span>}
           {generationStep.status === 'succeeded' && (
-            <span>{isDemoMode ? 'Demo PRD generated from your answers.' : 'PRD sections generated and saved.'}</span>
+            <span>PRD sections generated and saved.</span>
           )}
           {generationStep.status === 'failed' && (
             <span className="text-[var(--color-danger)]">{generationStep.errorMessage || 'PRD generation failed. Retry when ready.'}</span>

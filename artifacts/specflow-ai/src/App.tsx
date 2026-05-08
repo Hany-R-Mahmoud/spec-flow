@@ -1,8 +1,12 @@
 import { Switch, Route, Router as WouterRouter } from "wouter";
+import { Redirect, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppShell } from "@/components/layout/AppShell";
+import { ThemeProvider } from "@/components/providers/theme-provider";
+import { DensityProvider } from "@/components/providers/density-provider";
+import { AuthProvider, useAuth } from "@/components/providers/auth-provider";
 import { SessionProvider } from "@/store/session-store";
 import { Dashboard } from "@/pages/Dashboard";
 import { NewBreakdown } from "@/pages/NewBreakdown";
@@ -11,39 +15,73 @@ import { WorkflowWorkspace } from "@/pages/WorkflowWorkspace";
 import { ReviewsPage } from "@/pages/ReviewsPage";
 import { ExportsPage } from "@/pages/ExportsPage";
 import { SettingsPage } from "@/pages/SettingsPage";
+import { LoginPage } from "@/pages/LoginPage";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient();
 
 function Router() {
+  const [location] = useLocation();
+  const { status, session } = useAuth();
+
+  if (status === "loading") {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background px-6 text-center">
+        <div className="max-w-sm space-y-3">
+          <div className="mx-auto h-10 w-10 animate-pulse rounded-full border border-border bg-card" />
+          <p className="text-sm font-medium text-foreground">Loading your Supabase session...</p>
+          <p className="text-xs text-muted-foreground">Restoring user access and workspace data.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!session) {
+    if (location !== "/login") {
+      return <Redirect to="/login" />;
+    }
+
+    return <LoginPage />;
+  }
+
+  if (location === "/login") {
+    return <Redirect to="/" />;
+  }
+
   return (
-    <AppShell>
-      <Switch>
-        <Route path="/" component={Dashboard} />
-        <Route path="/new" component={NewBreakdown} />
-        <Route path="/projects" component={ProjectsPage} />
-        <Route path="/workspace/:id" component={WorkflowWorkspace} />
-        <Route path="/reviews" component={ReviewsPage} />
-        <Route path="/exports" component={ExportsPage} />
-        <Route path="/settings" component={SettingsPage} />
-        <Route component={NotFound} />
-      </Switch>
-    </AppShell>
+    <SessionProvider>
+      <AppShell>
+        <Switch>
+          <Route path="/" component={Dashboard} />
+          <Route path="/new" component={NewBreakdown} />
+          <Route path="/projects" component={ProjectsPage} />
+          <Route path="/workspace/:id" component={WorkflowWorkspace} />
+          <Route path="/reviews" component={ReviewsPage} />
+          <Route path="/exports" component={ExportsPage} />
+          <Route path="/settings" component={SettingsPage} />
+          <Route component={NotFound} />
+        </Switch>
+      </AppShell>
+    </SessionProvider>
   );
 }
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <SessionProvider>
-        <TooltipProvider>
-          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-            <Router />
-          </WouterRouter>
-          <Toaster />
-        </TooltipProvider>
-      </SessionProvider>
-    </QueryClientProvider>
+    <ThemeProvider>
+      <DensityProvider>
+        <AuthProvider>
+          <QueryClientProvider client={queryClient}>
+            <TooltipProvider>
+              <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+                <Router />
+              </WouterRouter>
+              <Toaster />
+            </TooltipProvider>
+          </QueryClientProvider>
+        </AuthProvider>
+      </DensityProvider>
+    </ThemeProvider>
   );
 }
 

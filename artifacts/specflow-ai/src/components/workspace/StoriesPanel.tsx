@@ -16,7 +16,6 @@ interface StoriesPanelProps {
   stories: Story[];
   onSendToReview: (storyId: string) => void;
   generationStep: GenerationStepState;
-  isDemoMode: boolean;
   onGenerateStories: () => void;
   onGenerateQuality: () => void;
 }
@@ -261,7 +260,6 @@ export function StoriesPanel({
   epics,
   stories,
   generationStep,
-  isDemoMode,
   onGenerateStories,
   onGenerateQuality,
 }: StoriesPanelProps) {
@@ -304,7 +302,7 @@ export function StoriesPanel({
         <div className="rounded-md border border-border bg-card px-3 py-2 text-xs text-muted-foreground">
           {generationStep.status === 'running' && <span>Generating stories…</span>}
           {generationStep.status === 'succeeded' && (
-            <span>{isDemoMode ? 'Demo stories generated from the epics.' : 'Stories generated and saved.'}</span>
+            <span>Stories generated and saved.</span>
           )}
           {generationStep.status === 'failed' && (
             <span className="text-[var(--color-danger)]">{generationStep.errorMessage || 'Story generation failed. Retry when ready.'}</span>

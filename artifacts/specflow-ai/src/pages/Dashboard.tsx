@@ -58,9 +58,7 @@ export function Dashboard() {
           <p className="text-sm text-muted-foreground mt-1">
             {sessions.length} active breakdowns · {awaitingReview} stories awaiting review · {exportsReady} exports ready
           </p>
-          {error && state.dataSource === 'demo' && (
-            <p className="text-xs text-[var(--color-warning)] mt-1">{error}</p>
-          )}
+          {error && <p className="text-xs text-[var(--color-warning)] mt-1">{error}</p>}
         </div>
         <Button size="sm" onClick={() => setLocation('/new')} data-testid="button-new-breakdown">
           <Plus className="w-4 h-4 mr-1.5" />
@@ -69,7 +67,7 @@ export function Dashboard() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {[
           { label: 'Active Breakdowns', value: sessions.length, sub: 'sessions in progress', icon: TrendingUp, color: 'text-primary', bg: 'bg-[var(--color-primary-soft)]' },
           { label: 'Avg Readiness Score', value: `${avgScore}/100`, sub: avgScore >= 75 ? 'healthy developer readiness' : 'needs quality attention', icon: TrendingUp, color: avgScore >= 75 ? 'text-[var(--color-success)]' : 'text-[var(--color-warning)]', bg: avgScore >= 75 ? 'bg-[var(--color-success-soft)]' : 'bg-[var(--color-warning-soft)]' },
@@ -167,7 +165,7 @@ export function Dashboard() {
       </div>
 
       {/* Bottom two-column */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         {/* Review Queue */}
         <div className="bg-card border border-border rounded-md overflow-hidden">
           <div className="flex items-center justify-between px-4 py-3 border-b border-border">

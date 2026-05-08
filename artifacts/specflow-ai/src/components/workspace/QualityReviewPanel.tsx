@@ -13,7 +13,6 @@ interface QualityReviewPanelProps {
   stories: Story[];
   epics: Epic[];
   generationStep: GenerationStepState;
-  isDemoMode: boolean;
   onGenerateQuality: () => void;
   onSendToDevReview: () => void;
 }
@@ -36,7 +35,6 @@ export function QualityReviewPanel({
   stories,
   epics,
   generationStep,
-  isDemoMode,
   onGenerateQuality,
   onSendToDevReview,
 }: QualityReviewPanelProps) {
@@ -99,7 +97,7 @@ export function QualityReviewPanel({
         <div className="rounded-md border border-border bg-card px-3 py-2 text-xs text-muted-foreground">
           {generationStep.status === 'running' && <span>Scoring stories and detecting warnings…</span>}
           {generationStep.status === 'succeeded' && (
-            <span>{isDemoMode ? 'Demo readiness scoring applied.' : 'Readiness scores refreshed from the API workflow.'}</span>
+            <span>Readiness scores refreshed from the API workflow.</span>
           )}
           {generationStep.status === 'failed' && (
             <span className="text-[var(--color-danger)]">{generationStep.errorMessage || 'Quality review failed. Retry when ready.'}</span>
