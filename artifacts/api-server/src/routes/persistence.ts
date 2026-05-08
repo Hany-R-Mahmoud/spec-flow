@@ -4,7 +4,11 @@ import {
   type ClarificationQuestion,
   type Epic,
   exportPackagesTable,
+  exportItemsTable,
+  integrationConfigTable,
   type ExportPackage,
+  type ExportItemRow,
+  type IntegrationConfigRow,
   type GenerationMode,
   type GenerationStatus,
   type Phase,
@@ -697,3 +701,175 @@ export async function createProjectRecord(
 }
 
 export { DEFAULT_PHASES, DEFAULT_SETTINGS_ID, randomUUID, eq, asc };
+
+export interface ExportItem {
+  id: string;
+  exportPackageId: string;
+  storyId: string;
+  epicId: string;
+  title: string;
+  priority: string;
+  readinessScore: number;
+  reviewStatus: string;
+  jiraKey: string | null;
+  githubIssueUrl: string | null;
+  externalExportStatus: string | null;
+  externalExportError: string | null;
+  exportedAt: Date | null;
+}
+
+export interface IntegrationConfig {
+  id: string;
+  integrationType: string;
+  enabled: boolean;
+  configured: boolean;
+}
+
+export function toExportItem(
+  item: ExportItemRow,
+): ExportItem {
+  return {
+    id: item.id,
+    exportPackageId: item.exportPackageId,
+    storyId: item.storyId,
+    epicId: item.epicId,
+    title: item.title,
+    priority: item.priority,
+    readinessScore: item.readinessScore,
+    reviewStatus: item.reviewStatus,
+    jiraKey: item.jiraKey,
+    githubIssueUrl: item.githubIssueUrl,
+    externalExportStatus: item.externalExportStatus,
+    externalExportError: item.externalExportError,
+    exportedAt: item.exportedAt,
+  };
+}
+
+export function toIntegrationConfig(
+  config: IntegrationConfigRow,
+): IntegrationConfig {
+  const hasValidConfig = Object.keys(config.config).length > 0 &&
+    Object.values(config.config).some(v => v && v.length > 0);
+  return {
+    id: config.id,
+    integrationType: config.integrationType,
+    enabled: config.enabled,
+    configured: hasValidConfig,
+  };
+}
+
+export async function getIntegrationConfigs(
+  db: Database,
+): Promise<IntegrationConfig[]> {
+  const configs = await db.select().from(integrationConfigTable);
+  return configs.map(toIntegrationConfig);
+}
+
+export async function getIntegrationConfig(
+  db: Database,
+  type: string,
+): Promise<IntegrationConfigRow | null> {
+  const [config] = await db
+    .select()
+    .from(integrationConfigTable)
+    .where(eq(integrationConfigTable.integrationType, type));
+  return config ?? null;
+}
+
+export async function updateIntegrationConfigRecord(
+  db: Database,
+  type: string,
+  input: { enabled: boolean; config: Record<string, string> },
+): Promise<IntegrationConfig> {
+  const existing = await getIntegrationConfig(db, type);
+  const now = new Date();
+
+  if (existing) {
+    const [updated] = await db
+      .update(integrationConfigTable)
+      .set({
+        enabled: input.enabled,
+        config: input.config,
+        updatedAt: now,
+      })
+      .where(eq(integrationConfigTable.integrationType, type))
+      .returning();
+    return toIntegrationConfig(updated);
+  }
+
+  const [created] = await db
+    .insert(integrationConfigTable)
+    .values({
+      id: randomUUID(),
+      integrationType: type,
+      enabled: input.enabled,
+      config: input.config,
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning();
+  return toIntegrationConfig(created);
+}
+
+export async function getExportItemsByPackageId(
+  db: Database,
+  packageId: string,
+): Promise<ExportItem[]> {
+  const items = await db
+    .select()
+    .from(exportItemsTable)
+    .where(eq(exportItemsTable.exportPackageId, packageId));
+  return items.map(toExportItem);
+}
+
+export async function createExportItemRecord(
+  db: Database,
+  input: {
+    exportPackageId: string;
+    storyId: string;
+    epicId: string;
+    title: string;
+    priority: string;
+    readinessScore: number;
+    reviewStatus: string;
+  },
+): Promise<ExportItem> {
+  const [item] = await db
+    .insert(exportItemsTable)
+    .values({
+      id: randomUUID(),
+      ...input,
+      jiraKey: null,
+      githubIssueUrl: null,
+      externalExportStatus: "pending",
+      externalExportError: null,
+      exportedAt: null,
+      createdAt: new Date(),
+    })
+    .returning();
+  return toExportItem(item);
+}
+
+export async function updateExportItemExternalResult(
+  db: Database,
+  itemId: string,
+  result: {
+    status: string;
+    jiraKey?: string;
+    githubIssueUrl?: string;
+    error?: string;
+  },
+): Promise<ExportItem> {
+  const [updated] = await db
+    .update(exportItemsTable)
+    .set({
+      externalExportStatus: result.status,
+      jiraKey: result.jiraKey ?? null,
+      githubIssueUrl: result.githubIssueUrl ?? null,
+      externalExportError: result.error ?? null,
+      exportedAt: result.status === "success" ? new Date() : null,
+    })
+    .where(eq(exportItemsTable.id, itemId))
+    .returning();
+  return toExportItem(updated);
+}

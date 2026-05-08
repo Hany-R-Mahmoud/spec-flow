@@ -350,6 +350,135 @@ paths:
                 $ref: "#/components/schemas/ExportPackageListResponse"
         default:
           $ref: "#/components/responses/ApiError"
+    post:
+      operationId: createExportPackage
+      tags: [exports]
+      summary: Create export package
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateExportPackageRequest"
+      responses:
+        "201":
+          description: Export package created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExportPackageDetailResponse"
+        default:
+          $ref: "#/components/responses/ApiError"
+  /export-packages/{id}:
+    get:
+      operationId: getExportPackage
+      tags: [exports]
+      summary: Get export package details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Export package details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExportPackageDetailResponse"
+        default:
+          $ref: "#/components/responses/ApiError"
+  /export-packages/{id}/export-jira:
+    post:
+      operationId: exportToJira
+      tags: [exports]
+      summary: Export package to Jira
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Jira export results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ExportResult"
+        default:
+          $ref: "#/components/responses/ApiError"
+  /export-packages/{id}/export-github:
+    post:
+      operationId: exportToGitHub
+      tags: [exports]
+      summary: Export package to GitHub
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: GitHub export results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ExportResult"
+        default:
+          $ref: "#/components/responses/ApiError"
+  /integrations/config:
+    get:
+      operationId: listIntegrationConfigs
+      tags: [integrations]
+      summary: List integration configurations
+      responses:
+        "200":
+          description: Integration configuration list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IntegrationConfigListResponse"
+        default:
+          $ref: "#/components/responses/ApiError"
+  /integrations/config/{type}:
+    put:
+      operationId: updateIntegrationConfig
+      tags: [integrations]
+      summary: Update integration configuration
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateIntegrationConfigRequest"
+      responses:
+        "200":
+          description: Integration configuration updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IntegrationConfig"
+        default:
+          $ref: "#/components/responses/ApiError"
 components:
   parameters:
     ProjectId:
@@ -1054,3 +1183,100 @@ components:
           items:
             $ref: "#/components/schemas/ExportPackage"
       required: [exportPackages]
+    ExportItem:
+      type: object
+      properties:
+        id:
+          type: string
+        exportPackageId:
+          type: string
+        storyId:
+          type: string
+        epicId:
+          type: string
+        title:
+          type: string
+        priority:
+          type: string
+        readinessScore:
+          type: integer
+        reviewStatus:
+          type: string
+        jiraKey:
+          type: string
+        githubIssueUrl:
+          type: string
+        externalExportStatus:
+          type: string
+        externalExportError:
+          type: string
+        exportedAt:
+          type: string
+          format: date-time
+      required: [id, exportPackageId, storyId, epicId, title, priority, readinessScore, reviewStatus]
+    ExportPackageDetailResponse:
+      type: object
+      properties:
+        exportPackage:
+          $ref: "#/components/schemas/ExportPackage"
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ExportItem"
+      required: [exportPackage, items]
+    CreateExportPackageRequest:
+      type: object
+      properties:
+        sessionId:
+          type: string
+        storyIds:
+          type: array
+          items:
+            type: string
+        format:
+          $ref: "#/components/schemas/ExportFormat"
+      required: [sessionId, storyIds, format]
+    ExportResult:
+      type: object
+      properties:
+        storyId:
+          type: string
+        success:
+          type: boolean
+        remoteKey:
+          type: string
+        remoteUrl:
+          type: string
+        error:
+          type: string
+      required: [storyId, success]
+    IntegrationConfig:
+      type: object
+      properties:
+        id:
+          type: string
+        integrationType:
+          type: string
+        enabled:
+          type: boolean
+        configured:
+          type: boolean
+      required: [id, integrationType, enabled, configured]
+    IntegrationConfigListResponse:
+      type: object
+      properties:
+        integrations:
+          type: array
+          items:
+            $ref: "#/components/schemas/IntegrationConfig"
+      required: [integrations]
+    UpdateIntegrationConfigRequest:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+        config:
+          type: object
+          additionalProperties:
+            type: string
+      required: [enabled]

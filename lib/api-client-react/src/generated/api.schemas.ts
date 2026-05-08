@@ -375,6 +375,61 @@ export interface ExportPackageListResponse {
   exportPackages: ExportPackage[];
 }
 
+export interface ExportItem {
+  id: string;
+  exportPackageId: string;
+  storyId: string;
+  epicId: string;
+  title: string;
+  priority: string;
+  readinessScore: number;
+  reviewStatus: string;
+  jiraKey: string | null;
+  githubIssueUrl: string | null;
+  externalExportStatus: string | null;
+  externalExportError: string | null;
+  exportedAt: string | null;
+}
+
+export interface ExportPackageDetailResponse {
+  exportPackage: ExportPackage;
+  items: ExportItem[];
+}
+
+export interface CreateExportPackageRequest {
+  sessionId: string;
+  storyIds: string[];
+  format: "markdown" | "csv" | "json";
+}
+
+export interface ExportResult {
+  storyId: string;
+  success: boolean;
+  remoteKey?: string;
+  remoteUrl?: string;
+  error?: string;
+}
+
+export interface ExportResultsResponse {
+  results: ExportResult[];
+}
+
+export interface IntegrationConfig {
+  id: string;
+  integrationType: string;
+  enabled: boolean;
+  configured: boolean;
+}
+
+export interface IntegrationConfigListResponse {
+  integrations: IntegrationConfig[];
+}
+
+export interface UpdateIntegrationConfigRequest {
+  enabled: boolean;
+  config?: Record<string, string>;
+}
+
 /**
  * API error
  */

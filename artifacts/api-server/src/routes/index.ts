@@ -5,6 +5,7 @@ import sessionRouter from "./sessions";
 import generationRouter from "./generation";
 import settingsRouter from "./settings";
 import exportPackagesRouter from "./export-packages";
+import integrationsRouter from "./integrations";
 
 const router: IRouter = Router();
 
@@ -14,5 +15,6 @@ router.use(sessionRouter);
 router.use(generationRouter);
 router.use(settingsRouter);
 router.use(exportPackagesRouter);
+router.use(integrationsRouter);
 
 export default router;

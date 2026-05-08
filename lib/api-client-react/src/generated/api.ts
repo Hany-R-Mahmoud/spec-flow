@@ -21,6 +21,12 @@ import type {
   CreateProjectRequest,
   CreateSessionRequest,
   ExportPackageListResponse,
+  ExportPackageDetailResponse,
+  CreateExportPackageRequest,
+  ExportResultsResponse,
+  IntegrationConfigListResponse,
+  UpdateIntegrationConfigRequest,
+  IntegrationConfig,
   GenerateWorkflowStepRequest,
   HealthStatus,
   Project,
@@ -1547,4 +1553,448 @@ export function useListExportPackages<
   };
 
   return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Create an export package
+ * @summary Create export package
+ */
+export const createExportPackageUrl = () => {
+  return `/api/export-packages`;
+};
+
+export const createExportPackage = async (
+  createExportPackageRequest: CreateExportPackageRequest,
+  options?: RequestInit,
+): Promise<ExportPackageDetailResponse> => {
+  return customFetch<ExportPackageDetailResponse>(createExportPackageUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(createExportPackageRequest),
+  });
+};
+
+export const getCreateExportPackageMutationOptions = <
+  TError = ErrorType<ApiErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createExportPackage>>,
+    TError,
+    { data: CreateExportPackageRequest },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createExportPackage>>,
+  TError,
+  { data: CreateExportPackageRequest },
+  TContext
+> => {
+  const mutationOptions: UseMutationOptions<
+    Awaited<ReturnType<typeof createExportPackage>>,
+    TError,
+    { data: CreateExportPackageRequest },
+    TContext
+  > = options?.mutation ?? {};
+
+  return mutationOptions;
+};
+
+export type CreateExportPackageMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createExportPackage>>
+>;
+export type CreateExportPackageMutationError = ErrorType<ApiErrorResponse>;
+
+export function useCreateExportPackage<
+  TError = ErrorType<ApiErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createExportPackage>>,
+    TError,
+    { data: CreateExportPackageRequest },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof createExportPackage>>,
+  TError,
+  { data: CreateExportPackageRequest },
+  TContext
+> {
+  const mutationOptions = getCreateExportPackageMutationOptions(options);
+
+  return useMutation(mutationOptions);
+}
+
+/**
+ * Get export package details
+ * @summary Get export package details
+ */
+export const getGetExportPackageUrl = (id: string) => {
+  return `/api/export-packages/${id}`;
+};
+
+export const getExportPackage = async (
+  id: string,
+  options?: RequestInit,
+): Promise<ExportPackageDetailResponse> => {
+  return customFetch<ExportPackageDetailResponse>(getGetExportPackageUrl(id), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetExportPackageQueryKey = (id: string) => {
+  return [`/api/export-packages`, id] as const;
+};
+
+export const getGetExportPackageQueryOptions = <
+  TData = Awaited<ReturnType<typeof getExportPackage>>,
+  TError = ErrorType<ApiErrorResponse>,
+>(
+  id: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getExportPackage>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetExportPackageQueryKey(id);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getExportPackage>>> = ({
+    signal,
+  }) => getExportPackage(id, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getExportPackage>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetExportPackageQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getExportPackage>>
+>;
+export type GetExportPackageQueryError = ErrorType<ApiErrorResponse>;
+
+export function useGetExportPackage<
+  TData = Awaited<ReturnType<typeof getExportPackage>>,
+  TError = ErrorType<ApiErrorResponse>,
+>(
+  id: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getExportPackage>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetExportPackageQueryOptions(id, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Export package to Jira
+ * @summary Export to Jira
+ */
+export const getExportToJiraUrl = (id: string) => {
+  return `/api/export-packages/${id}/export-jira`;
+};
+
+export const exportToJira = async (
+  id: string,
+  options?: RequestInit,
+): Promise<ExportResultsResponse> => {
+  return customFetch<ExportResultsResponse>(getExportToJiraUrl(id), {
+    ...options,
+    method: "POST",
+  });
+};
+
+export const getExportToJiraMutationOptions = <
+  TError = ErrorType<ApiErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof exportToJira>>,
+    TError,
+    { id: string },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof exportToJira>>,
+  TError,
+  { id: string },
+  TContext
+> => {
+  const mutationOptions: UseMutationOptions<
+    Awaited<ReturnType<typeof exportToJira>>,
+    TError,
+    { id: string },
+    TContext
+  > = options?.mutation ?? {};
+
+  return mutationOptions;
+};
+
+export type ExportToJiraMutationResult = NonNullable<
+  Awaited<ReturnType<typeof exportToJira>>
+>;
+export type ExportToJiraMutationError = ErrorType<ApiErrorResponse>;
+
+export function useExportToJira<
+  TError = ErrorType<ApiErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof exportToJira>>,
+    TError,
+    { id: string },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof exportToJira>>,
+  TError,
+  { id: string },
+  TContext
+> {
+  const mutationOptions = getExportToJiraMutationOptions(options);
+
+  return useMutation(mutationOptions);
+}
+
+/**
+ * Export package to GitHub
+ * @summary Export to GitHub
+ */
+export const getExportToGitHubUrl = (id: string) => {
+  return `/api/export-packages/${id}/export-github`;
+};
+
+export const exportToGitHub = async (
+  id: string,
+  options?: RequestInit,
+): Promise<ExportResultsResponse> => {
+  return customFetch<ExportResultsResponse>(getExportToGitHubUrl(id), {
+    ...options,
+    method: "POST",
+  });
+};
+
+export const getExportToGitHubMutationOptions = <
+  TError = ErrorType<ApiErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof exportToGitHub>>,
+    TError,
+    { id: string },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof exportToGitHub>>,
+  TError,
+  { id: string },
+  TContext
+> => {
+  const mutationOptions: UseMutationOptions<
+    Awaited<ReturnType<typeof exportToGitHub>>,
+    TError,
+    { id: string },
+    TContext
+  > = options?.mutation ?? {};
+
+  return mutationOptions;
+};
+
+export type ExportToGitHubMutationResult = NonNullable<
+  Awaited<ReturnType<typeof exportToGitHub>>
+>;
+export type ExportToGitHubMutationError = ErrorType<ApiErrorResponse>;
+
+export function useExportToGitHub<
+  TError = ErrorType<ApiErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof exportToGitHub>>,
+    TError,
+    { id: string },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof exportToGitHub>>,
+  TError,
+  { id: string },
+  TContext
+> {
+  const mutationOptions = getExportToGitHubMutationOptions(options);
+
+  return useMutation(mutationOptions);
+}
+
+/**
+ * List integration configurations
+ * @summary List integration configurations
+ */
+export const listIntegrationConfigsUrl = () => {
+  return `/api/integrations/config`;
+};
+
+export const listIntegrationConfigs = async (
+  options?: RequestInit,
+): Promise<IntegrationConfigListResponse> => {
+  return customFetch<IntegrationConfigListResponse>(listIntegrationConfigsUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getListIntegrationConfigsQueryKey = () => {
+  return [`/api/integrations/config`] as const;
+};
+
+export const getListIntegrationConfigsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listIntegrationConfigs>>,
+  TError = ErrorType<ApiErrorResponse>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listIntegrationConfigs>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getListIntegrationConfigsQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof listIntegrationConfigs>>
+  > = ({ signal }) => listIntegrationConfigs({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listIntegrationConfigs>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListIntegrationConfigsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listIntegrationConfigs>>
+>;
+export type ListIntegrationConfigsQueryError = ErrorType<ApiErrorResponse>;
+
+export function useListIntegrationConfigs<
+  TData = Awaited<ReturnType<typeof listIntegrationConfigs>>,
+  TError = ErrorType<ApiErrorResponse>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listIntegrationConfigs>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListIntegrationConfigsQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Update integration configuration
+ * @summary Update integration configuration
+ */
+export const updateIntegrationConfigUrl = (type: string) => {
+  return `/api/integrations/config/${type}`;
+};
+
+export const updateIntegrationConfig = async (
+  type: string,
+  updateIntegrationConfigRequest: UpdateIntegrationConfigRequest,
+  options?: RequestInit,
+): Promise<IntegrationConfig> => {
+  return customFetch<IntegrationConfig>(updateIntegrationConfigUrl(type), {
+    ...options,
+    method: "PUT",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(updateIntegrationConfigRequest),
+  });
+};
+
+export const getUpdateIntegrationConfigMutationOptions = <
+  TError = ErrorType<ApiErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateIntegrationConfig>>,
+    TError,
+    { type: string; data: UpdateIntegrationConfigRequest },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateIntegrationConfig>>,
+  TError,
+  { type: string; data: UpdateIntegrationConfigRequest },
+  TContext
+> => {
+  const mutationOptions: UseMutationOptions<
+    Awaited<ReturnType<typeof updateIntegrationConfig>>,
+    TError,
+    { type: string; data: UpdateIntegrationConfigRequest },
+    TContext
+  > = options?.mutation ?? {};
+
+  return mutationOptions;
+};
+
+export type UpdateIntegrationConfigMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateIntegrationConfig>>
+>;
+export type UpdateIntegrationConfigMutationError = ErrorType<ApiErrorResponse>;
+
+export function useUpdateIntegrationConfig<
+  TError = ErrorType<ApiErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateIntegrationConfig>>,
+    TError,
+    { type: string; data: UpdateIntegrationConfigRequest },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof updateIntegrationConfig>>,
+  TError,
+  { type: string; data: UpdateIntegrationConfigRequest },
+  TContext
+> {
+  const mutationOptions = getUpdateIntegrationConfigMutationOptions(options);
+
+  return useMutation(mutationOptions);
 }

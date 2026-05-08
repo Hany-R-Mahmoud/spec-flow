@@ -289,6 +289,40 @@ export const exportPackagesTable = pgTable("export_packages", {
   status: text("status").notNull(),
 });
 
+export const exportItemsTable = pgTable("export_items", {
+  id: text("id").primaryKey(),
+  exportPackageId: text("export_package_id")
+    .notNull()
+    .references(() => exportPackagesTable.id, { onDelete: "cascade" }),
+  storyId: text("story_id").notNull(),
+  epicId: text("epic_id").notNull(),
+  title: text("title").notNull(),
+  priority: text("priority").notNull(),
+  readinessScore: integer("readiness_score").notNull(),
+  reviewStatus: text("review_status").notNull(),
+  jiraKey: text("jira_key"),
+  githubIssueUrl: text("github_issue_url"),
+  externalExportStatus: text("external_export_status"),
+  externalExportError: text("external_export_error"),
+  exportedAt: timestamp("exported_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+export const integrationConfigTable = pgTable("integration_config", {
+  id: text("id").primaryKey(),
+  integrationType: text("integration_type").notNull(),
+  enabled: boolean("enabled").notNull().default(false),
+  config: jsonb("config").$type<Record<string, string>>().notNull().default({}),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
 export const projectsRelations = relations(projectsTable, ({ many }) => ({
   sessions: many(sessionsTable),
 }));
@@ -314,6 +348,24 @@ export const workflowArtifactsRelations = relations(
   }),
 );
 
+export const exportPackagesRelations = relations(
+  exportPackagesTable,
+  ({ one, many }) => ({
+    session: one(sessionsTable, {
+      fields: [exportPackagesTable.sessionId],
+      references: [sessionsTable.id],
+    }),
+    items: many(exportItemsTable),
+  }),
+);
+
+export const exportItemsRelations = relations(exportItemsTable, ({ one }) => ({
+  exportPackage: one(exportPackagesTable, {
+    fields: [exportItemsTable.exportPackageId],
+    references: [exportPackagesTable.id],
+  }),
+}));
+
 export const insertProjectSchema = createInsertSchema(projectsTable);
 export const insertSessionSchema = createInsertSchema(sessionsTable);
 export const insertWorkflowArtifactsSchema = createInsertSchema(
@@ -321,6 +373,8 @@ export const insertWorkflowArtifactsSchema = createInsertSchema(
 );
 export const insertSettingsSchema = createInsertSchema(settingsTable);
 export const insertExportPackageSchema = createInsertSchema(exportPackagesTable);
+export const insertExportItemSchema = createInsertSchema(exportItemsTable);
+export const insertIntegrationConfigSchema = createInsertSchema(integrationConfigTable);
 
 export type Phase = z.infer<typeof phaseSchema>;
 export type PhaseStatus = z.infer<typeof phaseStatusSchema>;
@@ -349,3 +403,7 @@ export type Settings = typeof settingsTable.$inferSelect;
 export type InsertSettings = z.infer<typeof insertSettingsSchema>;
 export type ExportPackageRow = typeof exportPackagesTable.$inferSelect;
 export type InsertExportPackage = z.infer<typeof insertExportPackageSchema>;
+export type ExportItemRow = typeof exportItemsTable.$inferSelect;
+export type InsertExportItem = z.infer<typeof insertExportItemSchema>;
+export type IntegrationConfigRow = typeof integrationConfigTable.$inferSelect;
+export type InsertIntegrationConfig = z.infer<typeof insertIntegrationConfigSchema>;
