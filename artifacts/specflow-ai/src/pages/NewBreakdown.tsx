@@ -1,18 +1,17 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'wouter';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { useSessionStore } from '@/store/session-store';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowRight, X, Plus } from 'lucide-react';
+import { ArrowRight, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const schema = z.object({
@@ -22,6 +21,8 @@ const schema = z.object({
   jiraKey: z.string().optional(),
   businessGoal: z.string().optional(),
   knownConstraints: z.string().optional(),
+  targetUsers: z.array(z.string()),
+  labels: z.array(z.string()),
   rawInput: z.string().min(10, 'Product input is required (min 10 characters)'),
 });
 
@@ -76,9 +77,6 @@ export function NewBreakdown() {
   const { createSession, state } = useSessionStore();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
-  const [targetUsers, setTargetUsers] = useState<string[]>([]);
-  const [labels, setLabels] = useState<string[]>([]);
-  const [charCount, setCharCount] = useState(0);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -89,20 +87,32 @@ export function NewBreakdown() {
       jiraKey: '',
       businessGoal: '',
       knownConstraints: '',
+      targetUsers: [],
+      labels: [],
       rawInput: '',
     },
   });
 
   useEffect(() => {
-    const jiraKey = form.getValues('jiraKey');
-    if (!jiraKey && state.settings?.jiraKey) {
-      form.setValue('jiraKey', state.settings.jiraKey);
+    if (!state.settings) {
+      return;
     }
 
-    if (labels.length === 0 && state.settings?.defaultLabels.length) {
-      setLabels(state.settings.defaultLabels);
-    }
-  }, [form, labels.length, state.settings]);
+    form.reset({
+      name: '',
+      inputType: '',
+      outputDepth: 'Standard',
+      jiraKey: state.settings.jiraKey ?? '',
+      businessGoal: '',
+      knownConstraints: '',
+      targetUsers: [],
+      labels: state.settings.defaultLabels ?? [],
+      rawInput: '',
+    });
+  }, [form, state.settings]);
+
+  const rawInput = useWatch({ control: form.control, name: 'rawInput' }) ?? '';
+  const charCount = rawInput.length;
 
   const onSubmit = async (data: FormValues) => {
     try {
@@ -111,10 +121,10 @@ export function NewBreakdown() {
         inputType: data.inputType,
         outputDepth: data.outputDepth,
         jiraKey: data.jiraKey || '',
-        targetUsers,
+        targetUsers: data.targetUsers,
         businessGoal: data.businessGoal || '',
         knownConstraints: data.knownConstraints || '',
-        labels,
+        labels: data.labels,
         rawInput: data.rawInput,
       });
 
@@ -218,12 +228,18 @@ export function NewBreakdown() {
                   </FormItem>
                 )} />
 
-                <div>
-                  <label className="text-xs font-medium">Target Users</label>
-                  <div className="mt-1.5">
-                    <ChipsInput value={targetUsers} onChange={setTargetUsers} placeholder="Type a user role, press Enter" />
-                  </div>
-                </div>
+                <FormField control={form.control} name="targetUsers" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-xs font-medium">Target Users</FormLabel>
+                    <FormControl>
+                      <ChipsInput
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="Type a user role, press Enter"
+                      />
+                    </FormControl>
+                  </FormItem>
+                )} />
 
                 <FormField control={form.control} name="businessGoal" render={({ field }) => (
                   <FormItem>
@@ -243,12 +259,18 @@ export function NewBreakdown() {
                   </FormItem>
                 )} />
 
-                <div>
-                  <label className="text-xs font-medium">Labels / Components</label>
-                  <div className="mt-1.5">
-                    <ChipsInput value={labels} onChange={setLabels} placeholder="Type a label, press Enter" />
-                  </div>
-                </div>
+                <FormField control={form.control} name="labels" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-xs font-medium">Labels / Components</FormLabel>
+                    <FormControl>
+                      <ChipsInput
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="Type a label, press Enter"
+                      />
+                    </FormControl>
+                  </FormItem>
+                )} />
               </div>
             </div>
 
@@ -265,7 +287,6 @@ export function NewBreakdown() {
                     <FormControl>
                       <Textarea
                         {...field}
-                        onChange={e => { field.onChange(e); setCharCount(e.target.value.length); }}
                         placeholder="We need users to invite team members to projects, assign roles, and manage access. Admins should be able to remove users. Some roles should only view data. Need to support email invites and handle expired invitations..."
                         className="text-xs min-h-[340px] resize-none font-mono leading-relaxed"
                         data-testid="textarea-raw-input"

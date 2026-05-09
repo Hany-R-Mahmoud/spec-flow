@@ -67,7 +67,7 @@ export function loadApiServerConfig(): ApiServerConfig {
   const clerkSecretKey = readRequiredEnv("CLERK_SECRET_KEY");
   const databaseUrl = readRequiredEnv("DATABASE_URL");
   const appOrigin = readRequiredEnv("VITE_APP_URL");
-  const rawClockSkewInMs = process.env.CLERK_CLOCK_SKEW_IN_MS?.trim() ?? "15000";
+  const rawClockSkewInMs = process.env.CLERK_CLOCK_SKEW_IN_MS?.trim() ?? "60000";
   const clerkClockSkewInMs = Number(rawClockSkewInMs);
 
   if (Number.isNaN(clerkClockSkewInMs) || clerkClockSkewInMs < 0) {

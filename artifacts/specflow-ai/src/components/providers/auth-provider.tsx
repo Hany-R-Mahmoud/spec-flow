@@ -43,38 +43,6 @@ function getDisplayName(
   return email ?? "Member";
 }
 
-function parseJwtPayload(token: string): Record<string, unknown> | null {
-  const parts = token.split(".");
-  if (parts.length < 2) {
-    return null;
-  }
-
-  try {
-    const payload = parts[1].replace(/-/g, "+").replace(/_/g, "/");
-    const padded = payload.padEnd(Math.ceil(payload.length / 4) * 4, "=");
-    const json = atob(padded);
-    const parsed = JSON.parse(json);
-    return parsed && typeof parsed === "object" ? (parsed as Record<string, unknown>) : null;
-  } catch {
-    return null;
-  }
-}
-
-function getTokenActivationDelayMs(token: string): number {
-  const payload = parseJwtPayload(token);
-  const notBefore = payload?.nbf;
-  if (typeof notBefore !== "number") {
-    return 0;
-  }
-
-  const now = Math.floor(Date.now() / 1000);
-  if (notBefore <= now) {
-    return 0;
-  }
-
-  return Math.max((notBefore - now) * 1000 + 250, 0);
-}
-
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { isLoaded, isSignedIn, getToken, sessionId, orgId, orgRole } = useClerkAuth();
   const { isLoaded: isOrganizationLoaded, organization } = useOrganization();
@@ -94,7 +62,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsTokenReady(false);
 
     void (async () => {
-      const token = await getToken();
+      const token = await getToken({ skipCache: true });
       if (cancelled) {
         return;
       }
@@ -105,29 +73,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      const activate = () => {
-        if (cancelled) {
-          return;
-        }
-
-        setAuthTokenGetter(() => token);
-        setIsTokenReady(true);
-      };
-
-      const delay = getTokenActivationDelayMs(token);
-      if (delay > 0) {
-        activationTimer = window.setTimeout(activate, delay);
-        return;
-      }
-
-      activate();
+      setAuthTokenGetter(() => getToken());
+      setIsTokenReady(true);
     })();
 
     return () => {
       cancelled = true;
-      if (activationTimer !== null) {
-        window.clearTimeout(activationTimer);
-      }
       setAuthTokenGetter(null);
       setIsTokenReady(false);
     };

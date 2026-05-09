@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import { Story } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { CheckCircle, AlertCircle, Clock, XCircle, AlertTriangle, Shield, Maximize } from 'lucide-react';
+import { CheckCircle, XCircle, AlertTriangle, Shield } from 'lucide-react';
 import { PriorityBadge } from '@/components/shared/PriorityBadge';
 import { ReviewStatusBadge } from '@/components/shared/StatusBadge';
 import { ReadinessScoreRing } from '@/components/shared/ReadinessScore';
@@ -17,6 +18,13 @@ interface DeveloperReviewPanelProps {
   onComplete: () => void;
 }
 
+type ReviewFormValues = {
+  reviewStatus: ReviewStatus;
+  comment: string;
+  reviewerName: string;
+  pmRevisionStatus: 'not-started' | 'in-progress' | 'resolved';
+};
+
 const REVIEWER_STATUSES: { value: ReviewStatus; label: string }[] = [
   { value: 'approved', label: 'Approved' },
   { value: 'needs-clarification', label: 'Needs Clarification' },
@@ -30,12 +38,47 @@ export function DeveloperReviewPanel({ stories, onComplete }: DeveloperReviewPan
   const { dispatch } = useSessionStore();
   const { toast } = useToast();
   const [selectedId, setSelectedId] = useState<string | null>(stories[0]?.id || null);
-  const [reviewStatus, setReviewStatus] = useState<ReviewStatus>('pending');
-  const [comment, setComment] = useState('');
-  const [reviewerName, setReviewerName] = useState('');
-  const [pmRevisionStatus, setPmRevisionStatus] = useState<'not-started' | 'in-progress' | 'resolved'>('not-started');
+
+  const form = useForm<ReviewFormValues>({
+    defaultValues: {
+      reviewStatus: 'pending',
+      comment: '',
+      reviewerName: '',
+      pmRevisionStatus: 'not-started',
+    },
+  });
 
   const selectedStory = stories.find(s => s.id === selectedId);
+
+  useEffect(() => {
+    if (selectedStory) {
+      form.reset({
+        reviewStatus: selectedStory.reviewStatus !== 'pending' ? selectedStory.reviewStatus : 'pending',
+        comment: selectedStory.developerReview?.comment || '',
+        reviewerName: selectedStory.developerReview?.reviewerName || '',
+        pmRevisionStatus: selectedStory.developerReview?.pmRevisionStatus || 'not-started',
+      });
+      return;
+    }
+
+    form.reset({
+      reviewStatus: 'pending',
+      comment: '',
+      reviewerName: '',
+      pmRevisionStatus: 'not-started',
+    });
+  }, [form, selectedStory]);
+
+  useEffect(() => {
+    if (!selectedId && stories[0]) {
+      setSelectedId(stories[0].id);
+      return;
+    }
+
+    if (selectedId && !stories.some(story => story.id === selectedId) && stories[0]) {
+      setSelectedId(stories[0].id);
+    }
+  }, [selectedId, stories]);
 
   const approved = stories.filter(s => s.reviewStatus === 'approved').length;
   const needsClarification = stories.filter(s => s.reviewStatus === 'needs-clarification').length;
@@ -45,23 +88,24 @@ export function DeveloperReviewPanel({ stories, onComplete }: DeveloperReviewPan
     ? Math.round(stories.reduce((sum, s) => sum + s.readinessScore.total, 0) / stories.length)
     : 0;
 
-  const submitReview = () => {
+  const submitReview = form.handleSubmit(values => {
     if (!selectedStory) return;
+
     const updated: Story = {
       ...selectedStory,
-      reviewStatus,
+      reviewStatus: values.reviewStatus,
       developerReview: {
-        status: reviewStatus,
-        comment,
-        reviewerName: reviewerName || 'Developer',
+        status: values.reviewStatus,
+        comment: values.comment,
+        reviewerName: values.reviewerName || 'Developer',
         timestamp: new Date().toISOString(),
-        pmRevisionStatus,
+        pmRevisionStatus: values.pmRevisionStatus,
       }
     };
+
     dispatch({ type: 'UPDATE_STORY', payload: updated });
     toast({ title: 'Review submitted', description: `Review for ${selectedStory.id} saved.` });
-    setComment('');
-  };
+  });
 
   return (
     <div className="space-y-4">
@@ -75,15 +119,14 @@ export function DeveloperReviewPanel({ stories, onComplete }: DeveloperReviewPan
         </Button>
       </div>
 
-      {/* Review Summary */}
       <div className="grid grid-cols-5 gap-2">
         {[
-          { label: 'Approved', count: approved, color: 'var(--color-success)', icon: CheckCircle },
-          { label: 'Clarification', count: needsClarification, color: 'var(--color-warning)', icon: AlertTriangle },
-          { label: 'Blocked', count: blocked, color: 'var(--color-danger)', icon: XCircle },
-          { label: 'Tech Risk', count: techRisk, color: '#EA580C', icon: Shield },
-          { label: 'Avg Readiness', count: avgReadiness, color: 'hsl(var(--primary))', icon: CheckCircle, suffix: '/100' },
-        ].map(({ label, count, color, icon: Icon, suffix }) => (
+          { label: 'Approved', count: approved, color: 'var(--color-success)' },
+          { label: 'Clarification', count: needsClarification, color: 'var(--color-warning)' },
+          { label: 'Blocked', count: blocked, color: 'var(--color-danger)' },
+          { label: 'Tech Risk', count: techRisk, color: '#EA580C' },
+          { label: 'Avg Readiness', count: avgReadiness, color: 'hsl(var(--primary))', suffix: '/100' },
+        ].map(({ label, count, color, suffix }) => (
           <div key={label} className="border border-border rounded-md p-2.5 bg-card text-center">
             <div className="text-xl font-bold" style={{ color }}>{count}{suffix}</div>
             <div className="text-xs text-muted-foreground mt-0.5">{label}</div>
@@ -91,9 +134,7 @@ export function DeveloperReviewPanel({ stories, onComplete }: DeveloperReviewPan
         ))}
       </div>
 
-      {/* Split view */}
       <div className="grid grid-cols-[280px_1fr] gap-4 h-[520px]">
-        {/* Story list */}
         <div className="border border-border rounded-md overflow-hidden flex flex-col">
           <div className="px-3 py-2 bg-muted border-b border-border">
             <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Stories</span>
@@ -102,13 +143,7 @@ export function DeveloperReviewPanel({ stories, onComplete }: DeveloperReviewPan
             {stories.map(story => (
               <button
                 key={story.id}
-                onClick={() => {
-                  setSelectedId(story.id);
-                  setReviewStatus(story.reviewStatus !== 'pending' ? story.reviewStatus : 'pending');
-                  setComment(story.developerReview?.comment || '');
-                  setReviewerName(story.developerReview?.reviewerName || '');
-                  setPmRevisionStatus(story.developerReview?.pmRevisionStatus || 'not-started');
-                }}
+                onClick={() => setSelectedId(story.id)}
                 data-testid={`review-story-${story.id}`}
                 className={cn(
                   'w-full text-left px-3 py-2.5 transition-colors',
@@ -129,7 +164,6 @@ export function DeveloperReviewPanel({ stories, onComplete }: DeveloperReviewPan
           </div>
         </div>
 
-        {/* Review detail */}
         <div className="border border-border rounded-md overflow-hidden flex flex-col">
           {selectedStory ? (
             <>
@@ -144,56 +178,78 @@ export function DeveloperReviewPanel({ stories, onComplete }: DeveloperReviewPan
               </div>
 
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                <div>
-                  <label className="block text-xs font-semibold text-foreground mb-1.5">Review Status</label>
-                  <Select value={reviewStatus} onValueChange={(v) => setReviewStatus(v as ReviewStatus)}>
-                    <SelectTrigger className="h-8 text-xs" data-testid="select-review-status">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {REVIEWER_STATUSES.map(s => (
-                        <SelectItem key={s.value} value={s.value} className="text-xs">{s.label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                <Controller
+                  control={form.control}
+                  name="reviewStatus"
+                  render={({ field }) => (
+                    <div>
+                      <label className="block text-xs font-semibold text-foreground mb-1.5">Review Status</label>
+                      <Select value={field.value} onValueChange={field.onChange}>
+                        <SelectTrigger className="h-8 text-xs" data-testid="select-review-status">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {REVIEWER_STATUSES.map(s => (
+                            <SelectItem key={s.value} value={s.value} className="text-xs">{s.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                />
 
-                <div>
-                  <label className="block text-xs font-semibold text-foreground mb-1.5">Developer Comment</label>
-                  <Textarea
-                    value={comment}
-                    onChange={e => setComment(e.target.value)}
-                    placeholder="Add technical feedback, blockers, or clarification requests..."
-                    className="text-xs min-h-[80px] resize-none"
-                    data-testid="textarea-review-comment"
-                  />
-                </div>
+                <Controller
+                  control={form.control}
+                  name="comment"
+                  render={({ field }) => (
+                    <div>
+                      <label className="block text-xs font-semibold text-foreground mb-1.5">Developer Comment</label>
+                      <Textarea
+                        {...field}
+                        placeholder="Add technical feedback, blockers, or clarification requests..."
+                        className="text-xs min-h-[80px] resize-none"
+                        data-testid="textarea-review-comment"
+                      />
+                    </div>
+                  )}
+                />
 
                 <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs font-semibold text-foreground mb-1.5">Reviewer Name</label>
-                    <input
-                      type="text"
-                      value={reviewerName}
-                      onChange={e => setReviewerName(e.target.value)}
-                      placeholder="Your name"
-                      className="w-full h-8 px-3 text-xs border border-input rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-ring"
-                      data-testid="input-reviewer-name"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-foreground mb-1.5">PM Revision Status</label>
-                    <Select value={pmRevisionStatus} onValueChange={(v) => setPmRevisionStatus(v as 'not-started' | 'in-progress' | 'resolved')}>
-                      <SelectTrigger className="h-8 text-xs">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="not-started" className="text-xs">Not Started</SelectItem>
-                        <SelectItem value="in-progress" className="text-xs">In Progress</SelectItem>
-                        <SelectItem value="resolved" className="text-xs">Resolved</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  <Controller
+                    control={form.control}
+                    name="reviewerName"
+                    render={({ field }) => (
+                      <div>
+                        <label className="block text-xs font-semibold text-foreground mb-1.5">Reviewer Name</label>
+                        <input
+                          {...field}
+                          type="text"
+                          placeholder="Your name"
+                          className="w-full h-8 px-3 text-xs border border-input rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+                          data-testid="input-reviewer-name"
+                        />
+                      </div>
+                    )}
+                  />
+                  <Controller
+                    control={form.control}
+                    name="pmRevisionStatus"
+                    render={({ field }) => (
+                      <div>
+                        <label className="block text-xs font-semibold text-foreground mb-1.5">PM Revision Status</label>
+                        <Select value={field.value} onValueChange={field.onChange}>
+                          <SelectTrigger className="h-8 text-xs">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="not-started" className="text-xs">Not Started</SelectItem>
+                            <SelectItem value="in-progress" className="text-xs">In Progress</SelectItem>
+                            <SelectItem value="resolved" className="text-xs">Resolved</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+                  />
                 </div>
 
                 {selectedStory.developerReview && (

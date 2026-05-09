@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -11,6 +11,18 @@ import { X } from 'lucide-react';
 import { useSessionStore } from '@/store/session-store';
 import { ThemeModeToggle } from '@/components/shared/ThemeModeToggle';
 import { DensityToggle } from '@/components/shared/DensityToggle';
+
+type SettingsFormValues = {
+  workspaceName: string;
+  jiraKey: string;
+  defaultLabels: string[];
+  defaultComponents: string[];
+  templatePreference: string;
+  qualityThreshold: number;
+  devReviewRequired: boolean;
+  autoGenerateQuestions: boolean;
+  showReadinessWarnings: boolean;
+};
 
 function ChipsInput({ value, onChange, placeholder }: { value: string[]; onChange: (v: string[]) => void; placeholder: string }) {
   const [input, setInput] = useState('');
@@ -46,7 +58,7 @@ function SettingsSection({
   onSave,
 }: {
   title: string;
-  children: React.ReactNode;
+  children: ReactNode;
   onSave?: () => void | Promise<void>;
 }) {
   return (
@@ -54,7 +66,7 @@ function SettingsSection({
       <div className="px-4 py-3 border-b border-border bg-muted flex items-center justify-between">
         <span className="text-sm font-semibold text-foreground">{title}</span>
         {onSave ? (
-          <Button size="sm" variant="outline" onClick={onSave} className="text-xs h-7">
+          <Button type="button" size="sm" variant="outline" onClick={onSave} className="text-xs h-7">
             Save
           </Button>
         ) : null}
@@ -68,33 +80,39 @@ export function SettingsPage() {
   const { toast } = useToast();
   const { saveSettings, state } = useSessionStore();
 
-  const [workspaceName, setWorkspaceName] = useState('Acme Corp Workspace');
-  const [jiraKey, setJiraKey] = useState('ACME');
-  const [defaultLabels, setDefaultLabels] = useState(['Feature', 'Backend', 'Frontend']);
-  const [defaultComponents, setDefaultComponents] = useState(['API', 'Web App']);
-  const [templatePreference, setTemplatePreference] = useState('Standard');
-  const [qualityThreshold, setQualityThreshold] = useState([75]);
-  const [devReviewRequired, setDevReviewRequired] = useState(true);
-  const [autoGenerateQuestions, setAutoGenerateQuestions] = useState(true);
-  const [showReadinessWarnings, setShowReadinessWarnings] = useState(true);
+  const form = useForm<SettingsFormValues>({
+    defaultValues: {
+      workspaceName: 'Acme Corp Workspace',
+      jiraKey: 'ACME',
+      defaultLabels: ['Feature', 'Backend', 'Frontend'],
+      defaultComponents: ['API', 'Web App'],
+      templatePreference: 'Standard',
+      qualityThreshold: 75,
+      devReviewRequired: true,
+      autoGenerateQuestions: true,
+      showReadinessWarnings: true,
+    },
+  });
 
   useEffect(() => {
     if (!state.settings) {
       return;
     }
 
-    setWorkspaceName(state.settings.workspaceName);
-    setJiraKey(state.settings.jiraKey);
-    setDefaultLabels(state.settings.defaultLabels);
-    setDefaultComponents(state.settings.defaultComponents);
-    setTemplatePreference(state.settings.templatePreference);
-    setQualityThreshold([state.settings.qualityThreshold]);
-    setDevReviewRequired(state.settings.devReviewRequired);
-    setAutoGenerateQuestions(state.settings.autoGenerateQuestions);
-    setShowReadinessWarnings(state.settings.showReadinessWarnings);
-  }, [state.settings]);
+    form.reset({
+      workspaceName: state.settings.workspaceName,
+      jiraKey: state.settings.jiraKey,
+      defaultLabels: state.settings.defaultLabels,
+      defaultComponents: state.settings.defaultComponents,
+      templatePreference: state.settings.templatePreference,
+      qualityThreshold: state.settings.qualityThreshold,
+      devReviewRequired: state.settings.devReviewRequired,
+      autoGenerateQuestions: state.settings.autoGenerateQuestions,
+      showReadinessWarnings: state.settings.showReadinessWarnings,
+    });
+  }, [form, state.settings]);
 
-  const save = async (section: string) => {
+  const save = async (section: string, values: Partial<SettingsFormValues>) => {
     if (!state.settings) {
       return;
     }
@@ -102,15 +120,16 @@ export function SettingsPage() {
     try {
       await saveSettings({
         ...state.settings,
-        workspaceName,
-        jiraKey,
-        defaultLabels,
-        defaultComponents,
-        templatePreference,
-        qualityThreshold: qualityThreshold[0] ?? 75,
-        devReviewRequired,
-        autoGenerateQuestions,
-        showReadinessWarnings,
+        ...values,
+        qualityThreshold: values.qualityThreshold ?? state.settings.qualityThreshold,
+        workspaceName: values.workspaceName ?? state.settings.workspaceName,
+        jiraKey: values.jiraKey ?? state.settings.jiraKey,
+        defaultLabels: values.defaultLabels ?? state.settings.defaultLabels,
+        defaultComponents: values.defaultComponents ?? state.settings.defaultComponents,
+        templatePreference: values.templatePreference ?? state.settings.templatePreference,
+        devReviewRequired: values.devReviewRequired ?? state.settings.devReviewRequired,
+        autoGenerateQuestions: values.autoGenerateQuestions ?? state.settings.autoGenerateQuestions,
+        showReadinessWarnings: values.showReadinessWarnings ?? state.settings.showReadinessWarnings,
       });
 
       toast({ title: 'Saved', description: `${section} settings saved.` });
@@ -122,6 +141,22 @@ export function SettingsPage() {
       });
     }
   };
+
+  const saveWorkspace = form.handleSubmit(values => save('Workspace', {
+    workspaceName: values.workspaceName,
+    jiraKey: values.jiraKey,
+  }));
+  const saveStoryDefaults = form.handleSubmit(values => save('Story Defaults', {
+    defaultLabels: values.defaultLabels,
+    defaultComponents: values.defaultComponents,
+    templatePreference: values.templatePreference,
+    qualityThreshold: values.qualityThreshold,
+  }));
+  const saveWorkflow = form.handleSubmit(values => save('Workflow', {
+    devReviewRequired: values.devReviewRequired,
+    autoGenerateQuestions: values.autoGenerateQuestions,
+    showReadinessWarnings: values.showReadinessWarnings,
+  }));
 
   if (state.isLoading && !state.settings) {
     return (
@@ -161,117 +196,172 @@ export function SettingsPage() {
         </div>
       </SettingsSection>
 
-      <SettingsSection title="Workspace" onSave={() => save('Workspace')}>
-        <div>
-          <Label className="text-xs font-medium mb-1.5 block">Workspace Name</Label>
-          <Input
-            value={workspaceName}
-            onChange={e => setWorkspaceName(e.target.value)}
-            className="h-8 text-xs"
-            data-testid="input-workspace-name"
+      <form onSubmit={e => e.preventDefault()} className="space-y-6">
+        <SettingsSection title="Workspace" onSave={saveWorkspace}>
+          <Controller
+            control={form.control}
+            name="workspaceName"
+            render={({ field }) => (
+              <div>
+                <Label className="text-xs font-medium mb-1.5 block">Workspace Name</Label>
+                <Input
+                  {...field}
+                  className="h-8 text-xs"
+                  data-testid="input-workspace-name"
+                />
+              </div>
+            )}
           />
-        </div>
-        <div>
-          <Label className="text-xs font-medium mb-1.5 block">Default Jira Project Key</Label>
-          <Input
-            value={jiraKey}
-            onChange={e => setJiraKey(e.target.value.toUpperCase())}
-            className="h-8 text-xs font-mono uppercase"
-            placeholder="e.g. ACME"
-            data-testid="input-default-jira-key"
+          <Controller
+            control={form.control}
+            name="jiraKey"
+            render={({ field }) => (
+              <div>
+                <Label className="text-xs font-medium mb-1.5 block">Default Jira Project Key</Label>
+                <Input
+                  {...field}
+                  onChange={e => field.onChange(e.target.value.toUpperCase())}
+                  className="h-8 text-xs font-mono uppercase"
+                  placeholder="e.g. ACME"
+                  data-testid="input-default-jira-key"
+                />
+                <p className="text-xs text-muted-foreground mt-1">Used as default for new breakdowns if no key is specified.</p>
+              </div>
+            )}
           />
-          <p className="text-xs text-muted-foreground mt-1">Used as default for new breakdowns if no key is specified.</p>
-        </div>
-      </SettingsSection>
+        </SettingsSection>
 
-      <SettingsSection title="Story Defaults" onSave={() => save('Story Defaults')}>
-        <div>
-          <Label className="text-xs font-medium mb-1.5 block">Default Labels</Label>
-          <ChipsInput value={defaultLabels} onChange={setDefaultLabels} placeholder="Add a label..." />
-          <p className="text-xs text-muted-foreground mt-1">Applied to all generated stories by default.</p>
-        </div>
-        <div>
-          <Label className="text-xs font-medium mb-1.5 block">Default Components</Label>
-          <ChipsInput value={defaultComponents} onChange={setDefaultComponents} placeholder="Add a component..." />
-        </div>
-        <div>
-          <Label className="text-xs font-medium mb-1.5 block">Story Template Preference</Label>
-          <Select value={templatePreference} onValueChange={setTemplatePreference}>
-            <SelectTrigger className="h-8 text-xs" data-testid="select-template">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Minimal" className="text-xs">Minimal — Core fields only</SelectItem>
-              <SelectItem value="Standard" className="text-xs">Standard — Full story set</SelectItem>
-              <SelectItem value="Detailed" className="text-xs">Detailed — With edge cases, analytics, and localization</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <Label className="text-xs font-medium mb-3 block">
-            Quality Threshold — {qualityThreshold[0]}/100
-          </Label>
-          <div className="px-1">
-            <Slider
-              value={qualityThreshold}
-              onValueChange={setQualityThreshold}
-              min={0}
-              max={100}
-              step={5}
-              className="w-full"
-              data-testid="slider-quality-threshold"
-            />
-          </div>
-          <div className="flex justify-between text-xs text-muted-foreground mt-2">
-            <span>0 — Any</span>
-            <span className="text-[var(--color-warning)]">60 — Min</span>
-            <span className="text-primary">75 — Recommended</span>
-            <span className="text-[var(--color-success)]">90 — Strict</span>
-          </div>
-          <p className="text-xs text-muted-foreground mt-2">
-            Stories below this score will show quality warnings and be flagged during export.
-          </p>
-        </div>
-      </SettingsSection>
+        <SettingsSection title="Story Defaults" onSave={saveStoryDefaults}>
+          <Controller
+            control={form.control}
+            name="defaultLabels"
+            render={({ field }) => (
+              <div>
+                <Label className="text-xs font-medium mb-1.5 block">Default Labels</Label>
+                <ChipsInput value={field.value} onChange={field.onChange} placeholder="Add a label..." />
+                <p className="text-xs text-muted-foreground mt-1">Applied to all generated stories by default.</p>
+              </div>
+            )}
+          />
+          <Controller
+            control={form.control}
+            name="defaultComponents"
+            render={({ field }) => (
+              <div>
+                <Label className="text-xs font-medium mb-1.5 block">Default Components</Label>
+                <ChipsInput value={field.value} onChange={field.onChange} placeholder="Add a component..." />
+              </div>
+            )}
+          />
+          <Controller
+            control={form.control}
+            name="templatePreference"
+            render={({ field }) => (
+              <div>
+                <Label className="text-xs font-medium mb-1.5 block">Story Template Preference</Label>
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger className="h-8 text-xs" data-testid="select-template">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Minimal" className="text-xs">Minimal - Core fields only</SelectItem>
+                    <SelectItem value="Standard" className="text-xs">Standard - Full story set</SelectItem>
+                    <SelectItem value="Detailed" className="text-xs">Detailed - With edge cases, analytics, and localization</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+          />
+          <Controller
+            control={form.control}
+            name="qualityThreshold"
+            render={({ field }) => (
+              <div>
+                <Label className="text-xs font-medium mb-3 block">
+                  Quality Threshold - {field.value}/100
+                </Label>
+                <div className="px-1">
+                  <Slider
+                    value={[field.value]}
+                    onValueChange={values => field.onChange(values[0] ?? 75)}
+                    min={0}
+                    max={100}
+                    step={5}
+                    className="w-full"
+                    data-testid="slider-quality-threshold"
+                  />
+                </div>
+                <div className="flex justify-between text-xs text-muted-foreground mt-2">
+                  <span>0 - Any</span>
+                  <span className="text-[var(--color-warning)]">60 - Min</span>
+                  <span className="text-primary">75 - Recommended</span>
+                  <span className="text-[var(--color-success)]">90 - Strict</span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Stories below this score will show quality warnings and be flagged during export.
+                </p>
+              </div>
+            )}
+          />
+        </SettingsSection>
 
-      <SettingsSection title="Workflow" onSave={() => save('Workflow')}>
-        {[
-          {
-            id: 'dev-review',
-            label: 'Developer Review Required',
-            desc: 'Require developer review before stories can be exported.',
-            value: devReviewRequired,
-            onChange: setDevReviewRequired,
-          },
-          {
-            id: 'auto-questions',
-            label: 'Auto-generate Clarification Questions',
-            desc: 'Automatically generate questions when starting a new breakdown.',
-            value: autoGenerateQuestions,
-            onChange: setAutoGenerateQuestions,
-          },
-          {
-            id: 'readiness-warnings',
-            label: 'Show Readiness Warnings',
-            desc: 'Display quality warnings on story cards and in the quality panel.',
-            value: showReadinessWarnings,
-            onChange: setShowReadinessWarnings,
-          },
-        ].map(({ id, label, desc, value, onChange }) => (
-          <div key={id} className="flex items-start justify-between gap-4">
-            <div className="flex-1">
-              <Label htmlFor={id} className="text-xs font-medium cursor-pointer">{label}</Label>
-              <p className="text-xs text-muted-foreground mt-0.5">{desc}</p>
-            </div>
-            <Switch
-              id={id}
-              checked={value}
-              onCheckedChange={onChange}
-              data-testid={`switch-${id}`}
-            />
-          </div>
-        ))}
-      </SettingsSection>
+        <SettingsSection title="Workflow" onSave={saveWorkflow}>
+          <Controller
+            control={form.control}
+            name="devReviewRequired"
+            render={({ field }) => (
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1">
+                  <Label htmlFor="dev-review" className="text-xs font-medium cursor-pointer">Developer Review Required</Label>
+                  <p className="text-xs text-muted-foreground mt-0.5">Require developer review before stories can be exported.</p>
+                </div>
+                <Switch
+                  id="dev-review"
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                  data-testid="switch-dev-review"
+                />
+              </div>
+            )}
+          />
+          <Controller
+            control={form.control}
+            name="autoGenerateQuestions"
+            render={({ field }) => (
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1">
+                  <Label htmlFor="auto-questions" className="text-xs font-medium cursor-pointer">Auto-generate Clarification Questions</Label>
+                  <p className="text-xs text-muted-foreground mt-0.5">Automatically generate questions when starting a new breakdown.</p>
+                </div>
+                <Switch
+                  id="auto-questions"
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                  data-testid="switch-auto-questions"
+                />
+              </div>
+            )}
+          />
+          <Controller
+            control={form.control}
+            name="showReadinessWarnings"
+            render={({ field }) => (
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1">
+                  <Label htmlFor="readiness-warnings" className="text-xs font-medium cursor-pointer">Show Readiness Warnings</Label>
+                  <p className="text-xs text-muted-foreground mt-0.5">Display quality warnings on story cards and in the quality panel.</p>
+                </div>
+                <Switch
+                  id="readiness-warnings"
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                  data-testid="switch-readiness-warnings"
+                />
+              </div>
+            )}
+          />
+        </SettingsSection>
+      </form>
     </div>
   );
 }

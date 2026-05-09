@@ -178,6 +178,10 @@ const SessionContext = createContext<{
   state: State;
   dispatch: (action: Action) => void;
   createSession: (input: CreateSessionInput) => Promise<ProjectSession>;
+  saveClarificationQuestions: (
+    questions: ClarificationQuestion[],
+  ) => Promise<ProjectSession | null>;
+  savePrdSections: (sections: PRDSection[]) => Promise<ProjectSession | null>;
   saveSettings: (input: WorkspaceSettings) => Promise<WorkspaceSettings>;
   runGeneration: (
     sessionId: string,
@@ -286,6 +290,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
             'api',
           ),
         );
+        return updatedSession;
       } catch (error) {
         setState((current) => ({
           ...current,
@@ -294,9 +299,36 @@ export function SessionProvider({ children }: { children: ReactNode }) {
               ? error.message
               : 'Failed to save workflow artifact changes.',
         }));
+        return null;
       }
     },
     [],
+  );
+
+  const saveClarificationQuestions = useCallback(
+    async (questions: ClarificationQuestion[]) => {
+      const activeSessionId = state.activeSessionId;
+      if (!activeSessionId) {
+        return null;
+      }
+
+      return syncSessionArtifacts(activeSessionId, {
+        clarificationQuestions: questions,
+      });
+    },
+    [state.activeSessionId, syncSessionArtifacts],
+  );
+
+  const savePrdSections = useCallback(
+    async (sections: PRDSection[]) => {
+      const activeSessionId = state.activeSessionId;
+      if (!activeSessionId) {
+        return null;
+      }
+
+      return syncSessionArtifacts(activeSessionId, { prdSections: sections });
+    },
+    [state.activeSessionId, syncSessionArtifacts],
   );
 
   const dispatch = useCallback(
@@ -459,12 +491,6 @@ export function SessionProvider({ children }: { children: ReactNode }) {
             current.dataSource,
           );
         });
-
-        if (state.dataSource === 'api') {
-          void syncSessionArtifacts(activeSession.id, {
-            clarificationQuestions: nextQuestions,
-          });
-        }
         return;
       }
 
@@ -503,10 +529,6 @@ export function SessionProvider({ children }: { children: ReactNode }) {
             current.dataSource,
           );
         });
-
-        if (state.dataSource === 'api') {
-          void syncSessionArtifacts(activeSession.id, { prdSections: nextSections });
-        }
       }
     },
     [state, syncSessionArtifacts, syncSessionSummary],
@@ -640,11 +662,22 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       state,
       dispatch,
       createSession,
+      saveClarificationQuestions,
+      savePrdSections,
       saveSettings,
       runGeneration,
       reload: load,
     }),
-    [state, dispatch, createSession, saveSettings, runGeneration, load],
+    [
+      state,
+      dispatch,
+      createSession,
+      saveClarificationQuestions,
+      savePrdSections,
+      saveSettings,
+      runGeneration,
+      load,
+    ],
   );
 
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
