@@ -175,12 +175,16 @@ export function NewBreakdown() {
                       >
                         {INPUT_TYPES.map(t => (
                           <div key={t.value} className={cn('flex items-center gap-3 px-3 py-2 rounded border cursor-pointer transition-colors',
-                            field.value === t.value ? 'border-primary bg-[var(--color-primary-soft)]' : 'border-border hover:bg-muted'
+                            field.value === t.value ? 'border-primary bg-[var(--color-primary-soft)] ring-1 ring-primary/20 shadow-sm' : 'border-border bg-card hover:bg-muted/70'
                           )}>
                             <RadioGroupItem value={t.value} id={`input-type-${t.value}`} className="flex-shrink-0" />
                             <Label htmlFor={`input-type-${t.value}`} className="cursor-pointer flex-1">
-                              <span className="text-xs font-medium text-foreground">{t.value}</span>
-                              <span className="text-xs text-muted-foreground ml-2">{t.description}</span>
+                              <span className={cn('text-xs', field.value === t.value ? 'font-semibold text-foreground' : 'font-medium text-foreground')}>
+                                {t.value}
+                              </span>
+                              <span className={cn('ml-2 text-xs', field.value === t.value ? 'text-foreground/80' : 'text-muted-foreground')}>
+                                {t.description}
+                              </span>
                             </Label>
                           </div>
                         ))}
@@ -200,11 +204,15 @@ export function NewBreakdown() {
                           type="button"
                           onClick={() => field.onChange(d.value)}
                           className={cn('flex-1 px-3 py-2 rounded border text-left transition-colors',
-                            field.value === d.value ? 'border-primary bg-[var(--color-primary-soft)]' : 'border-border hover:bg-muted'
+                            field.value === d.value ? 'border-primary bg-[var(--color-primary-soft)] ring-1 ring-primary/20 shadow-sm' : 'border-border bg-card hover:bg-muted/70'
                           )}
                         >
-                          <div className="text-xs font-medium text-foreground">{d.label}</div>
-                          <div className="text-xs text-muted-foreground">{d.desc}</div>
+                          <div className={cn('text-xs', field.value === d.value ? 'font-semibold text-foreground' : 'font-medium text-foreground')}>
+                            {d.label}
+                          </div>
+                          <div className={cn('text-xs', field.value === d.value ? 'text-foreground/80' : 'text-muted-foreground')}>
+                            {d.desc}
+                          </div>
                         </button>
                       ))}
                     </div>

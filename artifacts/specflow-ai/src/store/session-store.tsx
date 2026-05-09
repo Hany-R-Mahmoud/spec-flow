@@ -178,10 +178,19 @@ const SessionContext = createContext<{
   state: State;
   dispatch: (action: Action) => void;
   createSession: (input: CreateSessionInput) => Promise<ProjectSession>;
+  saveWorkflowArtifacts: (
+    patch: Partial<
+      Pick<
+        ProjectSession,
+        'clarificationQuestions' | 'prdSections' | 'epics' | 'stories'
+      >
+    >,
+  ) => Promise<ProjectSession | null>;
   saveClarificationQuestions: (
     questions: ClarificationQuestion[],
   ) => Promise<ProjectSession | null>;
   savePrdSections: (sections: PRDSection[]) => Promise<ProjectSession | null>;
+  saveStories: (stories: Story[]) => Promise<ProjectSession | null>;
   saveSettings: (input: WorkspaceSettings) => Promise<WorkspaceSettings>;
   runGeneration: (
     sessionId: string,
@@ -305,28 +314,47 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     [],
   );
 
-  const saveClarificationQuestions = useCallback(
-    async (questions: ClarificationQuestion[]) => {
+  const saveWorkflowArtifacts = useCallback(
+    async (
+      patch: Partial<
+        Pick<
+          ProjectSession,
+          'clarificationQuestions' | 'prdSections' | 'epics' | 'stories'
+        >
+      >,
+    ) => {
       const activeSessionId = state.activeSessionId;
       if (!activeSessionId) {
         return null;
       }
 
-      return syncSessionArtifacts(activeSessionId, {
-        clarificationQuestions: questions,
-      });
+      return syncSessionArtifacts(activeSessionId, patch);
     },
     [state.activeSessionId, syncSessionArtifacts],
   );
 
+  const saveClarificationQuestions = useCallback(
+    async (questions: ClarificationQuestion[]) => {
+      return saveWorkflowArtifacts({ clarificationQuestions: questions });
+    },
+    [saveWorkflowArtifacts],
+  );
+
   const savePrdSections = useCallback(
     async (sections: PRDSection[]) => {
+      return saveWorkflowArtifacts({ prdSections: sections });
+    },
+    [saveWorkflowArtifacts],
+  );
+
+  const saveStories = useCallback(
+    async (stories: Story[]) => {
       const activeSessionId = state.activeSessionId;
       if (!activeSessionId) {
         return null;
       }
 
-      return syncSessionArtifacts(activeSessionId, { prdSections: sections });
+      return syncSessionArtifacts(activeSessionId, { stories });
     },
     [state.activeSessionId, syncSessionArtifacts],
   );
@@ -662,8 +690,10 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       state,
       dispatch,
       createSession,
+      saveWorkflowArtifacts,
       saveClarificationQuestions,
       savePrdSections,
+      saveStories,
       saveSettings,
       runGeneration,
       reload: load,
@@ -672,8 +702,10 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       state,
       dispatch,
       createSession,
+      saveWorkflowArtifacts,
       saveClarificationQuestions,
       savePrdSections,
+      saveStories,
       saveSettings,
       runGeneration,
       load,

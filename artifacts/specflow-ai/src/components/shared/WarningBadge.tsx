@@ -8,9 +8,9 @@ interface WarningBadgeProps {
 }
 
 const severityConfig = {
-  error: { icon: AlertCircle, className: 'bg-[var(--color-danger-soft)] text-[var(--color-danger)] border border-red-200' },
-  warning: { icon: AlertTriangle, className: 'bg-[var(--color-warning-soft)] text-[var(--color-warning)] border border-yellow-200' },
-  info: { icon: Info, className: 'bg-[var(--color-info-soft)] text-[var(--color-info)] border border-cyan-200' },
+  error: { icon: AlertCircle, className: 'bg-[var(--color-danger-soft)] text-[var(--color-danger)] border border-border/50' },
+  warning: { icon: AlertTriangle, className: 'bg-[var(--color-warning-soft)] text-[var(--color-warning)] border border-border/50' },
+  info: { icon: Info, className: 'bg-[var(--color-info-soft)] text-[var(--color-info)] border border-border/50' },
 };
 
 export function WarningBadge({ warning, className }: WarningBadgeProps) {

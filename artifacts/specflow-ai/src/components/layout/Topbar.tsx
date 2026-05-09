@@ -7,6 +7,8 @@ import {
   LayoutDashboard,
   MessageSquare,
   Plus,
+  PanelLeftClose,
+  PanelLeftOpen,
   Search,
   Settings,
 } from "lucide-react";
@@ -14,7 +16,6 @@ import { UserButton } from "@clerk/react";
 import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator, CommandShortcut } from "@/components/ui/command";
 import { useSessionStore } from "@/store/session-store";
 import { ThemeModeToggle } from "@/components/shared/ThemeModeToggle";
-import { DensityToggle } from "@/components/shared/DensityToggle";
 import { useAuth } from "@/components/providers/auth-provider";
 
 const NAV_COMMANDS = [
@@ -26,14 +27,17 @@ const NAV_COMMANDS = [
   { label: "Settings", href: "/settings", icon: Settings, shortcut: "G S" },
 ];
 
-export function Topbar() {
+interface TopbarProps {
+  isSidebarCollapsed: boolean;
+  onToggleSidebar: () => void;
+}
+
+export function Topbar({ isSidebarCollapsed, onToggleSidebar }: TopbarProps) {
   const [, setLocation] = useLocation();
   const { state, dispatch } = useSessionStore();
-  const { displayName, email, workspaceName, workspaceType, orgRole } = useAuth();
+  const { displayName, email, workspaceName } = useAuth();
   const [open, setOpen] = useState(false);
   const currentWorkspace = state.settings?.workspaceName ?? workspaceName;
-  const currentSession =
-    state.sessions.find((session) => session.id === state.activeSessionId) ?? null;
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -76,25 +80,34 @@ export function Topbar() {
       style={{ paddingInline: "var(--shell-header-padding)" }}
     >
       <div className="min-w-0 flex-1">
-        <button
-          type="button"
-          onClick={openProjects}
-          className="flex min-w-0 flex-col items-start rounded-md px-2 py-1 text-left transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          aria-label="Open project switcher"
-        >
-          <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-            Workspace
-          </span>
-          <span className="truncate text-sm font-semibold text-foreground">
-            {currentWorkspace}
-          </span>
-          <span className="truncate text-[11px] text-muted-foreground">
-            {workspaceType === "organization"
-              ? `${orgRole ?? "member"} · `
-              : "Personal workspace · "}
-            {state.sessions.length} sessions · {currentSession?.name ?? "No active session selected"}
-          </span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={onToggleSidebar}
+            className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border bg-card text-muted-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            aria-label={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            title={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          >
+            {isSidebarCollapsed ? (
+              <PanelLeftOpen className="h-4 w-4" aria-hidden="true" />
+            ) : (
+              <PanelLeftClose className="h-4 w-4" aria-hidden="true" />
+            )}
+          </button>
+          <button
+            type="button"
+            onClick={openProjects}
+            className="flex min-w-0 flex-col items-start rounded-md px-2 py-1 text-left transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            aria-label="Open project switcher"
+          >
+            <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+              Workspace
+            </span>
+            <span className="truncate text-sm font-semibold text-foreground">
+              {currentWorkspace}
+            </span>
+          </button>
+        </div>
       </div>
 
       <div className="flex flex-1 justify-center">
@@ -116,7 +129,6 @@ export function Topbar() {
       </div>
 
       <div className="flex flex-1 items-center justify-end gap-3">
-        <DensityToggle className="hidden xl:flex" />
         <ThemeModeToggle className="hidden xl:flex" />
         <button
           type="button"
@@ -129,20 +141,15 @@ export function Topbar() {
           <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-destructive" />
         </button>
 
-        <div className="hidden xl:flex flex-col items-end leading-tight">
-          <span className="text-xs font-medium text-foreground">{displayName}</span>
-          <span className="text-[11px] text-muted-foreground">{email || "Signed in"}</span>
+        <div className="hidden xl:flex items-center gap-3">
+          <span className="max-w-[16rem] truncate text-xs font-medium text-muted-foreground">
+            {email || displayName || "Signed in"}
+          </span>
+          <UserButton />
         </div>
-
-        {workspaceType === "organization" ? (
-          <div className="hidden items-end rounded-md border border-border bg-muted/40 px-3 py-1 text-right leading-tight xl:flex">
-            <span className="text-xs font-medium text-foreground">{workspaceName}</span>
-            <span className="text-[11px] text-muted-foreground">
-              {orgRole ?? "member"} workspace
-            </span>
-          </div>
-        ) : null}
-        <UserButton />
+        <div className="xl:hidden">
+          <UserButton />
+        </div>
       </div>
 
       <CommandDialog open={open} onOpenChange={setOpen}>

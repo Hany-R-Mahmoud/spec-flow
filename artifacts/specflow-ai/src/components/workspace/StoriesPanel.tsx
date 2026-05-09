@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronDown, ChevronRight, Edit3, Send, X, CheckCircle } from 'lucide-react';
+import { ChevronDown, ChevronRight, Send, CheckCircle } from 'lucide-react';
 import { Story, Epic, GenerationStepState } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { PriorityBadge } from '@/components/shared/PriorityBadge';
@@ -8,8 +8,6 @@ import { ReadinessScoreRing } from '@/components/shared/ReadinessScore';
 import { WarningList } from '@/components/shared/WarningBadge';
 import { ScoreBar } from '@/components/shared/ScoreBar';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
-import { useSessionStore } from '@/store/session-store';
 
 interface StoriesPanelProps {
   epics: Epic[];
@@ -20,17 +18,9 @@ interface StoriesPanelProps {
   onGenerateQuality: () => void;
 }
 
-function StoryCard({ story }: { story: Story }) {
+function StoryCard({ story, onSendToReview }: { story: Story; onSendToReview: (storyId: string) => void }) {
   const [expanded, setExpanded] = useState(false);
   const [showScoreBreakdown, setShowScoreBreakdown] = useState(false);
-  const { toast } = useToast();
-  const { dispatch } = useSessionStore();
-
-  const handleSendToReview = () => {
-    const updated: Story = { ...story, reviewStatus: 'pending' };
-    dispatch({ type: 'UPDATE_STORY', payload: updated });
-    toast({ title: 'Sent to review', description: `${story.id} sent to developer review queue.` });
-  };
 
   return (
     <div className="border border-border rounded-md overflow-hidden" data-testid={`story-card-${story.id}`}>
@@ -236,7 +226,7 @@ function StoryCard({ story }: { story: Story }) {
             <Button
               size="sm"
               variant="outline"
-              onClick={handleSendToReview}
+              onClick={() => onSendToReview(story.id)}
               className="text-xs"
               data-testid={`button-send-review-${story.id}`}
             >
@@ -259,6 +249,7 @@ function StoryCard({ story }: { story: Story }) {
 export function StoriesPanel({
   epics,
   stories,
+  onSendToReview,
   generationStep,
   onGenerateStories,
   onGenerateQuality,
@@ -337,7 +328,9 @@ export function StoriesPanel({
                   {epicStories.length === 0 ? (
                     <p className="text-xs text-muted-foreground px-4 py-3">No stories for this epic yet.</p>
                   ) : (
-                    epicStories.map(story => <StoryCard key={story.id} story={story} />)
+                    epicStories.map((story) => (
+                      <StoryCard key={story.id} story={story} onSendToReview={onSendToReview} />
+                    ))
                   )}
                 </div>
               )}

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
 
@@ -7,6 +7,8 @@ interface AppShellProps {
 }
 
 export function AppShell({ children }: AppShellProps) {
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
   return (
     <div className="flex h-screen bg-background text-foreground overflow-hidden">
       <a
@@ -15,9 +17,12 @@ export function AppShell({ children }: AppShellProps) {
       >
         Skip to content
       </a>
-      <Sidebar />
+      <Sidebar collapsed={isSidebarCollapsed} />
       <div className="flex flex-col flex-1 overflow-hidden">
-        <Topbar />
+        <Topbar
+          isSidebarCollapsed={isSidebarCollapsed}
+          onToggleSidebar={() => setIsSidebarCollapsed((current) => !current)}
+        />
         <main
           id="main-content"
           tabIndex={-1}

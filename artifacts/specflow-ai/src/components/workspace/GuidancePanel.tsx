@@ -2,7 +2,7 @@ import { AlertCircle, AlertTriangle, ArrowRight, CheckCircle, Lightbulb } from '
 import { Phase, PhaseStatus } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
-interface GuidanceItem {
+export interface GuidanceItem {
   type: 'error' | 'warning' | 'success' | 'action';
   message: string;
   action?: string;
@@ -84,7 +84,7 @@ export function GuidancePanel({ phase, phaseStatus, items, readinessLabel, compl
             </div>
             <div className="space-y-2">
               {errors.map((item, i) => (
-                <div key={i} className="text-xs text-foreground bg-[var(--color-danger-soft)] px-3 py-2 rounded border border-red-100">
+                <div key={i} className="text-xs text-slate-900 bg-[var(--color-danger-soft)] px-3 py-2 rounded border border-border/50 dark:text-slate-100">
                   {item.message}
                 </div>
               ))}
@@ -101,7 +101,7 @@ export function GuidancePanel({ phase, phaseStatus, items, readinessLabel, compl
             </div>
             <div className="space-y-2">
               {warnings.map((item, i) => (
-                <div key={i} className="text-xs text-foreground bg-[var(--color-warning-soft)] px-3 py-2 rounded border border-yellow-100">
+                <div key={i} className="text-xs text-slate-900 bg-[var(--color-warning-soft)] px-3 py-2 rounded border border-border/50 dark:text-slate-100">
                   {item.message}
                 </div>
               ))}
@@ -118,7 +118,7 @@ export function GuidancePanel({ phase, phaseStatus, items, readinessLabel, compl
             </div>
             <div className="space-y-2">
               {successes.map((item, i) => (
-                <div key={i} className="text-xs text-foreground bg-[var(--color-success-soft)] px-3 py-2 rounded border border-green-100">
+                <div key={i} className="text-xs text-slate-900 bg-[var(--color-success-soft)] px-3 py-2 rounded border border-border/50 dark:text-slate-100">
                   {item.message}
                 </div>
               ))}
@@ -135,14 +135,22 @@ export function GuidancePanel({ phase, phaseStatus, items, readinessLabel, compl
             </div>
             <div className="space-y-1">
               {actions.map((item, i) => (
-                <button
-                  key={i}
-                  onClick={item.onAction}
-                  className="w-full text-left flex items-center gap-2 text-xs text-primary hover:text-primary/80 py-1.5 group transition-colors"
-                >
-                  <ArrowRight className="w-3 h-3 flex-shrink-0 group-hover:translate-x-0.5 transition-transform" />
-                  {item.message}
-                </button>
+                item.onAction ? (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={item.onAction}
+                    className="w-full text-left flex items-center gap-2 text-xs text-primary hover:text-primary/80 py-1.5 group transition-colors"
+                  >
+                    <ArrowRight className="w-3 h-3 flex-shrink-0 group-hover:translate-x-0.5 transition-transform" />
+                    {item.message}
+                  </button>
+                ) : (
+                  <div key={i} className="flex items-center gap-2 text-xs text-muted-foreground py-1.5">
+                    <ArrowRight className="w-3 h-3 flex-shrink-0" />
+                    {item.message}
+                  </div>
+                )
               ))}
             </div>
           </div>

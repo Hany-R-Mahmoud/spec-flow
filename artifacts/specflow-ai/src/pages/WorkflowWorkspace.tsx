@@ -12,33 +12,56 @@ import { QualityReviewPanel } from '@/components/workspace/QualityReviewPanel';
 import { DeveloperReviewPanel } from '@/components/workspace/DeveloperReviewPanel';
 import { ExportPanel } from '@/components/workspace/ExportPanel';
 import { useToast } from '@/hooks/use-toast';
+import type { GuidanceItem } from '@/components/workspace/GuidancePanel';
+import type { ClarificationQuestion, PRDSection, Story } from '@/lib/types';
 
-function buildGuidanceItems(phase: Phase, session: any, questions: any[], prdSections: any[], stories: any[]) {
-  const items: any[] = [];
+type GuidanceActions = {
+  onGeneratePRD: () => void;
+  onGenerateEpics: () => void;
+  onGenerateStories: () => void;
+  onGenerateQuality: () => void;
+  onSendToDevReview: () => void;
+  onCompleteReview: () => void;
+};
+
+function buildGuidanceItems(
+  phase: Phase,
+  questions: ClarificationQuestion[],
+  prdSections: PRDSection[],
+  stories: Story[],
+  actions: Partial<GuidanceActions>,
+): GuidanceItem[] {
+  const items: GuidanceItem[] = [];
 
   if (phase === 'clarification') {
-    const unanswered = questions.filter((q: any) => q.required && !q.answer && !q.skipped);
+    const unanswered = questions.filter((q) => q.required && !q.answer && !q.skipped);
     if (unanswered.length > 0) {
       items.push({ type: 'error', message: `${unanswered.length} required question${unanswered.length > 1 ? 's' : ''} unanswered` });
     }
-    const skipped = questions.filter((q: any) => q.skipped);
+    const skipped = questions.filter((q) => q.skipped);
     if (skipped.length > 0) {
       items.push({ type: 'warning', message: `${skipped.length} question${skipped.length > 1 ? 's' : ''} skipped — may reduce quality` });
     }
     if (unanswered.length === 0) {
       items.push({ type: 'success', message: 'All required questions answered. Ready to generate PRD.' });
+      if (actions.onGeneratePRD) {
+        items.push({ type: 'action', message: 'Generate PRD', onAction: actions.onGeneratePRD });
+      }
     }
     items.push({ type: 'action', message: 'Answer remaining questions before generating PRD' });
     items.push({ type: 'action', message: 'Expand each section to see grouped questions' });
   }
 
   if (phase === 'prd') {
-    const incomplete = prdSections.filter((s: any) => !s.complete);
+    const incomplete = prdSections.filter((section) => !section.complete);
     if (incomplete.length > 0) {
       items.push({ type: 'warning', message: `${incomplete.length} PRD section${incomplete.length > 1 ? 's' : ''} incomplete` });
     }
     if (incomplete.length === 0) {
       items.push({ type: 'success', message: 'All PRD sections complete. Ready to generate epics.' });
+      if (actions.onGenerateEpics) {
+        items.push({ type: 'action', message: 'Generate Epics', onAction: actions.onGenerateEpics });
+      }
     }
     items.push({ type: 'action', message: 'Review each PRD section for accuracy' });
     items.push({ type: 'action', message: 'Edit sections by clicking "Edit" on any card' });
@@ -48,7 +71,9 @@ function buildGuidanceItems(phase: Phase, session: any, questions: any[], prdSec
     items.push({ type: 'success', message: '4 epics generated from PRD requirements' });
     items.push({ type: 'action', message: 'Review epic scope and business objectives' });
     items.push({ type: 'action', message: 'Copy epic descriptions to Jira as needed' });
-    items.push({ type: 'action', message: 'Generate stories when epics look correct' });
+    if (actions.onGenerateStories) {
+      items.push({ type: 'action', message: 'Generate Stories', onAction: actions.onGenerateStories });
+    }
   }
 
   if (phase === 'stories') {
@@ -66,6 +91,9 @@ function buildGuidanceItems(phase: Phase, session: any, questions: any[], prdSec
     }
     items.push({ type: 'action', message: 'Expand stories to review acceptance criteria' });
     items.push({ type: 'action', message: 'Address quality warnings before export' });
+    if (actions.onGenerateQuality) {
+      items.push({ type: 'action', message: 'Refresh Quality Scores', onAction: actions.onGenerateQuality });
+    }
   }
 
   if (phase === 'quality') {
@@ -74,7 +102,9 @@ function buildGuidanceItems(phase: Phase, session: any, questions: any[], prdSec
       items.push({ type: 'error', message: `${notReady.length} ${notReady.length === 1 ? 'story' : 'stories'} below quality threshold` });
     }
     items.push({ type: 'action', message: 'Apply suggested fixes to low-scoring stories' });
-    items.push({ type: 'action', message: 'Send all ready stories to developer review' });
+    if (actions.onSendToDevReview) {
+      items.push({ type: 'action', message: 'Send All to Dev Review', onAction: actions.onSendToDevReview });
+    }
   }
 
   if (phase === 'devReview') {
@@ -87,6 +117,9 @@ function buildGuidanceItems(phase: Phase, session: any, questions: any[], prdSec
       items.push({ type: 'success', message: `${approved} ${approved === 1 ? 'story' : 'stories'} approved` });
     }
     items.push({ type: 'action', message: 'Submit reviews for each story' });
+    if (actions.onCompleteReview) {
+      items.push({ type: 'action', message: 'Complete Review', onAction: actions.onCompleteReview });
+    }
     items.push({ type: 'action', message: 'Resolve clarification requests before export' });
   }
 
@@ -108,7 +141,7 @@ export function WorkflowWorkspace() {
   const [, setLocation] = useLocation();
   const [, params] = useRoute('/workspace/:id');
   const sessionId = params?.id;
-  const { state, dispatch, runGeneration } = useSessionStore();
+  const { state, dispatch, runGeneration, saveWorkflowArtifacts } = useSessionStore();
   const { toast } = useToast();
 
   const session = state.sessions.find(s => s.id === sessionId);
@@ -184,6 +217,165 @@ export function WorkflowWorkspace() {
     toast({ title: 'Phase advanced', description: `Now in ${nextPhase} phase.` });
   };
 
+  const handleSendStoryToReview = async (storyId: string) => {
+    const targetStory = stories.find((story) => story.id === storyId);
+    if (!targetStory) {
+      return;
+    }
+
+    const nextStories = stories.map((story) =>
+      story.id === storyId
+        ? {
+            ...story,
+            reviewStatus: 'pending' as const,
+            developerReview: undefined,
+          }
+        : story,
+    );
+    const savedSession = await saveWorkflowArtifacts({ stories: nextStories });
+
+    if (!savedSession) {
+      toast({
+        title: 'Send to review failed',
+        description: 'Could not update the review queue. Try again.',
+      });
+      return;
+    }
+
+    toast({
+      title: 'Sent to review',
+      description: `${targetStory.id} added to developer review queue.`,
+    });
+  };
+
+  const handleSplitStory = async (storyId: string) => {
+    const sourceStory = stories.find((story) => story.id === storyId);
+    if (!sourceStory) {
+      return;
+    }
+
+    const sourceEpic = epics.find((epic) => epic.id === sourceStory.epicId);
+    const splitIndex = stories.filter((story) => story.id.startsWith(`${sourceStory.id}-split-`)).length + 1;
+    const splitStoryId = `${sourceStory.id}-split-${splitIndex}`;
+    const midpoint = Math.max(1, Math.ceil(sourceStory.acceptanceCriteria.length / 2));
+    const primaryCriteria = sourceStory.acceptanceCriteria.slice(0, midpoint);
+    const splitCriteria = sourceStory.acceptanceCriteria.slice(midpoint);
+    const nextSourceCriteria =
+      splitCriteria.length > 0 ? primaryCriteria : sourceStory.acceptanceCriteria.slice(0, 1);
+    const nextSplitCriteria =
+      splitCriteria.length > 0
+        ? splitCriteria
+        : [`Complete the remaining scope for ${sourceStory.title}`];
+
+    const resetReadinessScore = (): Story['readinessScore'] => ({
+      total: 0,
+      clarity: 0,
+      acceptanceCriteria: 0,
+      businessAlignment: 0,
+      technicalFeasibility: 0,
+      testability: 0,
+      edgeCasesErrorHandling: 0,
+      dependenciesDesignLocalization: 0,
+      label: 'Not ready',
+    });
+
+    const splitWarning = (storyIdValue: string) => [
+      {
+        id: `${storyIdValue}-warning-split`,
+        type: 'split-story',
+        message: 'Story was split. Run quality review again before export.',
+        severity: 'warning' as const,
+      },
+    ];
+
+    const nextSourceStory: Story = {
+      ...sourceStory,
+      title: `${sourceStory.title} (Part 1)`,
+      userStory: `${sourceStory.userStory} (part 1)`,
+      description: `${sourceStory.description}\n\nSplit focus: ${nextSourceCriteria.join(' · ')}`,
+      acceptanceCriteria: nextSourceCriteria,
+      reviewStatus: 'pending',
+      developerReview: undefined,
+      readinessScore: resetReadinessScore(),
+      warnings: splitWarning(sourceStory.id),
+    };
+
+    const nextSplitStory: Story = {
+      ...sourceStory,
+      id: splitStoryId,
+      title: `${sourceStory.title} (Part 2)`,
+      userStory: `${sourceStory.userStory} (part 2)`,
+      description: `${sourceStory.description}\n\nSplit focus: ${nextSplitCriteria.join(' · ')}`,
+      acceptanceCriteria: nextSplitCriteria,
+      reviewStatus: 'pending',
+      developerReview: undefined,
+      readinessScore: resetReadinessScore(),
+      warnings: splitWarning(splitStoryId),
+    };
+
+    const nextStories = stories.flatMap((story) =>
+      story.id === sourceStory.id ? [nextSourceStory, nextSplitStory] : [story],
+    );
+    const nextEpics = epics.map((epic) =>
+      epic.id === sourceStory.epicId
+        ? { ...epic, storyCount: nextStories.filter((story) => story.epicId === epic.id).length }
+        : epic,
+    );
+
+    const savedSession = await saveWorkflowArtifacts({
+      stories: nextStories,
+      epics: nextEpics,
+    });
+
+    if (!savedSession) {
+      toast({
+        title: 'Split failed',
+        description: 'Could not split the story. Try again.',
+      });
+      return;
+    }
+
+    toast({
+      title: 'Story split',
+      description: sourceEpic
+        ? `${sourceStory.id} split under ${sourceEpic.title}.`
+        : `${sourceStory.id} split into two stories.`,
+    });
+  };
+
+  const completionBlocker = (() => {
+    const pending = stories.filter((story) => story.reviewStatus === 'pending').length;
+    if (pending > 0) {
+      return `${pending} ${pending > 1 ? 'stories are' : 'story is'} still in the review queue.`;
+    }
+
+    const unresolvedPm = stories.filter(
+      (story) => story.developerReview && story.developerReview.pmRevisionStatus !== 'resolved',
+    ).length;
+    if (unresolvedPm > 0) {
+      return `${unresolvedPm} ${unresolvedPm > 1 ? 'stories' : 'story'} still need PM revision resolution.`;
+    }
+
+    if (stories.length === 0) {
+      return 'No stories available for review yet.';
+    }
+
+    return null;
+  })();
+
+  const canCompleteReview = completionBlocker === null;
+  const handleCompleteReview = () => {
+    if (!canCompleteReview) {
+      toast({
+        title: 'Review not complete',
+        description: completionBlocker || 'Resolve all review blockers first.',
+      });
+      return;
+    }
+
+    advancePhase('export');
+  };
+
   const handleGeneration = async (step: 'clarification' | 'prd' | 'epics' | 'stories' | 'quality') => {
     const updatedSession = await runGeneration(session.id, step);
 
@@ -230,14 +422,21 @@ export function WorkflowWorkspace() {
     return undefined;
   })();
 
-  const guidanceItems = buildGuidanceItems(activePhase, session, questions, prdSections, stories);
+  const guidanceItems = buildGuidanceItems(activePhase, questions, prdSections, stories, {
+    onGeneratePRD: () => void handleGeneration('prd'),
+    onGenerateEpics: () => void handleGeneration('epics'),
+    onGenerateStories: () => void handleGeneration('stories'),
+    onGenerateQuality: () => void handleGeneration('quality'),
+    onSendToDevReview: () => advancePhase('devReview'),
+    onCompleteReview: handleCompleteReview,
+  });
   return (
     <div className="flex flex-col h-full -m-4 sm:-m-6 md:-m-8">
       {/* Phase tracker */}
       <PhaseTracker
         session={session}
         activePhase={activePhase}
-        onPhaseClick={setActivePhase}
+        onPhaseClick={advancePhase}
       />
 
       {/* Content area */}
@@ -286,8 +485,8 @@ export function WorkflowWorkspace() {
             <StoriesPanel
               epics={epics}
               stories={stories}
+              onSendToReview={handleSendStoryToReview}
               generationStep={session.generation.stories}
-              onSendToReview={(id) => toast({ title: 'Sent', description: `${id} added to review queue.` })}
               onGenerateStories={() => void handleGeneration('stories')}
               onGenerateQuality={() => void handleGeneration('quality')}
             />
@@ -299,14 +498,34 @@ export function WorkflowWorkspace() {
               epics={epics}
               generationStep={session.generation.quality}
               onGenerateQuality={() => void handleGeneration('quality')}
-              onSendToDevReview={() => advancePhase('devReview')}
+              onSendToDevReview={async () => {
+                const queuedStories = stories.map((story) => ({
+                  ...story,
+                  reviewStatus: 'pending' as const,
+                  developerReview: undefined,
+                }));
+                const savedSession = await saveWorkflowArtifacts({ stories: queuedStories });
+
+                if (!savedSession) {
+                  toast({
+                    title: 'Handoff failed',
+                    description: 'Could not save the developer review queue.',
+                  });
+                  return;
+                }
+
+                advancePhase('devReview');
+              }}
+              onSplitStory={handleSplitStory}
             />
-            )}
+          )}
 
             {activePhase === 'devReview' && (
               <DeveloperReviewPanel
                 stories={stories}
-                onComplete={() => advancePhase('export')}
+                onComplete={handleCompleteReview}
+                canCompleteReview={canCompleteReview}
+                completionBlocker={completionBlocker}
               />
             )}
 

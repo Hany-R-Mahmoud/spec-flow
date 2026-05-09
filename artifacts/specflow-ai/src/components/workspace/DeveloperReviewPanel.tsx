@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { Story } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { CheckCircle, XCircle, AlertTriangle, Shield } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 import { PriorityBadge } from '@/components/shared/PriorityBadge';
 import { ReviewStatusBadge } from '@/components/shared/StatusBadge';
 import { ReadinessScoreRing } from '@/components/shared/ReadinessScore';
@@ -16,6 +16,8 @@ import { ReviewStatus } from '@/lib/types';
 interface DeveloperReviewPanelProps {
   stories: Story[];
   onComplete: () => void;
+  canCompleteReview?: boolean;
+  completionBlocker?: string | null;
 }
 
 type ReviewFormValues = {
@@ -34,7 +36,12 @@ const REVIEWER_STATUSES: { value: ReviewStatus; label: string }[] = [
   { value: 'missing-ac', label: 'Missing Acceptance Criteria' },
 ];
 
-export function DeveloperReviewPanel({ stories, onComplete }: DeveloperReviewPanelProps) {
+export function DeveloperReviewPanel({
+  stories,
+  onComplete,
+  canCompleteReview,
+  completionBlocker,
+}: DeveloperReviewPanelProps) {
   const { dispatch } = useSessionStore();
   const { toast } = useToast();
   const [selectedId, setSelectedId] = useState<string | null>(stories[0]?.id || null);
@@ -84,6 +91,22 @@ export function DeveloperReviewPanel({ stories, onComplete }: DeveloperReviewPan
   const needsClarification = stories.filter(s => s.reviewStatus === 'needs-clarification').length;
   const blocked = stories.filter(s => s.reviewStatus === 'blocked').length;
   const techRisk = stories.filter(s => s.reviewStatus === 'technically-risky').length;
+  const noStories = stories.length === 0;
+  const notApproved = stories.filter(s => s.reviewStatus !== 'approved').length;
+  const unresolvedPmRevision = stories.filter(
+    s => s.reviewStatus === 'approved' && s.developerReview?.pmRevisionStatus !== 'resolved',
+  ).length;
+  const computedCompletionBlocker = [
+    noStories ? 'no stories loaded for review' : null,
+    notApproved > 0 ? `${notApproved} ${notApproved === 1 ? 'story' : 'stories'} not approved` : null,
+    unresolvedPmRevision > 0
+      ? `${unresolvedPmRevision} ${unresolvedPmRevision === 1 ? 'story' : 'stories'} still need PM revision resolution`
+      : null,
+  ].filter((reason): reason is string => Boolean(reason)).join(', ') || null;
+  const effectiveCompletionBlocker = completionBlocker ?? computedCompletionBlocker;
+  const completionBlocked = canCompleteReview === undefined
+    ? effectiveCompletionBlocker !== null
+    : !canCompleteReview;
   const avgReadiness = stories.length > 0
     ? Math.round(stories.reduce((sum, s) => sum + s.readinessScore.total, 0) / stories.length)
     : 0;
@@ -112,12 +135,23 @@ export function DeveloperReviewPanel({ stories, onComplete }: DeveloperReviewPan
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-sm font-semibold text-foreground">Developer Review</h2>
-          <p className="text-xs text-muted-foreground mt-0.5">{stories.length} stories pending review</p>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Review queue: {stories.length} {stories.length === 1 ? 'story' : 'stories'}
+          </p>
         </div>
-        <Button size="sm" onClick={onComplete} data-testid="button-complete-review">
+        <Button size="sm" onClick={onComplete} disabled={completionBlocked} data-testid="button-complete-review">
           Complete Review
         </Button>
       </div>
+
+      {completionBlocked && (
+        <div className="rounded-md border border-yellow-200 bg-[var(--color-warning-soft)] px-3 py-2 text-xs text-[var(--color-warning)] flex items-start gap-2">
+          <AlertTriangle className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" />
+          <span>
+            Review locked: {effectiveCompletionBlocker || 'resolve all review blockers first'}.
+          </span>
+        </div>
+      )}
 
       <div className="grid grid-cols-5 gap-2">
         {[
@@ -147,7 +181,9 @@ export function DeveloperReviewPanel({ stories, onComplete }: DeveloperReviewPan
                 data-testid={`review-story-${story.id}`}
                 className={cn(
                   'w-full text-left px-3 py-2.5 transition-colors',
-                  selectedId === story.id ? 'bg-[var(--color-primary-soft)]' : 'hover:bg-muted'
+                  selectedId === story.id
+                    ? 'bg-[var(--color-primary-soft)] ring-inset ring-1 ring-primary/20'
+                    : 'hover:bg-muted/70'
                 )}
               >
                 <div className="flex items-center justify-between gap-2 mb-1">

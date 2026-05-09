@@ -140,12 +140,6 @@
   --shell-sidebar-padding: 1rem;
 }
 
-:root[data-density='compact'] {
-  --shell-main-padding: 1rem;
-  --shell-header-padding: 0.75rem;
-  --shell-sidebar-padding: 0.75rem;
-}
-
 .dark {
   --button-outline: rgba(255,255,255, .10);
   --badge-outline: rgba(255,255,255, .05);
@@ -188,12 +182,17 @@
   --chart-3: 38 85% 55%;
   --chart-4: 0 72% 60%;
   --chart-5: 191 75% 48%;
-}
 
-.dark[data-density='compact'] {
-  --shell-main-padding: 1rem;
-  --shell-header-padding: 0.75rem;
-  --shell-sidebar-padding: 0.75rem;
+  --color-success-soft: rgba(22, 163, 74, 0.16);
+  --color-warning-soft: rgba(217, 119, 6, 0.18);
+  --color-danger-soft: rgba(220, 38, 38, 0.18);
+  --color-info-soft: rgba(8, 145, 178, 0.16);
+  --color-primary-soft: rgba(47, 91, 255, 0.18);
+  --color-muted-text: #9CA6BA;
+  --color-secondary-text: #C8D0E0;
+  --color-primary-text: #EAF0FF;
+  --color-border-strong: #31405B;
+  --color-surface-muted: #182235;
 }
 
 @layer base {

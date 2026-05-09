@@ -3,18 +3,145 @@ import { cn } from '@/lib/utils';
 import { Download, FileText } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useSessionStore } from '@/store/session-store';
+import { getExportPackage } from '@workspace/api-client-react';
+
+function slugifyFilename(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 64) || 'export';
+}
+
+function escapeCsv(value: string): string {
+  return `"${value.replace(/"/g, '""')}"`;
+}
+
+function escapeMarkdownCell(value: string): string {
+  return value.replace(/\|/g, '\\|').replace(/\n/g, ' ');
+}
+
+function buildMarkdown(detail: Awaited<ReturnType<typeof getExportPackage>>): string {
+  const { exportPackage, items } = detail;
+
+  const rows = items.map((item) => [
+    item.storyId,
+    item.epicId,
+    item.title,
+    item.priority,
+    String(item.readinessScore),
+    item.reviewStatus,
+    item.jiraKey ?? '',
+    item.githubIssueUrl ?? '',
+  ]);
+
+  return [
+    `# Export Package: ${exportPackage.sessionName}`,
+    '',
+    `- Package ID: ${exportPackage.id}`,
+    `- Session ID: ${exportPackage.sessionId}`,
+    `- Date: ${new Date(exportPackage.date).toISOString()}`,
+    `- Format: ${exportPackage.format.toUpperCase()}`,
+    `- Status: ${exportPackage.status}`,
+    `- Epics: ${exportPackage.epicCount}`,
+    `- Stories: ${exportPackage.storyCount}`,
+    `- Average Readiness: ${exportPackage.avgReadiness}/100`,
+    '',
+    '## Items',
+    '',
+    '| Story ID | Epic ID | Title | Priority | Readiness | Review Status | Jira Key | GitHub URL |',
+    '|---|---|---|---:|---:|---|---|---|',
+    ...rows.map((row) => `| ${row.map((value) => escapeMarkdownCell(value || '—')).join(' | ')} |`),
+  ].join('\n');
+}
+
+function buildCsv(detail: Awaited<ReturnType<typeof getExportPackage>>): string {
+  const { exportPackage, items } = detail;
+  const header = [
+    'Export Package ID',
+    'Session Name',
+    'Story ID',
+    'Epic ID',
+    'Title',
+    'Priority',
+    'Readiness Score',
+    'Review Status',
+    'Jira Key',
+    'GitHub URL',
+  ];
+
+  const rows = items.map((item) => [
+    exportPackage.id,
+    exportPackage.sessionName,
+    item.storyId,
+    item.epicId,
+    item.title,
+    item.priority,
+    String(item.readinessScore),
+    item.reviewStatus,
+    item.jiraKey ?? '',
+    item.githubIssueUrl ?? '',
+  ]);
+
+  return [header.map(escapeCsv).join(','), ...rows.map((row) => row.map(escapeCsv).join(','))].join('\n');
+}
+
+function buildJson(detail: Awaited<ReturnType<typeof getExportPackage>>): string {
+  return JSON.stringify(detail, null, 2);
+}
+
+function triggerFileDownload(content: string, filename: string, mime: string): void {
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = filename;
+  anchor.rel = 'noreferrer';
+  anchor.style.display = 'none';
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 0);
+}
 
 export function ExportsPage() {
   const { toast } = useToast();
   const { state } = useSessionStore();
   const [filterStatus, setFilterStatus] = useState<'all' | 'complete' | 'partial' | 'draft'>('all');
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   const filtered = state.exportPackages.filter(pkg =>
     filterStatus === 'all' || pkg.status === filterStatus
   );
 
-  const download = (pkg: typeof state.exportPackages[number]) => {
-    toast({ title: 'Download started', description: `${pkg.sessionName} export (${pkg.format.toUpperCase()})` });
+  const download = async (pkg: typeof state.exportPackages[number]) => {
+    setDownloadingId(pkg.id);
+
+    try {
+      const detail = await getExportPackage(pkg.id);
+      const baseName = `${slugifyFilename(detail.exportPackage.sessionName)}-${detail.exportPackage.id}`;
+
+      if (detail.exportPackage.format === 'csv') {
+        triggerFileDownload(buildCsv(detail), `${baseName}.csv`, 'text/csv');
+      } else if (detail.exportPackage.format === 'markdown') {
+        triggerFileDownload(buildMarkdown(detail), `${baseName}.md`, 'text/markdown');
+      } else {
+        triggerFileDownload(buildJson(detail), `${baseName}.json`, 'application/json');
+      }
+
+      toast({
+        title: 'Download ready',
+        description: `${detail.exportPackage.sessionName} export saved locally.`,
+      });
+    } catch (error) {
+      toast({
+        title: 'Download failed',
+        description:
+          error instanceof Error ? error.message : 'Could not load export package.',
+      });
+    } finally {
+      setDownloadingId(null);
+    }
   };
 
   if (state.isLoading) {
@@ -105,13 +232,14 @@ export function ExportsPage() {
                 </td>
                 <td className="px-4 py-3">
                   <button
-                    onClick={() => download(pkg)}
-                    className="text-xs text-primary hover:text-primary/80 flex items-center gap-1 transition-colors"
+                    onClick={() => void download(pkg)}
+                    className="text-xs text-primary hover:text-primary/80 flex items-center gap-1 transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+                    disabled={downloadingId === pkg.id}
                     data-testid={`button-download-${pkg.id}`}
                     aria-label={`Download ${pkg.sessionName} ${pkg.format.toUpperCase()} export package`}
                   >
                     <Download className="w-3.5 h-3.5" />
-                    Download
+                    {downloadingId === pkg.id ? 'Downloading…' : 'Download'}
                   </button>
                 </td>
               </tr>

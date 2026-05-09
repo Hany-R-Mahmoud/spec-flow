@@ -10,7 +10,6 @@ import { useToast } from '@/hooks/use-toast';
 import { X } from 'lucide-react';
 import { useSessionStore } from '@/store/session-store';
 import { ThemeModeToggle } from '@/components/shared/ThemeModeToggle';
-import { DensityToggle } from '@/components/shared/DensityToggle';
 
 type SettingsFormValues = {
   workspaceName: string;
@@ -186,13 +185,8 @@ export function SettingsPage() {
       <SettingsSection title="Appearance">
         <div className="space-y-2">
           <Label className="text-xs font-medium block">Theme</Label>
-          <p className="text-xs text-muted-foreground">Choose light, dark, or system mode for the whole app.</p>
+          <p className="text-xs text-muted-foreground">Switch the whole app between light and dark mode.</p>
           <ThemeModeToggle className="w-full justify-start" />
-        </div>
-        <div className="space-y-2">
-          <Label className="text-xs font-medium block">Density</Label>
-          <p className="text-xs text-muted-foreground">Switch between comfortable and compact spacing.</p>
-          <DensityToggle className="w-full justify-start" />
         </div>
       </SettingsSection>
 

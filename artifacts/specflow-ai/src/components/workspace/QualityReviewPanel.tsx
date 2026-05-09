@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Story, Epic, GenerationStepState } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { ChevronDown, ChevronRight, CheckCircle, AlertTriangle, AlertCircle, Scissors, Send } from 'lucide-react';
+import { ChevronDown, ChevronRight, CheckCircle, Scissors, Send } from 'lucide-react';
 import { PriorityBadge } from '@/components/shared/PriorityBadge';
 import { WarningList } from '@/components/shared/WarningBadge';
 import { ScoreBar } from '@/components/shared/ScoreBar';
@@ -15,6 +15,7 @@ interface QualityReviewPanelProps {
   generationStep: GenerationStepState;
   onGenerateQuality: () => void;
   onSendToDevReview: () => void;
+  onSplitStory: (storyId: string) => void | Promise<void>;
 }
 
 function scoreColor(value: number) {
@@ -24,23 +25,18 @@ function scoreColor(value: number) {
   return 'text-[var(--color-danger)]';
 }
 
-function scoreBg(value: number) {
-  if (value >= 90) return 'bg-[var(--color-success-soft)]';
-  if (value >= 75) return 'bg-[var(--color-primary-soft)]';
-  if (value >= 60) return 'bg-[var(--color-warning-soft)]';
-  return 'bg-[var(--color-danger-soft)]';
-}
-
 export function QualityReviewPanel({
   stories,
   epics,
   generationStep,
   onGenerateQuality,
   onSendToDevReview,
+  onSplitStory,
 }: QualityReviewPanelProps) {
   const { toast } = useToast();
   const { dispatch } = useSessionStore();
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+  const [splittingStoryId, setSplittingStoryId] = useState<string | null>(null);
   const isGenerating = generationStep.status === 'running';
 
   const avgScore = stories.length > 0
@@ -69,8 +65,24 @@ export function QualityReviewPanel({
   };
 
   const sendToReview = (story: Story) => {
-    dispatch({ type: 'UPDATE_STORY', payload: { ...story, reviewStatus: 'pending' } });
-    toast({ title: 'Sent to review', description: `${story.id} added to developer review queue.` });
+    dispatch({
+      type: 'UPDATE_STORY',
+      payload: {
+        ...story,
+        reviewStatus: 'pending',
+        developerReview: undefined,
+      },
+    });
+    toast({ title: 'Returned to review queue', description: `${story.id} will be reviewed again.` });
+  };
+
+  const handleSplitStory = async (storyId: string) => {
+    setSplittingStoryId(storyId);
+    try {
+      await onSplitStory(storyId);
+    } finally {
+      setSplittingStoryId((current) => (current === storyId ? null : current));
+    }
   };
 
   return (
@@ -228,9 +240,15 @@ export function QualityReviewPanel({
                         <Send className="w-3 h-3 mr-1" />
                         Send to Review
                       </Button>
-                      <Button size="sm" variant="outline" className="text-xs h-7">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-xs h-7"
+                        onClick={() => void handleSplitStory(story.id)}
+                        disabled={isGenerating || splittingStoryId === story.id}
+                      >
                         <Scissors className="w-3 h-3 mr-1" />
-                        Split Story
+                        {splittingStoryId === story.id ? 'Splitting…' : 'Split Story'}
                       </Button>
                       <Button size="sm" variant="outline" className="text-xs h-7" onClick={() => markReady(story)}>
                         <CheckCircle className="w-3 h-3 mr-1" />

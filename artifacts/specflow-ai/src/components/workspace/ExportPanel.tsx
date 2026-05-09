@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useLocation } from 'wouter';
 import { Story, Epic } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { Copy, Download, CheckCircle, AlertTriangle, Link2Off } from 'lucide-react';
@@ -7,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { ReviewStatusBadge } from '@/components/shared/StatusBadge';
 import { PriorityBadge } from '@/components/shared/PriorityBadge';
+import { listIntegrationConfigs } from '@workspace/api-client-react';
 
 interface ExportPanelProps {
   epics: Epic[];
@@ -58,7 +60,15 @@ const CSV_HEADER = 'ID,Issue Type,Summary,Description,Acceptance Criteria,Priori
 
 export function ExportPanel({ epics, stories }: ExportPanelProps) {
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const [activeEpic, setActiveEpic] = useState<string>('all');
+  const [jiraConnectionState, setJiraConnectionState] = useState<{
+    status: 'loading' | 'connected' | 'disabled' | 'error';
+    message: string;
+  }>({
+    status: 'loading',
+    message: 'Checking Jira connection state...',
+  });
 
   const readyStories = stories.filter(s => s.readinessScore.total >= 90 || s.reviewStatus === 'approved');
   const reviewStories = stories.filter(s => s.readinessScore.total < 90 && s.reviewStatus !== 'approved');
@@ -90,6 +100,59 @@ export function ExportPanel({ epics, stories }: ExportPanelProps) {
     toast({ title: 'Download started', description: filename });
   };
 
+  useEffect(() => {
+    let cancelled = false;
+
+    void listIntegrationConfigs()
+      .then((response) => {
+        if (cancelled) {
+          return;
+        }
+
+        const jira = response.integrations.find((integration) => integration.integrationType === 'jira');
+
+        if (!jira) {
+          setJiraConnectionState({
+            status: 'disabled',
+            message: 'Jira integration is not configured for this workspace.',
+          });
+          return;
+        }
+
+        if (jira.enabled && jira.configured) {
+          setJiraConnectionState({
+            status: 'connected',
+            message: 'Jira integration is configured and ready for export.',
+          });
+          return;
+        }
+
+        setJiraConnectionState({
+          status: 'disabled',
+          message: jira.enabled
+            ? 'Jira integration is enabled but not fully configured yet.'
+            : 'Jira integration is disabled. Open settings to configure it.',
+        });
+      })
+      .catch((error) => {
+        if (cancelled) {
+          return;
+        }
+
+        setJiraConnectionState({
+          status: 'error',
+          message:
+            error instanceof Error
+              ? error.message
+              : 'Unable to load Jira connection state.',
+        });
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -99,17 +162,47 @@ export function ExportPanel({ epics, stories }: ExportPanelProps) {
             {readyStories.length} ready · {reviewStories.length} need review · {stories.length} total
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3 rounded-md border border-border bg-muted/40 px-3 py-2">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              {jiraConnectionState.status === 'connected' ? (
+                <CheckCircle className="w-4 h-4 text-[var(--color-success)]" />
+              ) : jiraConnectionState.status === 'error' ? (
+                <AlertTriangle className="w-4 h-4 text-[var(--color-danger)]" />
+              ) : (
+                <Link2Off className="w-4 h-4 text-muted-foreground" />
+              )}
+              <span
+                className={cn(
+                  'text-xs font-semibold',
+                  jiraConnectionState.status === 'connected'
+                    ? 'text-[var(--color-success)]'
+                    : jiraConnectionState.status === 'error'
+                      ? 'text-[var(--color-danger)]'
+                      : 'text-muted-foreground',
+                )}
+              >
+                {jiraConnectionState.status === 'connected'
+                  ? 'Jira connected'
+                  : jiraConnectionState.status === 'error'
+                    ? 'Jira unavailable'
+                    : 'Jira not connected'}
+              </span>
+            </div>
+            <p className="mt-0.5 text-[11px] text-muted-foreground">
+              {jiraConnectionState.message}
+            </p>
+          </div>
           <Button
             size="sm"
             variant="outline"
-            className="text-xs opacity-50 cursor-not-allowed"
-            disabled
-            title="Coming soon"
+            className="text-xs h-7 shrink-0"
+            onClick={() => setLocation('/settings')}
+            disabled={jiraConnectionState.status === 'loading' || jiraConnectionState.status === 'error'}
+            title={jiraConnectionState.status === 'error' ? jiraConnectionState.message : 'Open Jira settings'}
             data-testid="button-connect-jira"
           >
-            <Link2Off className="w-3 h-3 mr-1.5" />
-            Connect Jira — Coming Soon
+            {jiraConnectionState.status === 'connected' ? 'Manage Jira' : 'Open Settings'}
           </Button>
         </div>
       </div>
