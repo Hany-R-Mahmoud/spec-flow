@@ -93,6 +93,16 @@ Implemented:
 6. `lib/types.ts` now reuses generated API contract types instead of local duplicate interfaces.
 7. Vite dev server now proxies `/api` to the API server target.
 
+## Known Gaps
+
+These are the main pieces still not complete or not yet proven in a real runtime:
+
+1. `ExportsPage` download is still a toast-only action. The page shows persisted export history, but it does not generate or fetch a real file yet.
+2. `ReviewsPage` is display-only. Stories can be viewed and filtered, but there is no full developer-review writeback flow from that page yet.
+3. Workflow generation is deterministic/demo-driven, not live AI. That is acceptable for this persistence MVP, but it is still not the final intended AI behavior.
+4. Refresh verification is still pending against a real database-backed runtime. The code path exists, but `T031` and `T032` are not yet proven end to end in this session.
+5. A few UI strings still mention "local memory" or demo fallback. They do not block the flow, but they are stale copy and should be cleaned up later.
+
 ## Remaining Mock Usage
 
 `artifacts/specflow-ai/src/lib/sample-data.ts` remains only as a tiny typed fallback module. It is no longer the primary runtime source for Dashboard, Projects, Workspace, New Breakdown, Settings, or export history.

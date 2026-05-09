@@ -1,25 +1,35 @@
 import { Router, type IRouter } from "express";
+import { and } from "drizzle-orm";
 import { GetSettingsResponse, UpdateSettingsBody } from "@workspace/api-zod";
 import { settingsTable } from "@workspace/db";
 import { sendUnexpectedError } from "./error-response";
 import {
-  DEFAULT_SETTINGS_ID,
   ensureSeedData,
   eq,
+  getSettingsId,
   requireDatabase,
   toSettings,
 } from "./persistence";
+import { requireAuthContext, requireMutableWorkspaceContext } from "./auth";
 
 const router: IRouter = Router();
 
-router.get("/settings", async (_req, res) => {
+router.get("/settings", async (req, res) => {
   try {
     const db = requireDatabase();
-    await ensureSeedData(db);
+    const auth = requireAuthContext(req, res);
+    if (!auth) {
+      return;
+    }
+
+    await ensureSeedData(db, auth.workspaceId);
     const [settings] = await db
       .select()
       .from(settingsTable)
-      .where(eq(settingsTable.id, DEFAULT_SETTINGS_ID));
+      .where(and(
+        eq(settingsTable.id, getSettingsId(auth.workspaceId)),
+        eq(settingsTable.workspaceId, auth.workspaceId),
+      ));
 
     res.json(GetSettingsResponse.parse(toSettings(settings)));
   } catch (error) {
@@ -30,7 +40,12 @@ router.get("/settings", async (_req, res) => {
 router.put("/settings", async (req, res) => {
   try {
     const db = requireDatabase();
-    await ensureSeedData(db);
+    const auth = requireMutableWorkspaceContext(req, res);
+    if (!auth) {
+      return;
+    }
+
+    await ensureSeedData(db, auth.workspaceId);
     const input = UpdateSettingsBody.parse(req.body);
     const [settings] = await db
       .update(settingsTable)
@@ -38,8 +53,12 @@ router.put("/settings", async (req, res) => {
         ...input,
         jiraKey: input.jiraKey.toUpperCase(),
         updatedAt: new Date(),
+        workspaceId: auth.workspaceId,
       })
-      .where(eq(settingsTable.id, DEFAULT_SETTINGS_ID))
+      .where(and(
+        eq(settingsTable.id, getSettingsId(auth.workspaceId)),
+        eq(settingsTable.workspaceId, auth.workspaceId),
+      ))
       .returning();
 
     res.json(toSettings(settings));

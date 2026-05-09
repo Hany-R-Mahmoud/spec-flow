@@ -1,19 +1,37 @@
-import app from "./app";
+import { loadApiServerConfig } from "./config";
 import { logger } from "./lib/logger";
+import { getPool } from "@workspace/db";
 
-const rawPort = process.env["PORT"] ?? "24549";
+const config = loadApiServerConfig();
 
-const port = Number(rawPort);
+async function ensureWorkspaceSchema(): Promise<void> {
+  const pool = getPool();
+  const workspaceTables = [
+    "projects",
+    "sessions",
+    "workflow_artifacts",
+    "settings",
+    "export_packages",
+    "export_items",
+    "integration_config",
+  ];
 
-if (Number.isNaN(port) || port <= 0) {
-  throw new Error(`Invalid PORT value: "${rawPort}"`);
+  for (const tableName of workspaceTables) {
+    await pool.query(
+      `ALTER TABLE "${tableName}" ADD COLUMN IF NOT EXISTS "workspace_id" text`,
+    );
+  }
 }
 
-app.listen(port, (err) => {
+await ensureWorkspaceSchema();
+const { default: createApp } = await import("./app");
+const app = createApp(config);
+
+app.listen(config.port, (err) => {
   if (err) {
     logger.error({ err }, "Error listening on port");
     process.exit(1);
   }
 
-  logger.info({ port }, "Server listening");
+  logger.info({ port: config.port }, "Server listening");
 });

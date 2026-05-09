@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { asc, eq } from "drizzle-orm";
+import { and, asc, eq } from "drizzle-orm";
 import {
   type ClarificationQuestion,
   type Epic,
@@ -34,6 +34,10 @@ import type {
 type Database = ReturnType<typeof getDb>;
 
 const DEFAULT_SETTINGS_ID = "workspace-default";
+const REQUIRED_INTEGRATION_KEYS: Record<string, string[]> = {
+  jira: ["domain", "email", "apiToken", "projectKey"],
+  github: ["owner", "repo", "token"],
+};
 
 const DEFAULT_PHASES: Record<Phase, PhaseStatus> = {
   intake: "complete",
@@ -397,8 +401,7 @@ const DEMO_EXPORTS: ExportPackage[] = [
   },
 ];
 
-const DEFAULT_SETTINGS = {
-  id: DEFAULT_SETTINGS_ID,
+const DEFAULT_SETTINGS_TEMPLATE = {
   workspaceName: "SpecFlow Workspace",
   jiraKey: "SPEC",
   defaultLabels: ["Feature", "Frontend"],
@@ -408,7 +411,31 @@ const DEFAULT_SETTINGS = {
   devReviewRequired: true,
   autoGenerateQuestions: true,
   showReadinessWarnings: true,
-} satisfies Omit<WorkspaceSettings, 'createdAt' | 'updatedAt'>;
+} satisfies Omit<WorkspaceSettings, "id" | "workspaceId" | "createdAt" | "updatedAt">;
+
+export function getSettingsId(workspaceId: string): string {
+  return `workspace-settings-${assertWorkspaceId(workspaceId)}`;
+}
+
+function buildDefaultSettings(
+  workspaceId: string,
+): Omit<WorkspaceSettings, "createdAt" | "updatedAt"> & { workspaceId: string } {
+  const scopedWorkspaceId = assertWorkspaceId(workspaceId);
+  return {
+    id: getSettingsId(scopedWorkspaceId),
+    workspaceId: scopedWorkspaceId,
+    ...DEFAULT_SETTINGS_TEMPLATE,
+  };
+}
+
+function assertWorkspaceId(workspaceId: string): string {
+  const trimmed = workspaceId.trim();
+  if (!trimmed) {
+    throw new Error("Workspace ID is required.");
+  }
+
+  return trimmed;
+}
 
 export function requireDatabase(): Database {
   if (!isDatabaseConfigured()) {
@@ -420,13 +447,20 @@ export function requireDatabase(): Database {
   return getDb() as Database;
 }
 
-export async function ensureSeedData(db: Database): Promise<void> {
-  const [settingsCount] = await db.select().from(settingsTable);
+export async function ensureSeedData(db: Database, workspaceId: string): Promise<void> {
+  const scopedWorkspaceId = assertWorkspaceId(workspaceId);
+  const [settingsCount] = await db
+    .select()
+    .from(settingsTable)
+    .where(eq(settingsTable.workspaceId, scopedWorkspaceId));
   if (!settingsCount) {
-    await db.insert(settingsTable).values(DEFAULT_SETTINGS);
+    await db.insert(settingsTable).values(buildDefaultSettings(scopedWorkspaceId));
   }
 
-  const [projectCount] = await db.select().from(projectsTable);
+  const [projectCount] = await db
+    .select()
+    .from(projectsTable)
+    .where(eq(projectsTable.workspaceId, scopedWorkspaceId));
   if (projectCount) {
     return;
   }
@@ -438,6 +472,7 @@ export async function ensureSeedData(db: Database): Promise<void> {
 
   await db.insert(projectsTable).values({
     id: demoProjectId,
+    workspaceId: scopedWorkspaceId,
     name: "SpecFlow Persistence Demo",
     jiraKey: "SPEC",
     createdAt: now,
@@ -446,6 +481,7 @@ export async function ensureSeedData(db: Database): Promise<void> {
 
   await db.insert(sessionsTable).values({
     id: demoSessionId,
+    workspaceId: scopedWorkspaceId,
     projectId: demoProjectId,
     name: "SpecFlow Persistence Demo",
     inputType: "PRD draft",
@@ -471,6 +507,7 @@ export async function ensureSeedData(db: Database): Promise<void> {
 
   await db.insert(workflowArtifactsTable).values({
     sessionId: demoSessionId,
+    workspaceId: scopedWorkspaceId,
     ...demoArtifacts,
     createdAt: now,
     updatedAt: now,
@@ -479,6 +516,7 @@ export async function ensureSeedData(db: Database): Promise<void> {
   await db.insert(exportPackagesTable).values(
     DEMO_EXPORTS.map((pkg) => ({
       ...pkg,
+      workspaceId: scopedWorkspaceId,
       date: new Date(pkg.date),
     })),
   );
@@ -628,7 +666,9 @@ export function createSessionDefaults(): Pick<
 export async function getSessionArtifactsRecord(
   db: Database,
   sessionId: string,
+  workspaceId: string,
 ): Promise<SessionWithArtifactsRow | null> {
+  const scopedWorkspaceId = assertWorkspaceId(workspaceId);
   const [row] = await db
     .select({
       session: sessionsTable,
@@ -639,7 +679,7 @@ export async function getSessionArtifactsRecord(
       workflowArtifactsTable,
       eq(workflowArtifactsTable.sessionId, sessionsTable.id),
     )
-    .where(eq(sessionsTable.id, sessionId));
+    .where(and(eq(sessionsTable.id, sessionId), eq(sessionsTable.workspaceId, scopedWorkspaceId)));
 
   return row ?? null;
 }
@@ -657,7 +697,9 @@ export function buildPhaseUpdate(
 
 export async function listSessionsWithArtifacts(
   db: Database,
+  workspaceId: string,
 ): Promise<WorkflowSession[]> {
+  const scopedWorkspaceId = assertWorkspaceId(workspaceId);
   const rows = await db
     .select({
       session: sessionsTable,
@@ -668,6 +710,7 @@ export async function listSessionsWithArtifacts(
       workflowArtifactsTable,
       eq(workflowArtifactsTable.sessionId, sessionsTable.id),
     )
+    .where(eq(sessionsTable.workspaceId, scopedWorkspaceId))
     .orderBy(asc(sessionsTable.createdAt));
 
   return rows.map(toWorkflowSession);
@@ -676,20 +719,24 @@ export async function listSessionsWithArtifacts(
 export async function getSessionWithArtifacts(
   db: Database,
   sessionId: string,
+  workspaceId: string,
 ): Promise<WorkflowSession | null> {
-  const row = await getSessionArtifactsRecord(db, sessionId);
+  const row = await getSessionArtifactsRecord(db, sessionId, workspaceId);
   return row ? toWorkflowSession(row) : null;
 }
 
 export async function createProjectRecord(
   db: Database,
+  workspaceId: string,
   input: { name: string; jiraKey?: string },
 ): Promise<Project> {
+  const scopedWorkspaceId = assertWorkspaceId(workspaceId);
   const now = new Date();
   const [project] = await db
     .insert(projectsTable)
     .values({
       id: randomUUID(),
+      workspaceId: scopedWorkspaceId,
       name: input.name,
       jiraKey: input.jiraKey ?? "",
       createdAt: now,
@@ -748,8 +795,13 @@ export function toExportItem(
 export function toIntegrationConfig(
   config: IntegrationConfigRow,
 ): IntegrationConfig {
-  const hasValidConfig = Object.keys(config.config).length > 0 &&
-    Object.values(config.config).some(v => v && v.length > 0);
+  const requiredKeys = REQUIRED_INTEGRATION_KEYS[config.integrationType] ?? [];
+  const hasValidConfig =
+    requiredKeys.length > 0 &&
+    requiredKeys.every(
+      (key) =>
+        typeof config.config[key] === "string" && config.config[key].trim().length > 0,
+    );
   return {
     id: config.id,
     integrationType: config.integrationType,
@@ -760,28 +812,42 @@ export function toIntegrationConfig(
 
 export async function getIntegrationConfigs(
   db: Database,
+  workspaceId: string,
 ): Promise<IntegrationConfig[]> {
-  const configs = await db.select().from(integrationConfigTable);
+  const scopedWorkspaceId = assertWorkspaceId(workspaceId);
+  const configs = await db
+    .select()
+    .from(integrationConfigTable)
+    .where(eq(integrationConfigTable.workspaceId, scopedWorkspaceId));
   return configs.map(toIntegrationConfig);
 }
 
 export async function getIntegrationConfig(
   db: Database,
   type: string,
+  workspaceId: string,
 ): Promise<IntegrationConfigRow | null> {
+  const scopedWorkspaceId = assertWorkspaceId(workspaceId);
   const [config] = await db
     .select()
     .from(integrationConfigTable)
-    .where(eq(integrationConfigTable.integrationType, type));
+    .where(
+      and(
+        eq(integrationConfigTable.integrationType, type),
+        eq(integrationConfigTable.workspaceId, scopedWorkspaceId),
+      ),
+    );
   return config ?? null;
 }
 
 export async function updateIntegrationConfigRecord(
   db: Database,
   type: string,
+  workspaceId: string,
   input: { enabled: boolean; config: Record<string, string> },
 ): Promise<IntegrationConfig> {
-  const existing = await getIntegrationConfig(db, type);
+  const scopedWorkspaceId = assertWorkspaceId(workspaceId);
+  const existing = await getIntegrationConfig(db, type, scopedWorkspaceId);
   const now = new Date();
 
   if (existing) {
@@ -791,8 +857,14 @@ export async function updateIntegrationConfigRecord(
         enabled: input.enabled,
         config: input.config,
         updatedAt: now,
+        workspaceId: scopedWorkspaceId,
       })
-      .where(eq(integrationConfigTable.integrationType, type))
+      .where(
+        and(
+          eq(integrationConfigTable.integrationType, type),
+          eq(integrationConfigTable.workspaceId, scopedWorkspaceId),
+        ),
+      )
       .returning();
     return toIntegrationConfig(updated);
   }
@@ -801,6 +873,7 @@ export async function updateIntegrationConfigRecord(
     .insert(integrationConfigTable)
     .values({
       id: randomUUID(),
+      workspaceId: scopedWorkspaceId,
       integrationType: type,
       enabled: input.enabled,
       config: input.config,
@@ -814,16 +887,24 @@ export async function updateIntegrationConfigRecord(
 export async function getExportItemsByPackageId(
   db: Database,
   packageId: string,
+  workspaceId: string,
 ): Promise<ExportItem[]> {
+  const scopedWorkspaceId = assertWorkspaceId(workspaceId);
   const items = await db
     .select()
     .from(exportItemsTable)
-    .where(eq(exportItemsTable.exportPackageId, packageId));
+    .where(
+      and(
+        eq(exportItemsTable.exportPackageId, packageId),
+        eq(exportItemsTable.workspaceId, scopedWorkspaceId),
+      ),
+    );
   return items.map(toExportItem);
 }
 
 export async function createExportItemRecord(
   db: Database,
+  workspaceId: string,
   input: {
     exportPackageId: string;
     storyId: string;
@@ -834,10 +915,12 @@ export async function createExportItemRecord(
     reviewStatus: string;
   },
 ): Promise<ExportItem> {
+  const scopedWorkspaceId = assertWorkspaceId(workspaceId);
   const [item] = await db
     .insert(exportItemsTable)
     .values({
       id: randomUUID(),
+      workspaceId: scopedWorkspaceId,
       ...input,
       jiraKey: null,
       githubIssueUrl: null,
@@ -853,6 +936,7 @@ export async function createExportItemRecord(
 export async function updateExportItemExternalResult(
   db: Database,
   itemId: string,
+  workspaceId: string,
   result: {
     status: string;
     jiraKey?: string;
@@ -860,6 +944,7 @@ export async function updateExportItemExternalResult(
     error?: string;
   },
 ): Promise<ExportItem> {
+  const scopedWorkspaceId = assertWorkspaceId(workspaceId);
   const [updated] = await db
     .update(exportItemsTable)
     .set({
@@ -869,7 +954,12 @@ export async function updateExportItemExternalResult(
       externalExportError: result.error ?? null,
       exportedAt: result.status === "success" ? new Date() : null,
     })
-    .where(eq(exportItemsTable.id, itemId))
+    .where(
+      and(
+        eq(exportItemsTable.id, itemId),
+        eq(exportItemsTable.workspaceId, scopedWorkspaceId),
+      ),
+    )
     .returning();
   return toExportItem(updated);
 }

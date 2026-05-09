@@ -17,7 +17,8 @@ const basePath = process.env.BASE_PATH ?? "/";
 
 export default defineConfig({
   base: basePath,
-  envPrefix: ["VITE_", "SUPABASE_"],
+  envDir: path.resolve(import.meta.dirname, "..", ".."),
+  envPrefix: ["VITE_"],
   plugins: [
     react(),
     tailwindcss(),

@@ -18,20 +18,23 @@ import type {
 
 import type {
   ApiErrorResponse,
+  CreateExportPackageRequest,
   CreateProjectRequest,
   CreateSessionRequest,
-  ExportPackageListResponse,
   ExportPackageDetailResponse,
-  CreateExportPackageRequest,
-  ExportResultsResponse,
-  IntegrationConfigListResponse,
-  UpdateIntegrationConfigRequest,
-  IntegrationConfig,
+  ExportPackageListResponse,
+  ExportToGitHub200,
+  ExportToJira200,
+  ForbiddenResponse,
   GenerateWorkflowStepRequest,
   HealthStatus,
+  IntegrationConfig,
+  IntegrationConfigListResponse,
   Project,
   ProjectListResponse,
   SessionListResponse,
+  UnauthorizedResponse,
+  UpdateIntegrationConfigRequest,
   UpdateProjectRequest,
   UpdateSessionArtifactsRequest,
   UpdateSessionRequest,
@@ -147,7 +150,9 @@ export const getListProjectsQueryKey = () => {
 
 export const getListProjectsQueryOptions = <
   TData = Awaited<ReturnType<typeof listProjects>>,
-  TError = ErrorType<ApiErrorResponse>,
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
 >(options?: {
   query?: UseQueryOptions<
     Awaited<ReturnType<typeof listProjects>>,
@@ -174,7 +179,9 @@ export const getListProjectsQueryOptions = <
 export type ListProjectsQueryResult = NonNullable<
   Awaited<ReturnType<typeof listProjects>>
 >;
-export type ListProjectsQueryError = ErrorType<ApiErrorResponse>;
+export type ListProjectsQueryError = ErrorType<
+  UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+>;
 
 /**
  * @summary List projects
@@ -182,7 +189,9 @@ export type ListProjectsQueryError = ErrorType<ApiErrorResponse>;
 
 export function useListProjects<
   TData = Awaited<ReturnType<typeof listProjects>>,
-  TError = ErrorType<ApiErrorResponse>,
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
 >(options?: {
   query?: UseQueryOptions<
     Awaited<ReturnType<typeof listProjects>>,
@@ -220,7 +229,9 @@ export const createProject = async (
 };
 
 export const getCreateProjectMutationOptions = <
-  TError = ErrorType<ApiErrorResponse>,
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -261,13 +272,17 @@ export type CreateProjectMutationResult = NonNullable<
   Awaited<ReturnType<typeof createProject>>
 >;
 export type CreateProjectMutationBody = BodyType<CreateProjectRequest>;
-export type CreateProjectMutationError = ErrorType<ApiErrorResponse>;
+export type CreateProjectMutationError = ErrorType<
+  UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+>;
 
 /**
  * @summary Create project
  */
 export const useCreateProject = <
-  TError = ErrorType<ApiErrorResponse>,
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -309,7 +324,9 @@ export const getGetProjectQueryKey = (projectId: string) => {
 
 export const getGetProjectQueryOptions = <
   TData = Awaited<ReturnType<typeof getProject>>,
-  TError = ErrorType<ApiErrorResponse>,
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
 >(
   projectId: string,
   options?: {
@@ -344,7 +361,9 @@ export const getGetProjectQueryOptions = <
 export type GetProjectQueryResult = NonNullable<
   Awaited<ReturnType<typeof getProject>>
 >;
-export type GetProjectQueryError = ErrorType<ApiErrorResponse>;
+export type GetProjectQueryError = ErrorType<
+  UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+>;
 
 /**
  * @summary Get project
@@ -352,7 +371,9 @@ export type GetProjectQueryError = ErrorType<ApiErrorResponse>;
 
 export function useGetProject<
   TData = Awaited<ReturnType<typeof getProject>>,
-  TError = ErrorType<ApiErrorResponse>,
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
 >(
   projectId: string,
   options?: {
@@ -394,7 +415,9 @@ export const updateProject = async (
 };
 
 export const getUpdateProjectMutationOptions = <
-  TError = ErrorType<ApiErrorResponse>,
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -435,13 +458,17 @@ export type UpdateProjectMutationResult = NonNullable<
   Awaited<ReturnType<typeof updateProject>>
 >;
 export type UpdateProjectMutationBody = BodyType<UpdateProjectRequest>;
-export type UpdateProjectMutationError = ErrorType<ApiErrorResponse>;
+export type UpdateProjectMutationError = ErrorType<
+  UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+>;
 
 /**
  * @summary Update project
  */
 export const useUpdateProject = <
-  TError = ErrorType<ApiErrorResponse>,
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -482,7 +509,9 @@ export const getListSessionsQueryKey = () => {
 
 export const getListSessionsQueryOptions = <
   TData = Awaited<ReturnType<typeof listSessions>>,
-  TError = ErrorType<ApiErrorResponse>,
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
 >(options?: {
   query?: UseQueryOptions<
     Awaited<ReturnType<typeof listSessions>>,
@@ -509,7 +538,9 @@ export const getListSessionsQueryOptions = <
 export type ListSessionsQueryResult = NonNullable<
   Awaited<ReturnType<typeof listSessions>>
 >;
-export type ListSessionsQueryError = ErrorType<ApiErrorResponse>;
+export type ListSessionsQueryError = ErrorType<
+  UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+>;
 
 /**
  * @summary List workflow sessions
@@ -517,7 +548,9 @@ export type ListSessionsQueryError = ErrorType<ApiErrorResponse>;
 
 export function useListSessions<
   TData = Awaited<ReturnType<typeof listSessions>>,
-  TError = ErrorType<ApiErrorResponse>,
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
 >(options?: {
   query?: UseQueryOptions<
     Awaited<ReturnType<typeof listSessions>>,
@@ -555,7 +588,9 @@ export const createSession = async (
 };
 
 export const getCreateSessionMutationOptions = <
-  TError = ErrorType<ApiErrorResponse>,
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -596,13 +631,17 @@ export type CreateSessionMutationResult = NonNullable<
   Awaited<ReturnType<typeof createSession>>
 >;
 export type CreateSessionMutationBody = BodyType<CreateSessionRequest>;
-export type CreateSessionMutationError = ErrorType<ApiErrorResponse>;
+export type CreateSessionMutationError = ErrorType<
+  UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+>;
 
 /**
  * @summary Create workflow session
  */
 export const useCreateSession = <
-  TError = ErrorType<ApiErrorResponse>,
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -644,7 +683,9 @@ export const getGetSessionQueryKey = (sessionId: string) => {
 
 export const getGetSessionQueryOptions = <
   TData = Awaited<ReturnType<typeof getSession>>,
-  TError = ErrorType<ApiErrorResponse>,
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
 >(
   sessionId: string,
   options?: {
@@ -679,7 +720,9 @@ export const getGetSessionQueryOptions = <
 export type GetSessionQueryResult = NonNullable<
   Awaited<ReturnType<typeof getSession>>
 >;
-export type GetSessionQueryError = ErrorType<ApiErrorResponse>;
+export type GetSessionQueryError = ErrorType<
+  UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+>;
 
 /**
  * @summary Get workflow session
@@ -687,7 +730,9 @@ export type GetSessionQueryError = ErrorType<ApiErrorResponse>;
 
 export function useGetSession<
   TData = Awaited<ReturnType<typeof getSession>>,
-  TError = ErrorType<ApiErrorResponse>,
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
 >(
   sessionId: string,
   options?: {
@@ -729,7 +774,9 @@ export const updateSession = async (
 };
 
 export const getUpdateSessionMutationOptions = <
-  TError = ErrorType<ApiErrorResponse>,
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -770,13 +817,17 @@ export type UpdateSessionMutationResult = NonNullable<
   Awaited<ReturnType<typeof updateSession>>
 >;
 export type UpdateSessionMutationBody = BodyType<UpdateSessionRequest>;
-export type UpdateSessionMutationError = ErrorType<ApiErrorResponse>;
+export type UpdateSessionMutationError = ErrorType<
+  UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+>;
 
 /**
  * @summary Update workflow session summary
  */
 export const useUpdateSession = <
-  TError = ErrorType<ApiErrorResponse>,
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -816,7 +867,9 @@ export const updateSessionArtifacts = async (
 };
 
 export const getUpdateSessionArtifactsMutationOptions = <
-  TError = ErrorType<ApiErrorResponse>,
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -858,13 +911,17 @@ export type UpdateSessionArtifactsMutationResult = NonNullable<
 >;
 export type UpdateSessionArtifactsMutationBody =
   BodyType<UpdateSessionArtifactsRequest>;
-export type UpdateSessionArtifactsMutationError = ErrorType<ApiErrorResponse>;
+export type UpdateSessionArtifactsMutationError = ErrorType<
+  UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+>;
 
 /**
  * @summary Update workflow session artifacts
  */
 export const useUpdateSessionArtifacts = <
-  TError = ErrorType<ApiErrorResponse>,
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -904,7 +961,9 @@ export const generateClarification = async (
 };
 
 export const getGenerateClarificationMutationOptions = <
-  TError = ErrorType<ApiErrorResponse>,
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -946,13 +1005,17 @@ export type GenerateClarificationMutationResult = NonNullable<
 >;
 export type GenerateClarificationMutationBody =
   BodyType<GenerateWorkflowStepRequest>;
-export type GenerateClarificationMutationError = ErrorType<ApiErrorResponse>;
+export type GenerateClarificationMutationError = ErrorType<
+  UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+>;
 
 /**
  * @summary Generate clarification questions
  */
 export const useGenerateClarification = <
-  TError = ErrorType<ApiErrorResponse>,
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -992,7 +1055,9 @@ export const generatePrd = async (
 };
 
 export const getGeneratePrdMutationOptions = <
-  TError = ErrorType<ApiErrorResponse>,
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -1033,13 +1098,17 @@ export type GeneratePrdMutationResult = NonNullable<
   Awaited<ReturnType<typeof generatePrd>>
 >;
 export type GeneratePrdMutationBody = BodyType<GenerateWorkflowStepRequest>;
-export type GeneratePrdMutationError = ErrorType<ApiErrorResponse>;
+export type GeneratePrdMutationError = ErrorType<
+  UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+>;
 
 /**
  * @summary Generate PRD sections
  */
 export const useGeneratePrd = <
-  TError = ErrorType<ApiErrorResponse>,
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -1079,7 +1148,9 @@ export const generateEpics = async (
 };
 
 export const getGenerateEpicsMutationOptions = <
-  TError = ErrorType<ApiErrorResponse>,
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -1120,13 +1191,17 @@ export type GenerateEpicsMutationResult = NonNullable<
   Awaited<ReturnType<typeof generateEpics>>
 >;
 export type GenerateEpicsMutationBody = BodyType<GenerateWorkflowStepRequest>;
-export type GenerateEpicsMutationError = ErrorType<ApiErrorResponse>;
+export type GenerateEpicsMutationError = ErrorType<
+  UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+>;
 
 /**
  * @summary Generate epics
  */
 export const useGenerateEpics = <
-  TError = ErrorType<ApiErrorResponse>,
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -1166,7 +1241,9 @@ export const generateStories = async (
 };
 
 export const getGenerateStoriesMutationOptions = <
-  TError = ErrorType<ApiErrorResponse>,
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -1207,13 +1284,17 @@ export type GenerateStoriesMutationResult = NonNullable<
   Awaited<ReturnType<typeof generateStories>>
 >;
 export type GenerateStoriesMutationBody = BodyType<GenerateWorkflowStepRequest>;
-export type GenerateStoriesMutationError = ErrorType<ApiErrorResponse>;
+export type GenerateStoriesMutationError = ErrorType<
+  UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+>;
 
 /**
  * @summary Generate stories
  */
 export const useGenerateStories = <
-  TError = ErrorType<ApiErrorResponse>,
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -1253,7 +1334,9 @@ export const generateQuality = async (
 };
 
 export const getGenerateQualityMutationOptions = <
-  TError = ErrorType<ApiErrorResponse>,
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -1294,13 +1377,17 @@ export type GenerateQualityMutationResult = NonNullable<
   Awaited<ReturnType<typeof generateQuality>>
 >;
 export type GenerateQualityMutationBody = BodyType<GenerateWorkflowStepRequest>;
-export type GenerateQualityMutationError = ErrorType<ApiErrorResponse>;
+export type GenerateQualityMutationError = ErrorType<
+  UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+>;
 
 /**
  * @summary Score stories and detect warnings
  */
 export const useGenerateQuality = <
-  TError = ErrorType<ApiErrorResponse>,
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -1341,7 +1428,9 @@ export const getGetSettingsQueryKey = () => {
 
 export const getGetSettingsQueryOptions = <
   TData = Awaited<ReturnType<typeof getSettings>>,
-  TError = ErrorType<ApiErrorResponse>,
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
 >(options?: {
   query?: UseQueryOptions<
     Awaited<ReturnType<typeof getSettings>>,
@@ -1368,7 +1457,9 @@ export const getGetSettingsQueryOptions = <
 export type GetSettingsQueryResult = NonNullable<
   Awaited<ReturnType<typeof getSettings>>
 >;
-export type GetSettingsQueryError = ErrorType<ApiErrorResponse>;
+export type GetSettingsQueryError = ErrorType<
+  UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+>;
 
 /**
  * @summary Get workspace settings
@@ -1376,7 +1467,9 @@ export type GetSettingsQueryError = ErrorType<ApiErrorResponse>;
 
 export function useGetSettings<
   TData = Awaited<ReturnType<typeof getSettings>>,
-  TError = ErrorType<ApiErrorResponse>,
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
 >(options?: {
   query?: UseQueryOptions<
     Awaited<ReturnType<typeof getSettings>>,
@@ -1414,7 +1507,9 @@ export const updateSettings = async (
 };
 
 export const getUpdateSettingsMutationOptions = <
-  TError = ErrorType<ApiErrorResponse>,
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -1455,13 +1550,17 @@ export type UpdateSettingsMutationResult = NonNullable<
   Awaited<ReturnType<typeof updateSettings>>
 >;
 export type UpdateSettingsMutationBody = BodyType<UpdateSettingsRequest>;
-export type UpdateSettingsMutationError = ErrorType<ApiErrorResponse>;
+export type UpdateSettingsMutationError = ErrorType<
+  UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+>;
 
 /**
  * @summary Update workspace settings
  */
 export const useUpdateSettings = <
-  TError = ErrorType<ApiErrorResponse>,
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -1502,7 +1601,9 @@ export const getListExportPackagesQueryKey = () => {
 
 export const getListExportPackagesQueryOptions = <
   TData = Awaited<ReturnType<typeof listExportPackages>>,
-  TError = ErrorType<ApiErrorResponse>,
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
 >(options?: {
   query?: UseQueryOptions<
     Awaited<ReturnType<typeof listExportPackages>>,
@@ -1529,7 +1630,9 @@ export const getListExportPackagesQueryOptions = <
 export type ListExportPackagesQueryResult = NonNullable<
   Awaited<ReturnType<typeof listExportPackages>>
 >;
-export type ListExportPackagesQueryError = ErrorType<ApiErrorResponse>;
+export type ListExportPackagesQueryError = ErrorType<
+  UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+>;
 
 /**
  * @summary List export packages
@@ -1537,7 +1640,9 @@ export type ListExportPackagesQueryError = ErrorType<ApiErrorResponse>;
 
 export function useListExportPackages<
   TData = Awaited<ReturnType<typeof listExportPackages>>,
-  TError = ErrorType<ApiErrorResponse>,
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
 >(options?: {
   query?: UseQueryOptions<
     Awaited<ReturnType<typeof listExportPackages>>,
@@ -1556,10 +1661,9 @@ export function useListExportPackages<
 }
 
 /**
- * Create an export package
  * @summary Create export package
  */
-export const createExportPackageUrl = () => {
+export const getCreateExportPackageUrl = () => {
   return `/api/export-packages`;
 };
 
@@ -1567,7 +1671,7 @@ export const createExportPackage = async (
   createExportPackageRequest: CreateExportPackageRequest,
   options?: RequestInit,
 ): Promise<ExportPackageDetailResponse> => {
-  return customFetch<ExportPackageDetailResponse>(createExportPackageUrl(), {
+  return customFetch<ExportPackageDetailResponse>(getCreateExportPackageUrl(), {
     ...options,
     method: "POST",
     headers: { "Content-Type": "application/json", ...options?.headers },
@@ -1576,61 +1680,80 @@ export const createExportPackage = async (
 };
 
 export const getCreateExportPackageMutationOptions = <
-  TError = ErrorType<ApiErrorResponse>,
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof createExportPackage>>,
     TError,
-    { data: CreateExportPackageRequest },
+    { data: BodyType<CreateExportPackageRequest> },
     TContext
   >;
   request?: SecondParameter<typeof customFetch>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof createExportPackage>>,
   TError,
-  { data: CreateExportPackageRequest },
+  { data: BodyType<CreateExportPackageRequest> },
   TContext
 > => {
-  const mutationOptions: UseMutationOptions<
-    Awaited<ReturnType<typeof createExportPackage>>,
-    TError,
-    { data: CreateExportPackageRequest },
-    TContext
-  > = options?.mutation ?? {};
+  const mutationKey = ["createExportPackage"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
 
-  return mutationOptions;
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createExportPackage>>,
+    { data: BodyType<CreateExportPackageRequest> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return createExportPackage(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
 };
 
 export type CreateExportPackageMutationResult = NonNullable<
   Awaited<ReturnType<typeof createExportPackage>>
 >;
-export type CreateExportPackageMutationError = ErrorType<ApiErrorResponse>;
+export type CreateExportPackageMutationBody =
+  BodyType<CreateExportPackageRequest>;
+export type CreateExportPackageMutationError = ErrorType<
+  UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+>;
 
-export function useCreateExportPackage<
-  TError = ErrorType<ApiErrorResponse>,
+/**
+ * @summary Create export package
+ */
+export const useCreateExportPackage = <
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof createExportPackage>>,
     TError,
-    { data: CreateExportPackageRequest },
+    { data: BodyType<CreateExportPackageRequest> },
     TContext
   >;
   request?: SecondParameter<typeof customFetch>;
 }): UseMutationResult<
   Awaited<ReturnType<typeof createExportPackage>>,
   TError,
-  { data: CreateExportPackageRequest },
+  { data: BodyType<CreateExportPackageRequest> },
   TContext
-> {
-  const mutationOptions = getCreateExportPackageMutationOptions(options);
-
-  return useMutation(mutationOptions);
-}
+> => {
+  return useMutation(getCreateExportPackageMutationOptions(options));
+};
 
 /**
- * Get export package details
  * @summary Get export package details
  */
 export const getGetExportPackageUrl = (id: string) => {
@@ -1648,12 +1771,14 @@ export const getExportPackage = async (
 };
 
 export const getGetExportPackageQueryKey = (id: string) => {
-  return [`/api/export-packages`, id] as const;
+  return [`/api/export-packages/${id}`] as const;
 };
 
 export const getGetExportPackageQueryOptions = <
   TData = Awaited<ReturnType<typeof getExportPackage>>,
-  TError = ErrorType<ApiErrorResponse>,
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
 >(
   id: string,
   options?: {
@@ -1669,11 +1794,16 @@ export const getGetExportPackageQueryOptions = <
 
   const queryKey = queryOptions?.queryKey ?? getGetExportPackageQueryKey(id);
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof getExportPackage>>> = ({
-    signal,
-  }) => getExportPackage(id, { signal, ...requestOptions });
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getExportPackage>>
+  > = ({ signal }) => getExportPackage(id, { signal, ...requestOptions });
 
-  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!id,
+    ...queryOptions,
+  } as UseQueryOptions<
     Awaited<ReturnType<typeof getExportPackage>>,
     TError,
     TData
@@ -1683,11 +1813,19 @@ export const getGetExportPackageQueryOptions = <
 export type GetExportPackageQueryResult = NonNullable<
   Awaited<ReturnType<typeof getExportPackage>>
 >;
-export type GetExportPackageQueryError = ErrorType<ApiErrorResponse>;
+export type GetExportPackageQueryError = ErrorType<
+  UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+>;
+
+/**
+ * @summary Get export package details
+ */
 
 export function useGetExportPackage<
   TData = Awaited<ReturnType<typeof getExportPackage>>,
-  TError = ErrorType<ApiErrorResponse>,
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
 >(
   id: string,
   options?: {
@@ -1709,8 +1847,7 @@ export function useGetExportPackage<
 }
 
 /**
- * Export package to Jira
- * @summary Export to Jira
+ * @summary Export package to Jira
  */
 export const getExportToJiraUrl = (id: string) => {
   return `/api/export-packages/${id}/export-jira`;
@@ -1719,15 +1856,17 @@ export const getExportToJiraUrl = (id: string) => {
 export const exportToJira = async (
   id: string,
   options?: RequestInit,
-): Promise<ExportResultsResponse> => {
-  return customFetch<ExportResultsResponse>(getExportToJiraUrl(id), {
+): Promise<ExportToJira200> => {
+  return customFetch<ExportToJira200>(getExportToJiraUrl(id), {
     ...options,
     method: "POST",
   });
 };
 
 export const getExportToJiraMutationOptions = <
-  TError = ErrorType<ApiErrorResponse>,
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -1743,23 +1882,42 @@ export const getExportToJiraMutationOptions = <
   { id: string },
   TContext
 > => {
-  const mutationOptions: UseMutationOptions<
-    Awaited<ReturnType<typeof exportToJira>>,
-    TError,
-    { id: string },
-    TContext
-  > = options?.mutation ?? {};
+  const mutationKey = ["exportToJira"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
 
-  return mutationOptions;
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof exportToJira>>,
+    { id: string }
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return exportToJira(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
 };
 
 export type ExportToJiraMutationResult = NonNullable<
   Awaited<ReturnType<typeof exportToJira>>
 >;
-export type ExportToJiraMutationError = ErrorType<ApiErrorResponse>;
 
-export function useExportToJira<
-  TError = ErrorType<ApiErrorResponse>,
+export type ExportToJiraMutationError = ErrorType<
+  UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+>;
+
+/**
+ * @summary Export package to Jira
+ */
+export const useExportToJira = <
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -1774,15 +1932,12 @@ export function useExportToJira<
   TError,
   { id: string },
   TContext
-> {
-  const mutationOptions = getExportToJiraMutationOptions(options);
-
-  return useMutation(mutationOptions);
-}
+> => {
+  return useMutation(getExportToJiraMutationOptions(options));
+};
 
 /**
- * Export package to GitHub
- * @summary Export to GitHub
+ * @summary Export package to GitHub
  */
 export const getExportToGitHubUrl = (id: string) => {
   return `/api/export-packages/${id}/export-github`;
@@ -1791,15 +1946,17 @@ export const getExportToGitHubUrl = (id: string) => {
 export const exportToGitHub = async (
   id: string,
   options?: RequestInit,
-): Promise<ExportResultsResponse> => {
-  return customFetch<ExportResultsResponse>(getExportToGitHubUrl(id), {
+): Promise<ExportToGitHub200> => {
+  return customFetch<ExportToGitHub200>(getExportToGitHubUrl(id), {
     ...options,
     method: "POST",
   });
 };
 
 export const getExportToGitHubMutationOptions = <
-  TError = ErrorType<ApiErrorResponse>,
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -1815,23 +1972,42 @@ export const getExportToGitHubMutationOptions = <
   { id: string },
   TContext
 > => {
-  const mutationOptions: UseMutationOptions<
-    Awaited<ReturnType<typeof exportToGitHub>>,
-    TError,
-    { id: string },
-    TContext
-  > = options?.mutation ?? {};
+  const mutationKey = ["exportToGitHub"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
 
-  return mutationOptions;
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof exportToGitHub>>,
+    { id: string }
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return exportToGitHub(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
 };
 
 export type ExportToGitHubMutationResult = NonNullable<
   Awaited<ReturnType<typeof exportToGitHub>>
 >;
-export type ExportToGitHubMutationError = ErrorType<ApiErrorResponse>;
 
-export function useExportToGitHub<
-  TError = ErrorType<ApiErrorResponse>,
+export type ExportToGitHubMutationError = ErrorType<
+  UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+>;
+
+/**
+ * @summary Export package to GitHub
+ */
+export const useExportToGitHub = <
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -1846,27 +2022,27 @@ export function useExportToGitHub<
   TError,
   { id: string },
   TContext
-> {
-  const mutationOptions = getExportToGitHubMutationOptions(options);
-
-  return useMutation(mutationOptions);
-}
+> => {
+  return useMutation(getExportToGitHubMutationOptions(options));
+};
 
 /**
- * List integration configurations
  * @summary List integration configurations
  */
-export const listIntegrationConfigsUrl = () => {
+export const getListIntegrationConfigsUrl = () => {
   return `/api/integrations/config`;
 };
 
 export const listIntegrationConfigs = async (
   options?: RequestInit,
 ): Promise<IntegrationConfigListResponse> => {
-  return customFetch<IntegrationConfigListResponse>(listIntegrationConfigsUrl(), {
-    ...options,
-    method: "GET",
-  });
+  return customFetch<IntegrationConfigListResponse>(
+    getListIntegrationConfigsUrl(),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
 };
 
 export const getListIntegrationConfigsQueryKey = () => {
@@ -1875,7 +2051,9 @@ export const getListIntegrationConfigsQueryKey = () => {
 
 export const getListIntegrationConfigsQueryOptions = <
   TData = Awaited<ReturnType<typeof listIntegrationConfigs>>,
-  TError = ErrorType<ApiErrorResponse>,
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
 >(options?: {
   query?: UseQueryOptions<
     Awaited<ReturnType<typeof listIntegrationConfigs>>,
@@ -1886,7 +2064,8 @@ export const getListIntegrationConfigsQueryOptions = <
 }) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
-  const queryKey = queryOptions?.queryKey ?? getListIntegrationConfigsQueryKey();
+  const queryKey =
+    queryOptions?.queryKey ?? getListIntegrationConfigsQueryKey();
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof listIntegrationConfigs>>
@@ -1902,11 +2081,19 @@ export const getListIntegrationConfigsQueryOptions = <
 export type ListIntegrationConfigsQueryResult = NonNullable<
   Awaited<ReturnType<typeof listIntegrationConfigs>>
 >;
-export type ListIntegrationConfigsQueryError = ErrorType<ApiErrorResponse>;
+export type ListIntegrationConfigsQueryError = ErrorType<
+  UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+>;
+
+/**
+ * @summary List integration configurations
+ */
 
 export function useListIntegrationConfigs<
   TData = Awaited<ReturnType<typeof listIntegrationConfigs>>,
-  TError = ErrorType<ApiErrorResponse>,
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
 >(options?: {
   query?: UseQueryOptions<
     Awaited<ReturnType<typeof listIntegrationConfigs>>,
@@ -1925,10 +2112,9 @@ export function useListIntegrationConfigs<
 }
 
 /**
- * Update integration configuration
  * @summary Update integration configuration
  */
-export const updateIntegrationConfigUrl = (type: string) => {
+export const getUpdateIntegrationConfigUrl = (type: string) => {
   return `/api/integrations/config/${type}`;
 };
 
@@ -1937,7 +2123,7 @@ export const updateIntegrationConfig = async (
   updateIntegrationConfigRequest: UpdateIntegrationConfigRequest,
   options?: RequestInit,
 ): Promise<IntegrationConfig> => {
-  return customFetch<IntegrationConfig>(updateIntegrationConfigUrl(type), {
+  return customFetch<IntegrationConfig>(getUpdateIntegrationConfigUrl(type), {
     ...options,
     method: "PUT",
     headers: { "Content-Type": "application/json", ...options?.headers },
@@ -1946,55 +2132,75 @@ export const updateIntegrationConfig = async (
 };
 
 export const getUpdateIntegrationConfigMutationOptions = <
-  TError = ErrorType<ApiErrorResponse>,
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof updateIntegrationConfig>>,
     TError,
-    { type: string; data: UpdateIntegrationConfigRequest },
+    { type: string; data: BodyType<UpdateIntegrationConfigRequest> },
     TContext
   >;
   request?: SecondParameter<typeof customFetch>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof updateIntegrationConfig>>,
   TError,
-  { type: string; data: UpdateIntegrationConfigRequest },
+  { type: string; data: BodyType<UpdateIntegrationConfigRequest> },
   TContext
 > => {
-  const mutationOptions: UseMutationOptions<
-    Awaited<ReturnType<typeof updateIntegrationConfig>>,
-    TError,
-    { type: string; data: UpdateIntegrationConfigRequest },
-    TContext
-  > = options?.mutation ?? {};
+  const mutationKey = ["updateIntegrationConfig"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
 
-  return mutationOptions;
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateIntegrationConfig>>,
+    { type: string; data: BodyType<UpdateIntegrationConfigRequest> }
+  > = (props) => {
+    const { type, data } = props ?? {};
+
+    return updateIntegrationConfig(type, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
 };
 
 export type UpdateIntegrationConfigMutationResult = NonNullable<
   Awaited<ReturnType<typeof updateIntegrationConfig>>
 >;
-export type UpdateIntegrationConfigMutationError = ErrorType<ApiErrorResponse>;
+export type UpdateIntegrationConfigMutationBody =
+  BodyType<UpdateIntegrationConfigRequest>;
+export type UpdateIntegrationConfigMutationError = ErrorType<
+  UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+>;
 
-export function useUpdateIntegrationConfig<
-  TError = ErrorType<ApiErrorResponse>,
+/**
+ * @summary Update integration configuration
+ */
+export const useUpdateIntegrationConfig = <
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof updateIntegrationConfig>>,
     TError,
-    { type: string; data: UpdateIntegrationConfigRequest },
+    { type: string; data: BodyType<UpdateIntegrationConfigRequest> },
     TContext
   >;
   request?: SecondParameter<typeof customFetch>;
 }): UseMutationResult<
   Awaited<ReturnType<typeof updateIntegrationConfig>>,
   TError,
-  { type: string; data: UpdateIntegrationConfigRequest },
+  { type: string; data: BodyType<UpdateIntegrationConfigRequest> },
   TContext
-> {
-  const mutationOptions = getUpdateIntegrationConfigMutationOptions(options);
-
-  return useMutation(mutationOptions);
-}
+> => {
+  return useMutation(getUpdateIntegrationConfigMutationOptions(options));
+};

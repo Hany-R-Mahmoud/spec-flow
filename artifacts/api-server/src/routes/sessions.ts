@@ -1,4 +1,5 @@
 import { Router, type IRouter } from "express";
+import { and } from "drizzle-orm";
 import {
   CreateSessionBody,
   ListSessionsResponse,
@@ -22,6 +23,7 @@ import {
   eq,
   DEFAULT_PHASES,
 } from "./persistence";
+import { requireAuthContext } from "./auth";
 
 const router: IRouter = Router();
 
@@ -42,11 +44,16 @@ function normalizeArtifactsInput(
   };
 }
 
-router.get("/sessions", async (_req, res) => {
+router.get("/sessions", async (req, res) => {
   try {
     const db = requireDatabase();
-    await ensureSeedData(db);
-    const sessions = await listSessionsWithArtifacts(db);
+    const auth = requireAuthContext(req, res);
+    if (!auth) {
+      return;
+    }
+
+    await ensureSeedData(db, auth.workspaceId);
+    const sessions = await listSessionsWithArtifacts(db, auth.workspaceId);
     res.json(ListSessionsResponse.parse({ sessions }));
   } catch (error) {
     sendUnexpectedError(res, error);
@@ -56,8 +63,13 @@ router.get("/sessions", async (_req, res) => {
 router.post("/sessions", async (req, res) => {
   try {
     const db = requireDatabase();
+    const auth = requireAuthContext(req, res);
+    if (!auth) {
+      return;
+    }
+
     const input = CreateSessionBody.parse(req.body);
-    const project = await createProjectRecord(db, {
+    const project = await createProjectRecord(db, auth.workspaceId, {
       name: input.name,
       jiraKey: input.jiraKey?.toUpperCase(),
     });
@@ -67,6 +79,7 @@ router.post("/sessions", async (req, res) => {
 
     await db.insert(sessionsTable).values({
       id: sessionId,
+      workspaceId: auth.workspaceId,
       projectId: project.id,
       name: input.name,
       inputType: input.inputType,
@@ -85,12 +98,13 @@ router.post("/sessions", async (req, res) => {
 
     await db.insert(workflowArtifactsTable).values({
       sessionId,
+      workspaceId: auth.workspaceId,
       ...createSessionDefaults(),
       createdAt: now,
       updatedAt: now,
     });
 
-    const session = await getSessionWithArtifacts(db, sessionId);
+    const session = await getSessionWithArtifacts(db, sessionId, auth.workspaceId);
     res.status(201).json(session);
   } catch (error) {
     sendUnexpectedError(res, error);
@@ -100,7 +114,12 @@ router.post("/sessions", async (req, res) => {
 router.get("/sessions/:sessionId", async (req, res) => {
   try {
     const db = requireDatabase();
-    const session = await getSessionWithArtifacts(db, req.params.sessionId);
+    const auth = requireAuthContext(req, res);
+    if (!auth) {
+      return;
+    }
+
+    const session = await getSessionWithArtifacts(db, req.params.sessionId, auth.workspaceId);
 
     if (!session) {
       sendError(res, 404, "Session not found.");
@@ -116,6 +135,11 @@ router.get("/sessions/:sessionId", async (req, res) => {
 router.patch("/sessions/:sessionId", async (req, res) => {
   try {
     const db = requireDatabase();
+    const auth = requireAuthContext(req, res);
+    if (!auth) {
+      return;
+    }
+
     const input = UpdateSessionBody.parse(req.body);
     const [session] = await db
       .update(sessionsTable)
@@ -124,7 +148,10 @@ router.patch("/sessions/:sessionId", async (req, res) => {
         jiraKey: input.jiraKey?.toUpperCase(),
         updatedAt: new Date(),
       })
-      .where(eq(sessionsTable.id, req.params.sessionId))
+      .where(and(
+        eq(sessionsTable.id, req.params.sessionId),
+        eq(sessionsTable.workspaceId, auth.workspaceId),
+      ))
       .returning();
 
     if (!session) {
@@ -140,10 +167,13 @@ router.patch("/sessions/:sessionId", async (req, res) => {
           jiraKey: input.jiraKey?.toUpperCase() ?? session.jiraKey,
           updatedAt: new Date(),
         })
-        .where(eq(projectsTable.id, session.projectId));
+        .where(and(
+          eq(projectsTable.id, session.projectId),
+          eq(projectsTable.workspaceId, auth.workspaceId),
+        ));
     }
 
-    const updated = await getSessionWithArtifacts(db, req.params.sessionId);
+    const updated = await getSessionWithArtifacts(db, req.params.sessionId, auth.workspaceId);
     res.json(updated);
   } catch (error) {
     sendUnexpectedError(res, error);
@@ -153,6 +183,11 @@ router.patch("/sessions/:sessionId", async (req, res) => {
 router.patch("/sessions/:sessionId/artifacts", async (req, res) => {
   try {
     const db = requireDatabase();
+    const auth = requireAuthContext(req, res);
+    if (!auth) {
+      return;
+    }
+
     const input = normalizeArtifactsInput(UpdateSessionArtifactsBody.parse(req.body));
     const [artifacts] = await db
       .update(workflowArtifactsTable)
@@ -160,7 +195,10 @@ router.patch("/sessions/:sessionId/artifacts", async (req, res) => {
         ...input,
         updatedAt: new Date(),
       })
-      .where(eq(workflowArtifactsTable.sessionId, req.params.sessionId))
+      .where(and(
+        eq(workflowArtifactsTable.sessionId, req.params.sessionId),
+        eq(workflowArtifactsTable.workspaceId, auth.workspaceId),
+      ))
       .returning();
 
     if (!artifacts) {
@@ -171,9 +209,12 @@ router.patch("/sessions/:sessionId/artifacts", async (req, res) => {
     await db
       .update(sessionsTable)
       .set({ updatedAt: new Date() })
-      .where(eq(sessionsTable.id, req.params.sessionId));
+      .where(and(
+        eq(sessionsTable.id, req.params.sessionId),
+        eq(sessionsTable.workspaceId, auth.workspaceId),
+      ));
 
-    const updated = await getSessionWithArtifacts(db, req.params.sessionId);
+    const updated = await getSessionWithArtifacts(db, req.params.sessionId, auth.workspaceId);
     res.json(updated);
   } catch (error) {
     sendUnexpectedError(res, error);

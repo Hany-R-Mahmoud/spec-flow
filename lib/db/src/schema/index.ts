@@ -2,9 +2,11 @@ import { createInsertSchema } from "drizzle-zod";
 import { relations } from "drizzle-orm";
 import {
   boolean,
+  index,
   integer,
   jsonb,
   pgTable,
+  uniqueIndex,
   text,
   timestamp,
 } from "drizzle-orm/pg-core";
@@ -180,148 +182,215 @@ export const exportPackageSchema = z.object({
   status: exportStatusSchema,
 });
 
-export const projectsTable = pgTable("projects", {
-  id: text("id").primaryKey(),
-  name: text("name").notNull(),
-  jiraKey: text("jira_key").notNull().default(""),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-});
+export const projectsTable = pgTable(
+  "projects",
+  {
+    id: text("id").primaryKey(),
+    workspaceId: text("workspace_id").notNull(),
+    name: text("name").notNull(),
+    jiraKey: text("jira_key").notNull().default(""),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => ({
+    projectsWorkspaceIdx: index("projects_workspace_id_idx").on(table.workspaceId),
+  }),
+);
 
-export const sessionsTable = pgTable("sessions", {
-  id: text("id").primaryKey(),
-  projectId: text("project_id")
-    .notNull()
-    .references(() => projectsTable.id, { onDelete: "cascade" }),
-  name: text("name").notNull(),
-  inputType: text("input_type").notNull(),
-  outputDepth: text("output_depth").notNull(),
-  jiraKey: text("jira_key").notNull().default(""),
-  targetUsers: jsonb("target_users").$type<string[]>().notNull().default([]),
-  businessGoal: text("business_goal").notNull().default(""),
-  knownConstraints: text("known_constraints").notNull().default(""),
-  labels: jsonb("labels").$type<string[]>().notNull().default([]),
-  rawInput: text("raw_input").notNull(),
-  currentPhase: text("current_phase").notNull(),
-  phases: jsonb("phases")
-    .$type<z.infer<typeof phasesRecordSchema>>()
-    .notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-});
+export const sessionsTable = pgTable(
+  "sessions",
+  {
+    id: text("id").primaryKey(),
+    workspaceId: text("workspace_id").notNull(),
+    projectId: text("project_id")
+      .notNull()
+      .references(() => projectsTable.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    inputType: text("input_type").notNull(),
+    outputDepth: text("output_depth").notNull(),
+    jiraKey: text("jira_key").notNull().default(""),
+    targetUsers: jsonb("target_users").$type<string[]>().notNull().default([]),
+    businessGoal: text("business_goal").notNull().default(""),
+    knownConstraints: text("known_constraints").notNull().default(""),
+    labels: jsonb("labels").$type<string[]>().notNull().default([]),
+    rawInput: text("raw_input").notNull(),
+    currentPhase: text("current_phase").notNull(),
+    phases: jsonb("phases")
+      .$type<z.infer<typeof phasesRecordSchema>>()
+      .notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => ({
+    sessionsWorkspaceIdIdIdx: index("sessions_workspace_id_id_idx").on(
+      table.workspaceId,
+      table.id,
+    ),
+  }),
+);
 
-export const workflowArtifactsTable = pgTable("workflow_artifacts", {
-  sessionId: text("session_id")
-    .primaryKey()
-    .references(() => sessionsTable.id, { onDelete: "cascade" }),
-  clarificationQuestions: jsonb("clarification_questions")
-    .$type<Array<z.infer<typeof clarificationQuestionSchema>>>()
-    .notNull()
-    .default([]),
-  prdSections: jsonb("prd_sections")
-    .$type<Array<z.infer<typeof prdSectionSchema>>>()
-    .notNull()
-    .default([]),
-  epics: jsonb("epics").$type<Array<z.infer<typeof epicSchema>>>().notNull().default([]),
-  stories: jsonb("stories")
-    .$type<Array<z.infer<typeof storySchema>>>()
-    .notNull()
-    .default([]),
-  metadata: jsonb("metadata")
-    .$type<z.infer<typeof workflowArtifactsMetadataSchema>>()
-    .notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-});
+export const workflowArtifactsTable = pgTable(
+  "workflow_artifacts",
+  {
+    sessionId: text("session_id")
+      .primaryKey()
+      .references(() => sessionsTable.id, { onDelete: "cascade" }),
+    workspaceId: text("workspace_id").notNull(),
+    clarificationQuestions: jsonb("clarification_questions")
+      .$type<Array<z.infer<typeof clarificationQuestionSchema>>>()
+      .notNull()
+      .default([]),
+    prdSections: jsonb("prd_sections")
+      .$type<Array<z.infer<typeof prdSectionSchema>>>()
+      .notNull()
+      .default([]),
+    epics: jsonb("epics").$type<Array<z.infer<typeof epicSchema>>>().notNull().default([]),
+    stories: jsonb("stories")
+      .$type<Array<z.infer<typeof storySchema>>>()
+      .notNull()
+      .default([]),
+    metadata: jsonb("metadata")
+      .$type<z.infer<typeof workflowArtifactsMetadataSchema>>()
+      .notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => ({
+    workflowArtifactsWorkspaceSessionIdx: index(
+      "workflow_artifacts_workspace_id_session_id_idx",
+    ).on(table.workspaceId, table.sessionId),
+  }),
+);
 
-export const settingsTable = pgTable("settings", {
-  id: text("id").primaryKey(),
-  workspaceName: text("workspace_name").notNull(),
-  jiraKey: text("jira_key").notNull().default(""),
-  defaultLabels: jsonb("default_labels")
-    .$type<string[]>()
-    .notNull()
-    .default([]),
-  defaultComponents: jsonb("default_components")
-    .$type<string[]>()
-    .notNull()
-    .default([]),
-  templatePreference: text("template_preference").notNull().default("Standard"),
-  qualityThreshold: integer("quality_threshold").notNull().default(75),
-  devReviewRequired: boolean("dev_review_required").notNull().default(true),
-  autoGenerateQuestions: boolean("auto_generate_questions")
-    .notNull()
-    .default(true),
-  showReadinessWarnings: boolean("show_readiness_warnings")
-    .notNull()
-    .default(true),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-});
+export const settingsTable = pgTable(
+  "settings",
+  {
+    id: text("id").primaryKey(),
+    workspaceId: text("workspace_id").notNull(),
+    workspaceName: text("workspace_name").notNull(),
+    jiraKey: text("jira_key").notNull().default(""),
+    defaultLabels: jsonb("default_labels")
+      .$type<string[]>()
+      .notNull()
+      .default([]),
+    defaultComponents: jsonb("default_components")
+      .$type<string[]>()
+      .notNull()
+      .default([]),
+    templatePreference: text("template_preference").notNull().default("Standard"),
+    qualityThreshold: integer("quality_threshold").notNull().default(75),
+    devReviewRequired: boolean("dev_review_required").notNull().default(true),
+    autoGenerateQuestions: boolean("auto_generate_questions")
+      .notNull()
+      .default(true),
+    showReadinessWarnings: boolean("show_readiness_warnings")
+      .notNull()
+      .default(true),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => ({
+    settingsWorkspaceIdUnique: uniqueIndex("settings_workspace_id_unique").on(
+      table.workspaceId,
+    ),
+    settingsWorkspaceIdIdx: index("settings_workspace_id_idx").on(table.workspaceId),
+  }),
+);
 
-export const exportPackagesTable = pgTable("export_packages", {
-  id: text("id").primaryKey(),
-  sessionId: text("session_id")
-    .notNull()
-    .references(() => sessionsTable.id, { onDelete: "cascade" }),
-  sessionName: text("session_name").notNull(),
-  date: timestamp("date", { withTimezone: true }).notNull(),
-  epicCount: integer("epic_count").notNull(),
-  storyCount: integer("story_count").notNull(),
-  avgReadiness: integer("avg_readiness").notNull(),
-  format: text("format").notNull(),
-  status: text("status").notNull(),
-});
+export const exportPackagesTable = pgTable(
+  "export_packages",
+  {
+    id: text("id").primaryKey(),
+    workspaceId: text("workspace_id").notNull(),
+    sessionId: text("session_id")
+      .notNull()
+      .references(() => sessionsTable.id, { onDelete: "cascade" }),
+    sessionName: text("session_name").notNull(),
+    date: timestamp("date", { withTimezone: true }).notNull(),
+    epicCount: integer("epic_count").notNull(),
+    storyCount: integer("story_count").notNull(),
+    avgReadiness: integer("avg_readiness").notNull(),
+    format: text("format").notNull(),
+    status: text("status").notNull(),
+  },
+  (table) => ({
+    exportPackagesWorkspaceIdIdx: index("export_packages_workspace_id_idx").on(
+      table.workspaceId,
+      table.id,
+    ),
+  }),
+);
 
-export const exportItemsTable = pgTable("export_items", {
-  id: text("id").primaryKey(),
-  exportPackageId: text("export_package_id")
-    .notNull()
-    .references(() => exportPackagesTable.id, { onDelete: "cascade" }),
-  storyId: text("story_id").notNull(),
-  epicId: text("epic_id").notNull(),
-  title: text("title").notNull(),
-  priority: text("priority").notNull(),
-  readinessScore: integer("readiness_score").notNull(),
-  reviewStatus: text("review_status").notNull(),
-  jiraKey: text("jira_key"),
-  githubIssueUrl: text("github_issue_url"),
-  externalExportStatus: text("external_export_status"),
-  externalExportError: text("external_export_error"),
-  exportedAt: timestamp("exported_at", { withTimezone: true }),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-});
+export const exportItemsTable = pgTable(
+  "export_items",
+  {
+    id: text("id").primaryKey(),
+    workspaceId: text("workspace_id").notNull(),
+    exportPackageId: text("export_package_id")
+      .notNull()
+      .references(() => exportPackagesTable.id, { onDelete: "cascade" }),
+    storyId: text("story_id").notNull(),
+    epicId: text("epic_id").notNull(),
+    title: text("title").notNull(),
+    priority: text("priority").notNull(),
+    readinessScore: integer("readiness_score").notNull(),
+    reviewStatus: text("review_status").notNull(),
+    jiraKey: text("jira_key"),
+    githubIssueUrl: text("github_issue_url"),
+    externalExportStatus: text("external_export_status"),
+    externalExportError: text("external_export_error"),
+    exportedAt: timestamp("exported_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => ({
+    exportItemsWorkspacePackageIdx: index(
+      "export_items_workspace_id_export_package_id_idx",
+    ).on(table.workspaceId, table.exportPackageId),
+  }),
+);
 
-export const integrationConfigTable = pgTable("integration_config", {
-  id: text("id").primaryKey(),
-  integrationType: text("integration_type").notNull(),
-  enabled: boolean("enabled").notNull().default(false),
-  config: jsonb("config").$type<Record<string, string>>().notNull().default({}),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-});
+export const integrationConfigTable = pgTable(
+  "integration_config",
+  {
+    id: text("id").primaryKey(),
+    workspaceId: text("workspace_id").notNull(),
+    integrationType: text("integration_type").notNull(),
+    enabled: boolean("enabled").notNull().default(false),
+    config: jsonb("config").$type<Record<string, string>>().notNull().default({}),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => ({
+    integrationConfigWorkspaceTypeUnique: uniqueIndex(
+      "integration_config_workspace_id_integration_type_unique",
+    ).on(table.workspaceId, table.integrationType),
+    integrationConfigWorkspaceTypeIdx: index(
+      "integration_config_workspace_id_integration_type_idx",
+    ).on(table.workspaceId, table.integrationType),
+  }),
+);
 
 export const projectsRelations = relations(projectsTable, ({ many }) => ({
   sessions: many(sessionsTable),

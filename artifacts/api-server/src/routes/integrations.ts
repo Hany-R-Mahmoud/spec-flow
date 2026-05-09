@@ -1,20 +1,27 @@
 import { Router, type IRouter } from "express";
-import { eq } from "drizzle-orm";
-import { integrationConfigTable } from "@workspace/db";
 import { sendUnexpectedError } from "./error-response";
 import {
   requireDatabase,
   getIntegrationConfigs,
   updateIntegrationConfigRecord,
-  toIntegrationConfig,
 } from "./persistence";
+import { requireAuthContext, requireMutableWorkspaceContext } from "./auth";
+import {
+  IntegrationSecretSetupError,
+  normalizeIntegrationConfigInput,
+} from "../lib/integration-secrets";
 
 const router: IRouter = Router();
 
-router.get("/integrations/config", async (_req, res) => {
+router.get("/integrations/config", async (req, res) => {
   try {
     const db = requireDatabase();
-    const configs = await getIntegrationConfigs(db);
+    const auth = requireAuthContext(req, res);
+    if (!auth) {
+      return;
+    }
+
+    const configs = await getIntegrationConfigs(db, auth.workspaceId);
 
     const defaultIntegrations = [
       { id: "jira", integrationType: "jira", enabled: false, configured: false },
@@ -35,6 +42,11 @@ router.get("/integrations/config", async (_req, res) => {
 router.put("/integrations/config/:type", async (req, res) => {
   try {
     const db = requireDatabase();
+    const auth = requireMutableWorkspaceContext(req, res);
+    if (!auth) {
+      return;
+    }
+
     const { type } = req.params;
     const { enabled, config } = req.body;
 
@@ -48,20 +60,19 @@ router.put("/integrations/config/:type", async (req, res) => {
       return;
     }
 
-    const validKeys = type === "jira"
-      ? ["domain", "email", "apiToken", "projectKey"]
-      : ["owner", "repo", "token"];
-
-    const sanitizedConfig: Record<string, string> = {};
-    if (config && typeof config === "object") {
-      for (const key of validKeys) {
-        if (config[key] && typeof config[key] === "string" && config[key].length > 0) {
-          sanitizedConfig[key] = config[key];
-        }
+    let sanitizedConfig: Record<string, string>;
+    try {
+      sanitizedConfig = normalizeIntegrationConfigInput(type, config);
+    } catch (error) {
+      if (error instanceof IntegrationSecretSetupError) {
+        res.status(500).json({ message: error.message });
+        return;
       }
+
+      throw error;
     }
 
-    const result = await updateIntegrationConfigRecord(db, type, {
+    const result = await updateIntegrationConfigRecord(db, type, auth.workspaceId, {
       enabled,
       config: sanitizedConfig,
     });

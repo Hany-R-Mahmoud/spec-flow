@@ -384,11 +384,11 @@ export interface ExportItem {
   priority: string;
   readinessScore: number;
   reviewStatus: string;
-  jiraKey: string | null;
-  githubIssueUrl: string | null;
-  externalExportStatus: string | null;
-  externalExportError: string | null;
-  exportedAt: string | null;
+  jiraKey?: string;
+  githubIssueUrl?: string;
+  externalExportStatus?: string;
+  externalExportError?: string;
+  exportedAt?: string;
 }
 
 export interface ExportPackageDetailResponse {
@@ -399,7 +399,7 @@ export interface ExportPackageDetailResponse {
 export interface CreateExportPackageRequest {
   sessionId: string;
   storyIds: string[];
-  format: "markdown" | "csv" | "json";
+  format: ExportFormat;
 }
 
 export interface ExportResult {
@@ -408,10 +408,6 @@ export interface ExportResult {
   remoteKey?: string;
   remoteUrl?: string;
   error?: string;
-}
-
-export interface ExportResultsResponse {
-  results: ExportResult[];
 }
 
 export interface IntegrationConfig {
@@ -425,12 +421,32 @@ export interface IntegrationConfigListResponse {
   integrations: IntegrationConfig[];
 }
 
+export type UpdateIntegrationConfigRequestConfig = { [key: string]: string };
+
 export interface UpdateIntegrationConfigRequest {
   enabled: boolean;
-  config?: Record<string, string>;
+  config?: UpdateIntegrationConfigRequestConfig;
 }
 
 /**
  * API error
  */
 export type ApiErrorResponse = ApiError;
+
+/**
+ * Authentication required
+ */
+export type UnauthorizedResponse = ApiError;
+
+/**
+ * Authenticated but not authorized
+ */
+export type ForbiddenResponse = ApiError;
+
+export type ExportToJira200 = {
+  results?: ExportResult[];
+};
+
+export type ExportToGitHub200 = {
+  results?: ExportResult[];
+};

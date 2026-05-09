@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Switch, Route, Router as WouterRouter } from "wouter";
 import { Redirect, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -20,36 +21,82 @@ import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient();
 
+function useApiReady(): boolean {
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    let timeoutId: number | null = null;
+
+    const check = async (): Promise<void> => {
+      try {
+        const response = await fetch("/api/healthz", { method: "GET" });
+        if (cancelled) {
+          return;
+        }
+
+        if (response.ok) {
+          setIsReady(true);
+          return;
+        }
+      } catch {
+        // Keep polling until API is ready.
+      }
+
+      timeoutId = window.setTimeout(check, 250);
+    };
+
+    void check();
+
+    return () => {
+      cancelled = true;
+      if (timeoutId !== null) {
+        window.clearTimeout(timeoutId);
+      }
+    };
+  }, []);
+
+  return isReady;
+}
+
 function Router() {
   const [location] = useLocation();
-  const { status, session } = useAuth();
+  const { status, isSignedIn, isTokenReady, workspaceId } = useAuth();
+  const isApiReady = useApiReady();
+  const isLoginRoute = location === "/login" || location.startsWith("/login/");
 
-  if (status === "loading") {
+  if (location === "/signup" || location.startsWith("/signup/")) {
+    return <Redirect to={isSignedIn ? "/" : "/login"} />;
+  }
+
+  if (isSignedIn && isLoginRoute) {
+    return <Redirect to="/" />;
+  }
+
+  if (isLoginRoute) {
+    return <LoginPage />;
+  }
+
+  if (status === "loading" || (isSignedIn && (!isTokenReady || !isApiReady))) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background px-6 text-center">
         <div className="max-w-sm space-y-3">
           <div className="mx-auto h-10 w-10 animate-pulse rounded-full border border-border bg-card" />
-          <p className="text-sm font-medium text-foreground">Loading your Supabase session...</p>
-          <p className="text-xs text-muted-foreground">Restoring user access and workspace data.</p>
+          <p className="text-sm font-medium text-foreground">Loading your Clerk session...</p>
+          <p className="text-xs text-muted-foreground">
+            Restoring user access and waiting for API readiness.
+          </p>
         </div>
       </div>
     );
   }
 
-  if (!session) {
-    if (location !== "/login") {
-      return <Redirect to="/login" />;
-    }
-
-    return <LoginPage />;
-  }
-
-  if (location === "/login") {
-    return <Redirect to="/" />;
+  if (!isSignedIn) {
+    return <Redirect to="/login" />;
   }
 
   return (
-    <SessionProvider>
+    <SessionProvider key={workspaceId ?? "workspace"}>
       <AppShell>
         <Switch>
           <Route path="/" component={Dashboard} />

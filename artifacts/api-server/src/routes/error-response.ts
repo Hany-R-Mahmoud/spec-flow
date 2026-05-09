@@ -1,4 +1,5 @@
 import type { Response } from "express";
+import { logger } from "../lib/logger";
 
 export function sendError(
   res: Response,
@@ -17,9 +18,17 @@ export function sendUnexpectedError(res: Response, error: unknown): Response {
   }
 
   if (error instanceof Error) {
-    return sendError(res, 500, error.message);
+    logger.error(
+      { err: error, reqId: (res.req as { id?: string } | undefined)?.id },
+      "Unexpected API error",
+    );
+    return sendError(res, 500, "Unexpected server error.");
   }
 
+  logger.error(
+    { err: error, reqId: (res.req as { id?: string } | undefined)?.id },
+    "Unexpected API error",
+  );
   return sendError(res, 500, "Unexpected server error.");
 }
 

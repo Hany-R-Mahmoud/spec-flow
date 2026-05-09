@@ -1,4 +1,5 @@
 import { Router, type IRouter } from "express";
+import { and } from "drizzle-orm";
 import {
   CreateProjectBody,
   ListProjectsResponse,
@@ -13,14 +14,23 @@ import {
   requireDatabase,
   toProject,
 } from "./persistence";
+import { requireAuthContext } from "./auth";
 
 const router: IRouter = Router();
 
-router.get("/projects", async (_req, res) => {
+router.get("/projects", async (req, res) => {
   try {
     const db = requireDatabase();
-    await ensureSeedData(db);
-    const projects = await db.select().from(projectsTable);
+    const auth = requireAuthContext(req, res);
+    if (!auth) {
+      return;
+    }
+
+    await ensureSeedData(db, auth.workspaceId);
+    const projects = await db
+      .select()
+      .from(projectsTable)
+      .where(eq(projectsTable.workspaceId, auth.workspaceId));
 
     res.json(ListProjectsResponse.parse({ projects: projects.map(toProject) }));
   } catch (error) {
@@ -31,8 +41,13 @@ router.get("/projects", async (_req, res) => {
 router.post("/projects", async (req, res) => {
   try {
     const db = requireDatabase();
+    const auth = requireAuthContext(req, res);
+    if (!auth) {
+      return;
+    }
+
     const input = CreateProjectBody.parse(req.body);
-    const project = await createProjectRecord(db, input);
+    const project = await createProjectRecord(db, auth.workspaceId, input);
     res.status(201).json(project);
   } catch (error) {
     sendUnexpectedError(res, error);
@@ -42,10 +57,18 @@ router.post("/projects", async (req, res) => {
 router.get("/projects/:projectId", async (req, res) => {
   try {
     const db = requireDatabase();
+    const auth = requireAuthContext(req, res);
+    if (!auth) {
+      return;
+    }
+
     const [project] = await db
       .select()
       .from(projectsTable)
-      .where(eq(projectsTable.id, req.params.projectId));
+      .where(and(
+        eq(projectsTable.id, req.params.projectId),
+        eq(projectsTable.workspaceId, auth.workspaceId),
+      ));
 
     if (!project) {
       sendError(res, 404, "Project not found.");
@@ -61,6 +84,11 @@ router.get("/projects/:projectId", async (req, res) => {
 router.patch("/projects/:projectId", async (req, res) => {
   try {
     const db = requireDatabase();
+    const auth = requireAuthContext(req, res);
+    if (!auth) {
+      return;
+    }
+
     const input = UpdateProjectBody.parse(req.body);
     const [project] = await db
       .update(projectsTable)
@@ -68,7 +96,10 @@ router.patch("/projects/:projectId", async (req, res) => {
         ...input,
         updatedAt: new Date(),
       })
-      .where(eq(projectsTable.id, req.params.projectId))
+      .where(and(
+        eq(projectsTable.id, req.params.projectId),
+        eq(projectsTable.workspaceId, auth.workspaceId),
+      ))
       .returning();
 
     if (!project) {

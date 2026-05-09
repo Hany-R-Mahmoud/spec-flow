@@ -6,6 +6,8 @@ info:
 servers:
   - url: /api
     description: Base API path
+security:
+  - bearerAuth: []
 tags:
   - name: health
     description: Health operations
@@ -24,6 +26,7 @@ paths:
       tags: [health]
       summary: Health check
       description: Returns server health status
+      security: []
       responses:
         "200":
           description: Healthy
@@ -43,6 +46,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ProjectListResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
         default:
           $ref: "#/components/responses/ApiError"
     post:
@@ -62,6 +69,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Project"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
         default:
           $ref: "#/components/responses/ApiError"
   /projects/{projectId}:
@@ -78,6 +89,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Project"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
         default:
           $ref: "#/components/responses/ApiError"
     patch:
@@ -99,6 +114,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Project"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
         default:
           $ref: "#/components/responses/ApiError"
   /sessions:
@@ -113,6 +132,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/SessionListResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
         default:
           $ref: "#/components/responses/ApiError"
     post:
@@ -132,6 +155,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/WorkflowSession"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
         default:
           $ref: "#/components/responses/ApiError"
   /sessions/{sessionId}:
@@ -148,6 +175,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/WorkflowSession"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
         default:
           $ref: "#/components/responses/ApiError"
     patch:
@@ -169,6 +200,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/WorkflowSession"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
         default:
           $ref: "#/components/responses/ApiError"
   /sessions/{sessionId}/artifacts:
@@ -191,6 +226,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/WorkflowSession"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
         default:
           $ref: "#/components/responses/ApiError"
   /sessions/{sessionId}/generate/clarification:
@@ -213,6 +252,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/WorkflowSession"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
         default:
           $ref: "#/components/responses/ApiError"
   /sessions/{sessionId}/generate/prd:
@@ -235,6 +278,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/WorkflowSession"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
         default:
           $ref: "#/components/responses/ApiError"
   /sessions/{sessionId}/generate/epics:
@@ -257,6 +304,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/WorkflowSession"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
         default:
           $ref: "#/components/responses/ApiError"
   /sessions/{sessionId}/generate/stories:
@@ -279,6 +330,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/WorkflowSession"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
         default:
           $ref: "#/components/responses/ApiError"
   /sessions/{sessionId}/generate/quality:
@@ -301,6 +356,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/WorkflowSession"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
         default:
           $ref: "#/components/responses/ApiError"
   /settings:
@@ -315,6 +374,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/WorkspaceSettings"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
         default:
           $ref: "#/components/responses/ApiError"
     put:
@@ -334,6 +397,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/WorkspaceSettings"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
         default:
           $ref: "#/components/responses/ApiError"
   /export-packages:
@@ -348,6 +415,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ExportPackageListResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
         default:
           $ref: "#/components/responses/ApiError"
     post:
@@ -367,6 +438,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ExportPackageDetailResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
         default:
           $ref: "#/components/responses/ApiError"
   /export-packages/{id}:
@@ -387,6 +462,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ExportPackageDetailResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
         default:
           $ref: "#/components/responses/ApiError"
   /export-packages/{id}/export-jira:
@@ -412,6 +491,10 @@ paths:
                     type: array
                     items:
                       $ref: "#/components/schemas/ExportResult"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
         default:
           $ref: "#/components/responses/ApiError"
   /export-packages/{id}/export-github:
@@ -437,6 +520,10 @@ paths:
                     type: array
                     items:
                       $ref: "#/components/schemas/ExportResult"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
         default:
           $ref: "#/components/responses/ApiError"
   /integrations/config:
@@ -451,6 +538,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/IntegrationConfigListResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
         default:
           $ref: "#/components/responses/ApiError"
   /integrations/config/{type}:
@@ -477,9 +568,18 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/IntegrationConfig"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
         default:
           $ref: "#/components/responses/ApiError"
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   parameters:
     ProjectId:
       name: projectId
@@ -496,6 +596,18 @@ components:
   responses:
     ApiError:
       description: API error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
+    Unauthorized:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
+    Forbidden:
+      description: Authenticated but not authorized
       content:
         application/json:
           schema:

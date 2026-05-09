@@ -2761,3 +2761,125 @@ export const ListExportPackagesResponse = zod.object({
     }),
   ),
 });
+
+/**
+ * @summary Create export package
+ */
+export const CreateExportPackageBody = zod.object({
+  sessionId: zod.string(),
+  storyIds: zod.array(zod.string()),
+  format: zod.enum(["markdown", "csv", "json"]),
+});
+
+/**
+ * @summary Get export package details
+ */
+export const GetExportPackageParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const GetExportPackageResponse = zod.object({
+  exportPackage: zod.object({
+    id: zod.string(),
+    sessionId: zod.string(),
+    sessionName: zod.string(),
+    date: zod.coerce.date(),
+    epicCount: zod.number(),
+    storyCount: zod.number(),
+    avgReadiness: zod.number(),
+    format: zod.enum(["markdown", "csv", "json"]),
+    status: zod.enum(["complete", "partial", "draft"]),
+  }),
+  items: zod.array(
+    zod.object({
+      id: zod.string(),
+      exportPackageId: zod.string(),
+      storyId: zod.string(),
+      epicId: zod.string(),
+      title: zod.string(),
+      priority: zod.string(),
+      readinessScore: zod.number(),
+      reviewStatus: zod.string(),
+      jiraKey: zod.string().optional(),
+      githubIssueUrl: zod.string().optional(),
+      externalExportStatus: zod.string().optional(),
+      externalExportError: zod.string().optional(),
+      exportedAt: zod.coerce.date().optional(),
+    }),
+  ),
+});
+
+/**
+ * @summary Export package to Jira
+ */
+export const ExportToJiraParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const ExportToJiraResponse = zod.object({
+  results: zod
+    .array(
+      zod.object({
+        storyId: zod.string(),
+        success: zod.boolean(),
+        remoteKey: zod.string().optional(),
+        remoteUrl: zod.string().optional(),
+        error: zod.string().optional(),
+      }),
+    )
+    .optional(),
+});
+
+/**
+ * @summary Export package to GitHub
+ */
+export const ExportToGitHubParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const ExportToGitHubResponse = zod.object({
+  results: zod
+    .array(
+      zod.object({
+        storyId: zod.string(),
+        success: zod.boolean(),
+        remoteKey: zod.string().optional(),
+        remoteUrl: zod.string().optional(),
+        error: zod.string().optional(),
+      }),
+    )
+    .optional(),
+});
+
+/**
+ * @summary List integration configurations
+ */
+export const ListIntegrationConfigsResponse = zod.object({
+  integrations: zod.array(
+    zod.object({
+      id: zod.string(),
+      integrationType: zod.string(),
+      enabled: zod.boolean(),
+      configured: zod.boolean(),
+    }),
+  ),
+});
+
+/**
+ * @summary Update integration configuration
+ */
+export const UpdateIntegrationConfigParams = zod.object({
+  type: zod.coerce.string(),
+});
+
+export const UpdateIntegrationConfigBody = zod.object({
+  enabled: zod.boolean(),
+  config: zod.record(zod.string(), zod.string()).optional(),
+});
+
+export const UpdateIntegrationConfigResponse = zod.object({
+  id: zod.string(),
+  integrationType: zod.string(),
+  enabled: zod.boolean(),
+  configured: zod.boolean(),
+});

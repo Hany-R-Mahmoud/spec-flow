@@ -1,4 +1,5 @@
 import { Router, type IRouter } from "express";
+import { and } from "drizzle-orm";
 import {
   GenerateClarificationBody,
   GenerateEpicsBody,
@@ -30,6 +31,7 @@ import {
   withGenerationStatus,
   eq,
 } from "./persistence";
+import { requireAuthContext } from "./auth";
 
 const router: IRouter = Router();
 
@@ -88,12 +90,13 @@ function resetDownstream(
 
 async function markGenerationState(args: {
   sessionId: string;
+  workspaceId: string;
   step: GenerationRouteStep;
   status: "running" | "failed" | "succeeded" | "unavailable";
   errorMessage?: string | null;
 }) {
   const db = requireDatabase();
-  const row = await getSessionArtifactsRecord(db, args.sessionId);
+  const row = await getSessionArtifactsRecord(db, args.sessionId, args.workspaceId);
 
   if (!row?.artifacts) {
     return null;
@@ -114,17 +117,21 @@ async function markGenerationState(args: {
       metadata: { generation: nextGeneration },
       updatedAt: new Date(),
     })
-    .where(eq(workflowArtifactsTable.sessionId, args.sessionId));
+    .where(and(
+      eq(workflowArtifactsTable.sessionId, args.sessionId),
+      eq(workflowArtifactsTable.workspaceId, args.workspaceId),
+    ));
 
   return nextGeneration;
 }
 
 async function runGeneration(
   sessionId: string,
+  workspaceId: string,
   step: GenerationRouteStep,
 ): Promise<Awaited<ReturnType<typeof getSessionWithArtifacts>>> {
   const db = requireDatabase();
-  const row = await getSessionArtifactsRecord(db, sessionId);
+  const row = await getSessionArtifactsRecord(db, sessionId, workspaceId);
 
   if (!row) {
     throw new Error("Session not found.");
@@ -152,14 +159,20 @@ async function runGeneration(
         metadata: { generation },
         updatedAt: new Date(),
       })
-      .where(eq(workflowArtifactsTable.sessionId, sessionId));
+      .where(and(
+        eq(workflowArtifactsTable.sessionId, sessionId),
+        eq(workflowArtifactsTable.workspaceId, workspaceId),
+      ));
 
     await db
       .update(sessionsTable)
       .set(buildPhaseUpdate(step, "needs-attention"))
-      .where(eq(sessionsTable.id, sessionId));
+      .where(and(
+        eq(sessionsTable.id, sessionId),
+        eq(sessionsTable.workspaceId, workspaceId),
+      ));
 
-    return getSessionWithArtifacts(db, sessionId);
+    return getSessionWithArtifacts(db, sessionId, workspaceId);
   }
 
   const runningGeneration = withGenerationStatus(generation, step, {
@@ -174,7 +187,10 @@ async function runGeneration(
       metadata: { generation: runningGeneration },
       updatedAt: new Date(),
     })
-    .where(eq(workflowArtifactsTable.sessionId, sessionId));
+    .where(and(
+      eq(workflowArtifactsTable.sessionId, sessionId),
+      eq(workflowArtifactsTable.workspaceId, workspaceId),
+    ));
 
   try {
     const prompt = workflowPrompts[step].buildPrompt({
@@ -282,14 +298,20 @@ async function runGeneration(
         metadata: { generation: nextGeneration },
         updatedAt: new Date(),
       })
-      .where(eq(workflowArtifactsTable.sessionId, sessionId));
+      .where(and(
+        eq(workflowArtifactsTable.sessionId, sessionId),
+        eq(workflowArtifactsTable.workspaceId, workspaceId),
+      ));
 
     await db
       .update(sessionsTable)
       .set(buildPhaseUpdate(step, "in-progress"))
-      .where(eq(sessionsTable.id, sessionId));
+      .where(and(
+        eq(sessionsTable.id, sessionId),
+        eq(sessionsTable.workspaceId, workspaceId),
+      ));
 
-    return getSessionWithArtifacts(db, sessionId);
+    return getSessionWithArtifacts(db, sessionId, workspaceId);
   } catch (error) {
     const message =
       error instanceof Error
@@ -298,6 +320,7 @@ async function runGeneration(
 
     await markGenerationState({
       sessionId,
+      workspaceId,
       step,
       status: "failed",
       errorMessage: message,
@@ -306,7 +329,10 @@ async function runGeneration(
     await db
       .update(sessionsTable)
       .set(buildPhaseUpdate(step, "needs-attention"))
-      .where(eq(sessionsTable.id, sessionId));
+      .where(and(
+        eq(sessionsTable.id, sessionId),
+        eq(sessionsTable.workspaceId, workspaceId),
+      ));
 
     throw error;
   }
@@ -318,7 +344,12 @@ function handleStep(step: GenerationRouteStep) {
       generateBodyParsers[step].parse(req.body ?? {});
 
       const db = requireDatabase();
-      const existing = await getSessionArtifactsRecord(db, req.params.sessionId);
+      const auth = requireAuthContext(req, res);
+      if (!auth) {
+        return;
+      }
+
+      const existing = await getSessionArtifactsRecord(db, req.params.sessionId, auth.workspaceId);
 
       if (!existing) {
         sendError(res, 404, "Session not found.");
@@ -330,7 +361,7 @@ function handleStep(step: GenerationRouteStep) {
         return;
       }
 
-      const session = await runGeneration(req.params.sessionId, step);
+      const session = await runGeneration(req.params.sessionId, auth.workspaceId, step);
       res.json(session);
     } catch (error) {
       sendUnexpectedError(res, error);
