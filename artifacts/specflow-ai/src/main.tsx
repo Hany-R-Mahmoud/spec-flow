@@ -2,6 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { ClerkProvider } from "@clerk/react";
 import App from "./App";
+import { appPath } from "@/lib/routes";
 import "./index.css";
 
 const clerkPublishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
@@ -30,7 +31,7 @@ if (!clerkPublishableKey) {
       <ClerkProvider
         publishableKey={clerkPublishableKey}
         signInUrl="/login"
-        signInFallbackRedirectUrl="/"
+        signInFallbackRedirectUrl={appPath()}
       >
         <App />
       </ClerkProvider>

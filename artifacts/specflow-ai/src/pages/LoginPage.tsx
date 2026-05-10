@@ -1,5 +1,6 @@
 import { SignIn } from "@clerk/react";
 import { AuthPageShell } from "@/components/auth/AuthPageShell";
+import { appPath } from "@/lib/routes";
 
 function AuthFallback() {
   return (
@@ -12,7 +13,7 @@ function AuthFallback() {
 export function LoginPage() {
   return (
     <AuthPageShell>
-      <SignIn routing="path" path="/login" fallbackRedirectUrl="/" fallback={<AuthFallback />} />
+      <SignIn routing="path" path="/login" fallbackRedirectUrl={appPath()} fallback={<AuthFallback />} />
     </AuthPageShell>
   );
 }
