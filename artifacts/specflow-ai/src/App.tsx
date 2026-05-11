@@ -88,15 +88,15 @@ function useApiReady(): boolean {
       try {
         const response = await fetch(resolveApiUrl("/api/healthz"), {
           method: "GET",
+          mode: "no-cors",
         });
         if (cancelled) {
           return;
         }
 
-        if (response.ok) {
-          markReady();
-          return;
-        }
+        void response;
+        markReady();
+        return;
       } catch {
         // Keep polling until API is ready.
       }
