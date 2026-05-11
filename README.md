@@ -66,6 +66,12 @@ Frontend-only Vercel setup:
    - `VITE_APP_URL=https://your-project.vercel.app`
    - `APP_ALLOWED_ORIGINS=https://your-project.vercel.app`
 
+Backend Vercel project setup:
+
+1. Set Root Directory to `artifacts/api-server`.
+2. Keep build command as `pnpm run build`.
+3. Let Vercel serve the `api/[...path].ts` handler in that directory.
+
 After the server bundle change in `artifacts/api-server/src/server.ts`,
 backend production setup is env-only as long as the API stays reachable and the
 frontend origin is allowlisted.
