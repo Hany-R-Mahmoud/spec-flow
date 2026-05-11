@@ -23,6 +23,8 @@ import { ExportsPage } from "@/pages/ExportsPage";
 import { SettingsPage } from "@/pages/SettingsPage";
 import { LoginPage } from "@/pages/LoginPage";
 import NotFound from "@/pages/not-found";
+import { resolveApiUrl } from "@/lib/runtime";
+import { syncDocumentMetadata } from "@/lib/metadata";
 
 const queryClient = new QueryClient();
 const LEGACY_APP_PATHS = ["/new", "/projects", "/reviews", "/exports", "/settings"];
@@ -75,7 +77,9 @@ function useApiReady(): boolean {
 
     const check = async (): Promise<void> => {
       try {
-        const response = await fetch("/api/healthz", { method: "GET" });
+        const response = await fetch(resolveApiUrl("/api/healthz"), {
+          method: "GET",
+        });
         if (cancelled) {
           return;
         }
@@ -147,6 +151,10 @@ function Router() {
   const isLoginRoute = isAuthPath(location);
   const isLegacyRoute = isLegacyAppPath(location);
   const isAppRoute = isAppPath(location);
+
+  useEffect(() => {
+    syncDocumentMetadata(location);
+  }, [location]);
 
   if (status === "loading" && (isLoginRoute || isLegacyRoute || isAppRoute)) {
     return (

@@ -16,6 +16,7 @@ Create a local `.env` at the workspace root from `.env.example` and set:
 - `CLERK_SECRET_KEY`
 - `DATABASE_URL`
 - `VITE_APP_URL`
+- `VITE_API_SERVER_URL`
 - optional `API_SERVER_URL`
 - optional `APP_ALLOWED_ORIGINS`
 - optional `INTEGRATION_SECRET_ENCRYPTION_KEY`
@@ -52,6 +53,27 @@ For production deploys like Vercel, you do not run both local processes on your
 machine. The frontend is deployed separately, and the API is deployed behind its
 own hosted endpoint or serverless route. The browser then points at that hosted
 API instead of `localhost:24549`.
+
+Frontend-only Vercel setup:
+
+1. Deploy the frontend from the repo root using the Vercel config in
+   [`vercel.json`](./vercel.json).
+2. Set these Vercel env vars on the frontend project:
+   - `VITE_CLERK_PUBLISHABLE_KEY`
+   - `VITE_API_SERVER_URL`
+   - `VITE_APP_URL` if you want canonical URLs to resolve from the deployed site
+3. Keep the backend exactly as-is, but point its env at the deployed frontend:
+   - `VITE_APP_URL=https://your-project.vercel.app`
+   - `APP_ALLOWED_ORIGINS=https://your-project.vercel.app`
+
+After the server bundle change in `artifacts/api-server/src/server.ts`,
+backend production setup is env-only as long as the API stays reachable and the
+frontend origin is allowlisted.
+
+Preview deploys need the preview origin allowlisted too. If you want previews to
+work, add the preview URL to `APP_ALLOWED_ORIGINS` before or after each deploy.
+Otherwise, treat preview as frontend-only UI testing and use production API
+origins.
 
 ## Other workspace targets
 

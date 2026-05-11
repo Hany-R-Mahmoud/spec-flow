@@ -19,6 +19,14 @@ export default defineConfig({
   base: basePath,
   envDir: path.resolve(import.meta.dirname, "..", ".."),
   envPrefix: ["VITE_"],
+  define: {
+    "import.meta.env.VITE_VERCEL_ENV": JSON.stringify(
+      process.env.VERCEL_ENV ?? "",
+    ),
+    "import.meta.env.VITE_VERCEL_URL": JSON.stringify(
+      process.env.VERCEL_URL ?? "",
+    ),
+  },
   plugins: [
     react(),
     tailwindcss(),
