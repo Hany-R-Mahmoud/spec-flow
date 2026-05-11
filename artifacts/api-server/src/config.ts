@@ -1,7 +1,10 @@
 import path from "node:path";
 import { config as loadEnv } from "dotenv";
 
-const ROOT_ENV_PATH = path.resolve(process.cwd(), "../../.env");
+const ENV_PATHS = [
+  path.resolve(process.cwd(), ".env"),
+  path.resolve(process.cwd(), "../../.env"),
+];
 const DEFAULT_APP_ORIGINS = [
   "http://localhost:8080",
   "http://127.0.0.1:8080",
@@ -24,6 +27,26 @@ function readRequiredEnv(name: string): string {
   }
 
   return value;
+}
+
+function loadLocalEnv(): void {
+  for (const envPath of ENV_PATHS) {
+    loadEnv({ path: envPath });
+  }
+}
+
+function readAppOrigin(): string {
+  const configured = process.env.VITE_APP_URL?.trim();
+  if (configured) {
+    return configured;
+  }
+
+  const vercelUrl = process.env.VERCEL_URL?.trim();
+  if (vercelUrl) {
+    return `https://${vercelUrl}`;
+  }
+
+  throw new Error("Missing required server env: VITE_APP_URL");
 }
 
 function normalizeOrigin(value: string): string {
@@ -51,7 +74,7 @@ function parseAllowedOrigins(appOrigin: string): string[] {
 }
 
 export function loadApiServerConfig(): ApiServerConfig {
-  loadEnv({ path: ROOT_ENV_PATH });
+  loadLocalEnv();
 
   const clerkPublishableKey =
     process.env.CLERK_PUBLISHABLE_KEY?.trim() ??
@@ -66,7 +89,7 @@ export function loadApiServerConfig(): ApiServerConfig {
 
   const clerkSecretKey = readRequiredEnv("CLERK_SECRET_KEY");
   const databaseUrl = readRequiredEnv("DATABASE_URL");
-  const appOrigin = readRequiredEnv("VITE_APP_URL");
+  const appOrigin = readAppOrigin();
   const rawClockSkewInMs = process.env.CLERK_CLOCK_SKEW_IN_MS?.trim() ?? "60000";
   const clerkClockSkewInMs = Number(rawClockSkewInMs);
 

@@ -16,10 +16,10 @@ import {
   sessionsTable,
   type WorkflowGeneration,
 } from "@workspace/db";
-import { applyQualityReview, generateClarificationQuestions, generateEpics, generatePrdSections, generateStories } from "../ai/deterministic-workflow";
-import { getGenerationRuntime } from "../ai/config";
-import { workflowPrompts } from "../ai/prompts";
-import { sendError, sendUnexpectedError } from "./error-response";
+import { applyQualityReview, generateClarificationQuestions, generateEpics, generatePrdSections, generateStories } from "../ai/deterministic-workflow.js";
+import { getGenerationRuntime } from "../ai/config.js";
+import { workflowPrompts } from "../ai/prompts.js";
+import { sendError, sendUnexpectedError } from "./error-response.js";
 import {
   buildPhaseUpdate,
   createSessionDefaults,
@@ -30,8 +30,8 @@ import {
   requireDatabase,
   withGenerationStatus,
   eq,
-} from "./persistence";
-import { requireAuthContext } from "./auth";
+} from "./persistence.js";
+import { requireAuthContext } from "./auth.js";
 
 const router: IRouter = Router();
 

@@ -1,13 +1,13 @@
-import express, { type Express } from "express";
+import express from "express";
 import cors from "cors";
 import pinoHttp from "pino-http";
 import { clerkMiddleware } from "@clerk/express";
-import router from "./routes";
-import { logger } from "./lib/logger";
-import type { ApiServerConfig } from "./config";
+import router from "./routes/index.js";
+import { logger } from "./lib/logger.js";
+import type { ApiServerConfig } from "./config.js";
 
-export function createApp(config: ApiServerConfig): Express {
-  const app: Express = express();
+export function createApp(config: ApiServerConfig): ReturnType<typeof express> {
+  const app = express();
 
   app.use(
     clerkMiddleware({

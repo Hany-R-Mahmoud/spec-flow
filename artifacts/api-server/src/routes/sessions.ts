@@ -11,7 +11,7 @@ import {
   sessionsTable,
   workflowArtifactsTable,
 } from "@workspace/db";
-import { sendError, sendUnexpectedError } from "./error-response";
+import { sendError, sendUnexpectedError } from "./error-response.js";
 import {
   createProjectRecord,
   createSessionDefaults,
@@ -22,8 +22,8 @@ import {
   requireDatabase,
   eq,
   DEFAULT_PHASES,
-} from "./persistence";
-import { requireAuthContext } from "./auth";
+} from "./persistence.js";
+import { requireAuthContext } from "./auth.js";
 
 const router: IRouter = Router();
 

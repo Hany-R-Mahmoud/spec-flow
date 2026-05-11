@@ -2,7 +2,7 @@ import { Router, type IRouter } from "express";
 import { and, eq } from "drizzle-orm";
 import { ListExportPackagesResponse } from "@workspace/api-zod";
 import { exportPackagesTable, sessionsTable, workflowArtifactsTable } from "@workspace/db";
-import { sendUnexpectedError } from "./error-response";
+import { sendUnexpectedError } from "./error-response.js";
 import {
   asc,
   ensureSeedData,
@@ -13,8 +13,8 @@ import {
   createExportItemRecord,
   updateExportItemExternalResult,
   getIntegrationConfig,
-} from "./persistence";
-import { requireAuthContext } from "./auth";
+} from "./persistence.js";
+import { requireAuthContext } from "./auth.js";
 
 const router: IRouter = Router();
 

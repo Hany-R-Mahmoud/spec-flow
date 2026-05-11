@@ -1,11 +1,11 @@
 import { Router, type IRouter } from "express";
-import healthRouter from "./health";
-import projectRouter from "./projects";
-import sessionRouter from "./sessions";
-import generationRouter from "./generation";
-import settingsRouter from "./settings";
-import exportPackagesRouter from "./export-packages";
-import integrationsRouter from "./integrations";
+import healthRouter from "./health.js";
+import projectRouter from "./projects.js";
+import sessionRouter from "./sessions.js";
+import generationRouter from "./generation.js";
+import settingsRouter from "./settings.js";
+import exportPackagesRouter from "./export-packages.js";
+import integrationsRouter from "./integrations.js";
 
 const router: IRouter = Router();
 

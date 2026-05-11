@@ -19,19 +19,7 @@ if (!root) {
 
 setBaseUrl(apiServerUrl);
 
-if (import.meta.env.PROD && !apiServerUrl) {
-  root.innerHTML = `
-    <div style="min-height:100vh;display:grid;place-items:center;background:#0f172a;color:#e2e8f0;font-family:Inter,system-ui,sans-serif;padding:24px;text-align:center">
-      <div style="max-width:560px">
-        <div style="font-size:12px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#94a3b8;margin-bottom:12px">SpecFlow AI</div>
-        <h1 style="font-size:32px;line-height:1.1;margin:0 0 12px">API server URL missing</h1>
-        <p style="font-size:15px;line-height:1.6;margin:0;color:#cbd5e1">
-          Add <code>VITE_API_SERVER_URL</code> in Vercel so the frontend can reach the hosted backend.
-        </p>
-      </div>
-    </div>
-  `;
-} else if (!clerkPublishableKey) {
+if (!clerkPublishableKey) {
   root.innerHTML = `
     <div style="min-height:100vh;display:grid;place-items:center;background:#0f172a;color:#e2e8f0;font-family:Inter,system-ui,sans-serif;padding:24px;text-align:center">
       <div style="max-width:520px">

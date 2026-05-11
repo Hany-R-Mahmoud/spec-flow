@@ -2,15 +2,15 @@ import { Router, type IRouter } from "express";
 import { and } from "drizzle-orm";
 import { GetSettingsResponse, UpdateSettingsBody } from "@workspace/api-zod";
 import { settingsTable } from "@workspace/db";
-import { sendUnexpectedError } from "./error-response";
+import { sendUnexpectedError } from "./error-response.js";
 import {
   ensureSeedData,
   eq,
   getSettingsId,
   requireDatabase,
   toSettings,
-} from "./persistence";
-import { requireAuthContext, requireMutableWorkspaceContext } from "./auth";
+} from "./persistence.js";
+import { requireAuthContext, requireMutableWorkspaceContext } from "./auth.js";
 
 const router: IRouter = Router();
 

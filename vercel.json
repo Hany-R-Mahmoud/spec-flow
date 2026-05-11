@@ -1,10 +1,22 @@
 {
-  "buildCommand": "pnpm --filter @workspace/specflow-ai build",
+  "buildCommand": "pnpm --filter @workspace/api-server build && pnpm --filter @workspace/specflow-ai build",
   "outputDirectory": "artifacts/specflow-ai/dist/public",
-  "rewrites": [
+  "functions": {
+    "api/[...path].ts": {
+      "includeFiles": "artifacts/api-server/dist/**"
+    }
+  },
+  "routes": [
     {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "src": "/api/(.*)",
+      "dest": "/api/[...path].ts"
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
   ]
 }

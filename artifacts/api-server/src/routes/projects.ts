@@ -6,15 +6,15 @@ import {
   UpdateProjectBody,
 } from "@workspace/api-zod";
 import { projectsTable } from "@workspace/db";
-import { sendError, sendUnexpectedError } from "./error-response";
+import { sendError, sendUnexpectedError } from "./error-response.js";
 import {
   createProjectRecord,
   ensureSeedData,
   eq,
   requireDatabase,
   toProject,
-} from "./persistence";
-import { requireAuthContext } from "./auth";
+} from "./persistence.js";
+import { requireAuthContext } from "./auth.js";
 
 const router: IRouter = Router();
 

@@ -1,15 +1,15 @@
 import { Router, type IRouter } from "express";
-import { sendUnexpectedError } from "./error-response";
+import { sendUnexpectedError } from "./error-response.js";
 import {
   requireDatabase,
   getIntegrationConfigs,
   updateIntegrationConfigRecord,
-} from "./persistence";
-import { requireAuthContext, requireMutableWorkspaceContext } from "./auth";
+} from "./persistence.js";
+import { requireAuthContext, requireMutableWorkspaceContext } from "./auth.js";
 import {
   IntegrationSecretSetupError,
   normalizeIntegrationConfigInput,
-} from "../lib/integration-secrets";
+} from "../lib/integration-secrets.js";
 
 const router: IRouter = Router();
 

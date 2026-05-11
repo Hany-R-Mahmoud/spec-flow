@@ -1,6 +1,6 @@
 import { getAuth } from "@clerk/express";
 import type { Request, Response } from "express";
-import { sendError } from "./error-response";
+import { sendError } from "./error-response.js";
 
 export type WorkspaceType = "personal" | "organization";
 
