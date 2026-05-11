@@ -56,29 +56,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    let cancelled = false;
-    let activationTimer: number | null = null;
-
-    setIsTokenReady(false);
-
-    void (async () => {
-      const token = await getToken({ skipCache: true });
-      if (cancelled) {
-        return;
-      }
-
-      if (!token?.trim()) {
-        setAuthTokenGetter(null);
-        setIsTokenReady(false);
-        return;
-      }
-
-      setAuthTokenGetter(() => getToken());
-      setIsTokenReady(true);
-    })();
+    setAuthTokenGetter(() => getToken());
+    setIsTokenReady(true);
 
     return () => {
-      cancelled = true;
       setAuthTokenGetter(null);
       setIsTokenReady(false);
     };

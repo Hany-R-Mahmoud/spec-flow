@@ -8412,7 +8412,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/specflow-ai/src/components/providers/auth-provider.tsx",
-      "source_location": "L89",
+      "source_location": "L70",
       "weight": 1.0,
       "_src": "providers_auth_provider_authprovider",
       "_tgt": "providers_auth_provider_getdisplayname",

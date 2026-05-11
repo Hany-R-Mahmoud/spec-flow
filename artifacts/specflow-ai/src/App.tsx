@@ -74,6 +74,15 @@ function useApiReady(): boolean {
   useEffect(() => {
     let cancelled = false;
     let timeoutId: number | null = null;
+    let fallbackId: number | null = null;
+
+    const markReady = (): void => {
+      if (!cancelled) {
+        setIsReady(true);
+      }
+    };
+
+    fallbackId = window.setTimeout(markReady, 10000);
 
     const check = async (): Promise<void> => {
       try {
@@ -85,7 +94,7 @@ function useApiReady(): boolean {
         }
 
         if (response.ok) {
-          setIsReady(true);
+          markReady();
           return;
         }
       } catch {
@@ -101,6 +110,9 @@ function useApiReady(): boolean {
       cancelled = true;
       if (timeoutId !== null) {
         window.clearTimeout(timeoutId);
+      }
+      if (fallbackId !== null) {
+        window.clearTimeout(fallbackId);
       }
     };
   }, []);
