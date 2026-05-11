@@ -3,3 +3,7 @@ artifacts/mockup-sandbox/
 attached_assets/
 graphify-out/
 specs/
+node_modules/
+**/node_modules/
+dist/
+**/dist/
