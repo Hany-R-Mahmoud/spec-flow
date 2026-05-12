@@ -1,6 +1,14 @@
 .env
 .env.*
 .vercel/
+.git/
+.local/
+.opencode/
+.serena/
+.agents/
+.claude/
+.codex/
+.qodo/
 artifacts/mockup-sandbox/
 attached_assets/
 graphify-out/
