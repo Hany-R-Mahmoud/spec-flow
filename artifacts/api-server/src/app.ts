@@ -17,7 +17,6 @@ export function createApp(config: ApiServerConfig): ReturnType<typeof express> {
   // trigger OPTIONS checks, and Clerk must not reject those unauthenticated
   // probes before CORS can answer them.
   app.use(corsMiddleware);
-  app.options("*", corsMiddleware);
   app.use(
     pinoHttp({
       logger,
