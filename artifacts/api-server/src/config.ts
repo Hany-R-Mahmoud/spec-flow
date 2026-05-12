@@ -58,6 +58,17 @@ function normalizeOrigin(value: string): string {
   }
 }
 
+function readVercelOrigins(): string[] {
+  return [
+    process.env.VERCEL_URL,
+    process.env.VERCEL_BRANCH_URL,
+    process.env.VERCEL_PROJECT_PRODUCTION_URL,
+  ]
+    .map((value) => value?.trim())
+    .filter((value): value is string => Boolean(value))
+    .map((value) => normalizeOrigin(value.startsWith("http") ? value : `https://${value}`));
+}
+
 function parseAllowedOrigins(appOrigin: string): string[] {
   const configured = process.env.APP_ALLOWED_ORIGINS
     ?.split(",")
@@ -68,6 +79,7 @@ function parseAllowedOrigins(appOrigin: string): string[] {
   const merged = new Set<string>([
     normalizeOrigin(appOrigin),
     ...configured,
+    ...readVercelOrigins(),
     ...DEFAULT_APP_ORIGINS.map(normalizeOrigin),
   ]);
 
