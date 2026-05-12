@@ -29,7 +29,7 @@
 
 ---
 
-![SpecFlow AI live preview](https://spec-flow-ai.vercel.app/opengraph.jpg)
+![SpecFlow AI live preview](./artifacts/specflow-ai/public/readme-preview.png)
 
 ## At A Glance
 
