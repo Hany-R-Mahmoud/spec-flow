@@ -1,0 +1,10 @@
+{
+  "framework": null,
+  "buildCommand": "pnpm run build",
+  "outputDirectory": null,
+  "functions": {
+    "api/[...path].js": {
+      "includeFiles": "dist/**"
+    }
+  }
+}
