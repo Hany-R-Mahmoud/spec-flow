@@ -7,7 +7,7 @@
     breakdowns, structured stories, review, and export-ready handoff.
   </p>
   <p>
-    <a href="https://your-project.vercel.app"><strong>Visit Website</strong></a>
+    <a href="https://spec-flow-ai.vercel.app/"><strong>Visit Website</strong></a>
     ·
     <a href="#what-it-does">What it does</a>
     ·
@@ -29,7 +29,15 @@
 
 ---
 
-![SpecFlow AI preview](./artifacts/specflow-ai/public/opengraph.jpg)
+![SpecFlow AI live preview](https://spec-flow-ai.vercel.app/opengraph.jpg)
+
+## At A Glance
+
+| For | Does |
+| --- | --- |
+| Product teams | Turns rough ideas into a guided breakdown workflow |
+| Design and engineering | Keeps scope, stories, and review context aligned |
+| Delivery handoff | Prepares cleaner export-ready output for downstream tools |
 
 ## What This Repo Is
 
@@ -62,34 +70,45 @@ engineering can work from the same source of truth.
 
 ## Website
 
-> Replace `https://your-project.vercel.app` below with the production URL if it differs.
-
-- Live app: [https://your-project.vercel.app](https://your-project.vercel.app)
-- Local app: [http://localhost:8080](http://localhost:8080)
-- Local API: [http://127.0.0.1:24549](http://127.0.0.1:24549)
+- Live app: [https://spec-flow-ai.vercel.app/](https://spec-flow-ai.vercel.app/)
 
 ## Product Flow
 
 ```mermaid
 flowchart LR
-    A["Rough idea / brief"] --> B["Start breakdown"]
-    B --> C["Capture project input"]
-    C --> D["Generate structured stories"]
+    A["Idea, brief, or notes"] --> B["Breakdown"]
+    B --> C["Project input"]
+    C --> D["Structured stories"]
     D --> E["Review and refine"]
-    E --> F["Export downstream"]
-    F --> G["Jira / delivery workflows"]
+    E --> F["Export"]
+    F --> G["Delivery tools"]
 ```
 
 ## Architecture
 
 ```mermaid
 flowchart TB
-    U["User"] --> W["SpecFlow AI Web App<br/>React + Vite"]
-    W --> C["Clerk"]
-    W --> API["API Server<br/>Express 5"]
+    subgraph Experience
+        U["Visitor or team member"]
+        W["SpecFlow AI web app"]
+    end
+
+    subgraph Platform
+        C["Clerk auth"]
+        API["API server"]
+        DB["Supabase Postgres"]
+    end
+
+    subgraph SharedFoundation
+        PKG["Shared contracts and schema"]
+    end
+
+    U --> W
+    W --> C
+    W --> API
     API --> C
-    API --> DB["Supabase Postgres<br/>via DATABASE_URL"]
-    API --> PKG["Shared packages<br/>api-zod / api-client-react / db"]
+    API --> DB
+    API --> PKG
 ```
 
 ## Tech Stack
@@ -104,59 +123,63 @@ flowchart TB
 | Tooling | pnpm workspace, TypeScript project refs, Prettier, Graphify |
 | Deploy | Vercel for frontend/runtime routing |
 
-## Monorepo Structure
+## Repo Structure
 
 ```text
 .
-├── artifacts/
-│   ├── specflow-ai/        # React + Vite product app and landing page
-│   ├── api-server/         # Express API server
-│   └── mockup-sandbox/     # UI sandbox surface
-├── lib/
-│   ├── api-spec/           # OpenAPI source
-│   ├── api-client-react/   # Generated API client
-│   ├── api-zod/            # Generated Zod contracts
-│   └── db/                 # Drizzle schema and DB scripts
-├── specs/                  # Product specs and implementation plans
-├── scripts/                # Workspace utilities
-└── graphify-out/           # Project knowledge graph artifacts
+├── artifacts/specflow-ai   # product app and landing page
+├── artifacts/api-server    # backend API
+├── lib                     # shared contracts, client, and database package
+├── specs                   # product and implementation documents
+└── graphify-out            # generated architecture graph
 ```
 
 ## Project Graph
 
 ```mermaid
-flowchart TD
-    ROOT["spec-flow"] --> APP["artifacts/specflow-ai"]
-    ROOT --> SERVER["artifacts/api-server"]
-    ROOT --> DB["lib/db"]
-    ROOT --> SPEC["lib/api-spec"]
-    ROOT --> CLIENT["lib/api-client-react"]
-    ROOT --> ZOD["lib/api-zod"]
-    ROOT --> DOCS["specs"]
-    ROOT --> GRAPH["graphify-out"]
+flowchart TB
+    ROOT["spec-flow repo"]
 
+    subgraph ProductSurface
+        APP["specflow-ai"]
+        LAND["landing page"]
+        WORK["workflow app"]
+    end
+
+    subgraph BackendSurface
+        API["api-server"]
+        AUTH["auth boundary"]
+        DATA["database access"]
+    end
+
+    subgraph SharedPackages
+        SPEC["api-spec"]
+        CLIENT["api-client-react"]
+        ZOD["api-zod"]
+        DB["db"]
+    end
+
+    ROOT --> APP
+    ROOT --> API
+    ROOT --> SharedPackages
+
+    APP --> LAND
+    APP --> WORK
     APP --> CLIENT
-    APP --> ZOD
-    SERVER --> DB
-    SERVER --> ZOD
-    SERVER --> C1["Clerk auth boundary"]
-    DB --> PSQL["Supabase Postgres"]
+    API --> AUTH
+    API --> DATA
+    API --> ZOD
+    API --> DB
     SPEC --> CLIENT
     SPEC --> ZOD
 ```
 
-## Core Repo Areas
+## Main Areas
 
-| Path | Function |
-| --- | --- |
-| `artifacts/specflow-ai` | Main product UI, landing page, dashboard, workflow workspace |
-| `artifacts/api-server` | API routes, auth context, persistence orchestration |
-| `lib/db` | Database schema, connection setup, Supabase hardening scripts |
-| `lib/api-spec` | OpenAPI contract source |
-| `lib/api-client-react` | Typed frontend API client |
-| `lib/api-zod` | Shared generated request and response schemas |
-| `specs` | Execution plans, feature specs, research, and implementation context |
-| `graphify-out` | Knowledge graph report and generated graph artifacts |
+- `artifacts/specflow-ai`: public site and authenticated product experience
+- `artifacts/api-server`: backend behavior, auth-aware routes, persistence
+- `lib`: shared contracts, generated client, and database package
+- `specs`: plans, feature definitions, and product context
 
 ## Local Development
 
@@ -167,17 +190,7 @@ flowchart TD
 
 ### Environment
 
-Create `.env` from `.env.example` and set:
-
-- `CLERK_PUBLISHABLE_KEY`
-- `VITE_CLERK_PUBLISHABLE_KEY`
-- `CLERK_SECRET_KEY`
-- `DATABASE_URL`
-- `VITE_APP_URL`
-- `VITE_API_SERVER_URL`
-- optional `API_SERVER_URL`
-- optional `APP_ALLOWED_ORIGINS`
-- optional `INTEGRATION_SECRET_ENCRYPTION_KEY`
+Create `.env` from `.env.example`.
 
 ### Start Everything
 
@@ -186,12 +199,7 @@ pnpm install
 pnpm dev
 ```
 
-Open `http://localhost:8080/`.
-
-`pnpm dev` starts both:
-
-- `@workspace/specflow-ai` on `PORT=8080`
-- `@workspace/api-server` on `PORT=24549`
+Open local app in browser after start.
 
 ### Other Targets
 
@@ -201,13 +209,10 @@ pnpm dev:api
 pnpm dev:mockup
 ```
 
-## Security Notes
+## Security Note
 
-- Clerk owns sign-in and session tokens.
-- Express is the application authorization boundary.
-- Supabase is used as Postgres through `DATABASE_URL`.
-- Browser `SUPABASE_` env vars are not part of the active runtime path.
-- Public Supabase tables should stay locked down because app access goes through the API.
+This README intentionally avoids real secrets, database connection values,
+private tokens, project keys, and internal environment data.
 
 ### Supabase Hardening
 
@@ -223,20 +228,6 @@ Audit RLS and grants:
 pnpm --filter @workspace/db audit:supabase
 ```
 
-## Deploy Shape
-
-```mermaid
-flowchart LR
-    G["GitHub repo"] --> V["Vercel build"]
-    V --> FE["Frontend bundle<br/>artifacts/specflow-ai/dist/public"]
-    V --> FN["API function routing<br/>/api/[...path].ts"]
-    FN --> SV["Express server bundle"]
-```
-
-Repo root `vercel.json` builds both the frontend and API server, serves the
-frontend from `artifacts/specflow-ai/dist/public`, and routes `/api/*` to the
-bundled server entry.
-
 ## Useful Commands
 
 ```bash
@@ -244,19 +235,10 @@ pnpm dev
 pnpm build
 pnpm typecheck
 pnpm --filter @workspace/specflow-ai typecheck
-pnpm --filter @workspace/api-server typecheck
 pnpm --filter @workspace/db secure:supabase
 pnpm --filter @workspace/db audit:supabase
 graphify update .
 ```
-
-## Graphify
-
-This repo ships with Graphify artifacts under `graphify-out/`.
-
-- Read `graphify-out/GRAPH_REPORT.md` for high-level codebase structure
-- Use `graphify update .` after code changes to refresh the graph
-- Treat `graphify-out` as architecture support, not handwritten docs
 
 ## Status
 
@@ -268,5 +250,5 @@ SpecFlow AI currently combines:
 - Supabase-backed persistence
 - Export-oriented delivery prep
 
-If you want this README to point at the real production website, replace the
-placeholder `https://your-project.vercel.app` links with your live domain.
+SpecFlow AI live site:
+[https://spec-flow-ai.vercel.app/](https://spec-flow-ai.vercel.app/)
