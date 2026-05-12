@@ -8,15 +8,16 @@ import type { ApiServerConfig } from "./config.js";
 
 export function createApp(config: ApiServerConfig): ReturnType<typeof express> {
   const app = express();
+  const corsMiddleware = cors({
+    origin: config.appOrigins,
+    credentials: true,
+  });
 
-  app.use(
-    clerkMiddleware({
-      secretKey: config.clerkSecretKey,
-      publishableKey: config.clerkPublishableKey,
-      authorizedParties: config.appOrigins,
-      clockSkewInMs: config.clerkClockSkewInMs,
-    }),
-  );
+  // Let CORS handle preflight before auth. Browser Authorization requests
+  // trigger OPTIONS checks, and Clerk must not reject those unauthenticated
+  // probes before CORS can answer them.
+  app.use(corsMiddleware);
+  app.options("*", corsMiddleware);
   app.use(
     pinoHttp({
       logger,
@@ -37,9 +38,11 @@ export function createApp(config: ApiServerConfig): ReturnType<typeof express> {
     }),
   );
   app.use(
-    cors({
-      origin: config.appOrigins,
-      credentials: true,
+    clerkMiddleware({
+      secretKey: config.clerkSecretKey,
+      publishableKey: config.clerkPublishableKey,
+      authorizedParties: config.appOrigins,
+      clockSkewInMs: config.clerkClockSkewInMs,
     }),
   );
   app.use(express.json());
