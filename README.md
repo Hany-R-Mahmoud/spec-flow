@@ -32,6 +32,24 @@ Runtime model:
 - Supabase provides Postgres through `DATABASE_URL`.
 - Browser `SUPABASE_` env vars are not part of the current runtime path.
 
+## Database hardening
+
+Supabase exposes the `public` schema through its Data API by default. This app
+does not use that API for application access, so public tables should stay
+locked down.
+
+Run after provisioning or after schema changes:
+
+```bash
+pnpm --filter @workspace/db secure:supabase
+```
+
+Audit current RLS and grants:
+
+```bash
+pnpm --filter @workspace/db audit:supabase
+```
+
 ## Run the app
 
 ```bash

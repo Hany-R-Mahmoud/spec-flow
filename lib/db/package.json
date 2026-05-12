@@ -9,7 +9,9 @@
   },
   "scripts": {
     "push": "drizzle-kit push --config ./drizzle.config.ts",
-    "push-force": "drizzle-kit push --force --config ./drizzle.config.ts"
+    "push-force": "drizzle-kit push --force --config ./drizzle.config.ts",
+    "audit:supabase": "zsh -lc 'source ../../.env && psql \"$DATABASE_URL\" -v ON_ERROR_STOP=1 -f ./sql/audit-supabase-public-schema.sql'",
+    "secure:supabase": "zsh -lc 'source ../../.env && psql \"$DATABASE_URL\" -v ON_ERROR_STOP=1 -f ./sql/harden-supabase-public-schema.sql'"
   },
   "dependencies": {
     "drizzle-orm": "catalog:",
