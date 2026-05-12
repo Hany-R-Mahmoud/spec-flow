@@ -1,3 +1,6 @@
+.env
+.env.*
+.vercel/
 artifacts/mockup-sandbox/
 attached_assets/
 graphify-out/
@@ -6,4 +9,6 @@ node_modules/
 **/node_modules/
 dist/
 **/dist/
+**/.env
+**/.env.*
 artifacts/api-server/.replit-artifact/
