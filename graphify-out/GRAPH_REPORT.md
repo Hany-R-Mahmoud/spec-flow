@@ -1,11 +1,11 @@
 # Graph Report - spec-flow  (2026-05-12)
 
 ## Corpus Check
-- 248 files · ~136,717 words
+- 248 files · ~136,727 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 583 nodes · 652 edges · 31 communities detected
+- 583 nodes · 654 edges · 31 communities detected
 - Extraction: 88% EXTRACTED · 12% INFERRED · 0% AMBIGUOUS · INFERRED: 76 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
@@ -55,16 +55,16 @@
 10. `createWorkflowGeneration()` - 7 edges
 
 ## Surprising Connections (you probably didn't know these)
+- `requireDatabase()` --calls--> `isDatabaseConfigured()`  [INFERRED]
+  artifacts/api-server/src/routes/persistence.ts → lib/db/src/index.ts
 - `runGeneration()` --calls--> `generateEpics()`  [INFERRED]
   artifacts/api-server/src/routes/generation.ts → lib/api-client-react/src/generated/api.ts
 - `runGeneration()` --calls--> `generateStories()`  [INFERRED]
   artifacts/api-server/src/routes/generation.ts → lib/api-client-react/src/generated/api.ts
-- `requireDatabase()` --calls--> `isDatabaseConfigured()`  [INFERRED]
+- `requireDatabase()` --calls--> `getDb()`  [INFERRED]
   artifacts/api-server/src/routes/persistence.ts → lib/db/src/index.ts
 - `onSubmit()` --calls--> `createSession()`  [INFERRED]
   artifacts/specflow-ai/src/pages/NewBreakdown.tsx → lib/api-client-react/src/generated/api.ts
-- `download()` --calls--> `getExportPackage()`  [INFERRED]
-  artifacts/specflow-ai/src/pages/ExportsPage.tsx → lib/api-client-react/src/generated/api.ts
 
 ## Communities
 
@@ -78,7 +78,7 @@ Nodes (22): addToRemoveQueue(), dispatch(), genId(), reducer(), toast(), useToas
 
 ### Community 2 - "Community 2"
 Cohesion: 0.11
-Nodes (32): getGenerationRuntime(), markGenerationState(), resetDownstream(), resetStep(), runGeneration(), assertWorkspaceId(), buildDefaultSettings(), buildPhaseUpdate() (+24 more)
+Nodes (33): getGenerationRuntime(), markGenerationState(), resetDownstream(), resetStep(), runGeneration(), assertWorkspaceId(), buildDefaultSettings(), buildPhaseUpdate() (+25 more)
 
 ### Community 3 - "Community 3"
 Cohesion: 0.16
@@ -86,7 +86,7 @@ Nodes (18): ApiError, applyBaseUrl(), buildErrorMessage(), getMediaType(), getSt
 
 ### Community 4 - "Community 4"
 Cohesion: 0.17
-Nodes (15): requireDatabase(), createApp(), loadApiServerConfig(), loadLocalEnv(), normalizeOrigin(), parseAllowedOrigins(), readAppOrigin(), readRequiredEnv() (+7 more)
+Nodes (14): createApp(), loadApiServerConfig(), loadLocalEnv(), normalizeOrigin(), parseAllowedOrigins(), readAppOrigin(), readRequiredEnv(), ensureWorkspaceSchema() (+6 more)
 
 ### Community 5 - "Community 5"
 Cohesion: 0.23
@@ -113,12 +113,12 @@ Cohesion: 0.48
 Nodes (5): Pagination(), PaginationEllipsis(), PaginationLink(), PaginationNext(), PaginationPrevious()
 
 ### Community 13 - "Community 13"
-Cohesion: 0.6
-Nodes (3): cn(), ItemGroup(), ItemSeparator()
+Cohesion: 0.8
+Nodes (3): getApp(), handler(), loadServerModule()
 
 ### Community 14 - "Community 14"
 Cohesion: 0.6
-Nodes (3): getApp(), handler(), loadServerModule()
+Nodes (3): cn(), ItemGroup(), ItemSeparator()
 
 ### Community 15 - "Community 15"
 Cohesion: 0.67
@@ -233,7 +233,7 @@ Nodes (2): appPath(), joinAppPath()
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `runGeneration()` connect `Community 2` to `Community 0`, `Community 1`, `Community 4`, `Community 6`?**
+- **Why does `runGeneration()` connect `Community 2` to `Community 0`, `Community 1`, `Community 6`?**
   _High betweenness centrality (0.105) - this node is a cross-community bridge._
 - **Why does `customFetch()` connect `Community 0` to `Community 3`?**
   _High betweenness centrality (0.048) - this node is a cross-community bridge._

@@ -22,13 +22,31 @@
       "norm_label": "buildall()"
     },
     {
-      "label": "[...path].ts",
+      "label": "[...path].js",
       "file_type": "code",
-      "source_file": "artifacts/api-server/api/[...path].ts",
+      "source_file": "artifacts/api-server/api/[...path].js",
       "source_location": "L1",
-      "id": "artifacts_api_server_api_path_ts",
-      "community": 14,
-      "norm_label": "[...path].ts"
+      "id": "artifacts_api_server_api_path_js",
+      "community": 13,
+      "norm_label": "[...path].js"
+    },
+    {
+      "label": "loadServerModule()",
+      "file_type": "code",
+      "source_file": "api/[...path].ts",
+      "source_location": "L13",
+      "id": "api_path_loadservermodule",
+      "community": 13,
+      "norm_label": "loadservermodule()"
+    },
+    {
+      "label": "getApp()",
+      "file_type": "code",
+      "source_file": "api/[...path].ts",
+      "source_location": "L17",
+      "id": "api_path_getapp",
+      "community": 13,
+      "norm_label": "getapp()"
     },
     {
       "label": "handler()",
@@ -36,7 +54,7 @@
       "source_file": "api/[...path].ts",
       "source_location": "L22",
       "id": "api_path_handler",
-      "community": 14,
+      "community": 13,
       "norm_label": "handler()"
     },
     {
@@ -549,7 +567,7 @@
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
       "source_location": "L440",
       "id": "routes_persistence_requiredatabase",
-      "community": 4,
+      "community": 2,
       "norm_label": "requiredatabase()"
     },
     {
@@ -1296,7 +1314,7 @@
       "source_file": "artifacts/mockup-sandbox/src/components/ui/item.tsx",
       "source_location": "L1",
       "id": "artifacts_mockup_sandbox_src_components_ui_item_tsx",
-      "community": 13,
+      "community": 14,
       "norm_label": "item.tsx"
     },
     {
@@ -1305,7 +1323,7 @@
       "source_file": "artifacts/specflow-ai/src/components/ui/item.tsx",
       "source_location": "L8",
       "id": "ui_item_itemgroup",
-      "community": 13,
+      "community": 14,
       "norm_label": "itemgroup()"
     },
     {
@@ -1314,7 +1332,7 @@
       "source_file": "artifacts/specflow-ai/src/components/ui/item.tsx",
       "source_location": "L19",
       "id": "ui_item_itemseparator",
-      "community": 13,
+      "community": 14,
       "norm_label": "itemseparator()"
     },
     {
@@ -1323,7 +1341,7 @@
       "source_file": "artifacts/specflow-ai/src/components/ui/item.tsx",
       "source_location": "L110",
       "id": "ui_item_cn",
-      "community": 13,
+      "community": 14,
       "norm_label": "cn()"
     },
     {
@@ -2106,7 +2124,7 @@
       "source_file": "artifacts/specflow-ai/src/components/ui/item.tsx",
       "source_location": "L1",
       "id": "artifacts_specflow_ai_src_components_ui_item_tsx",
-      "community": 13,
+      "community": 14,
       "norm_label": "item.tsx"
     },
     {
@@ -5229,26 +5247,8 @@
       "source_file": "api/[...path].ts",
       "source_location": "L1",
       "id": "api_path_ts",
-      "community": 14,
+      "community": 13,
       "norm_label": "[...path].ts"
-    },
-    {
-      "label": "loadServerModule()",
-      "file_type": "code",
-      "source_file": "api/[...path].ts",
-      "source_location": "L13",
-      "id": "api_path_loadservermodule",
-      "community": 14,
-      "norm_label": "loadservermodule()"
-    },
-    {
-      "label": "getApp()",
-      "file_type": "code",
-      "source_file": "api/[...path].ts",
-      "source_location": "L17",
-      "id": "api_path_getapp",
-      "community": 14,
-      "norm_label": "getapp()"
     }
   ],
   "links": [
@@ -5267,13 +5267,85 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "artifacts/api-server/api/[...path].ts",
-      "source_location": "L6",
+      "source_file": "artifacts/api-server/api/[...path].js",
+      "source_location": "L5",
       "weight": 1.0,
-      "_src": "artifacts_api_server_api_path_ts",
+      "_src": "artifacts_api_server_api_path_js",
+      "_tgt": "api_path_loadservermodule",
+      "source": "artifacts_api_server_api_path_js",
+      "target": "api_path_loadservermodule",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "artifacts/api-server/api/[...path].js",
+      "source_location": "L9",
+      "weight": 1.0,
+      "_src": "artifacts_api_server_api_path_js",
+      "_tgt": "api_path_getapp",
+      "source": "artifacts_api_server_api_path_js",
+      "target": "api_path_getapp",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "artifacts/api-server/api/[...path].js",
+      "source_location": "L14",
+      "weight": 1.0,
+      "_src": "artifacts_api_server_api_path_js",
       "_tgt": "api_path_handler",
-      "source": "artifacts_api_server_api_path_ts",
+      "source": "artifacts_api_server_api_path_js",
       "target": "api_path_handler",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "api/[...path].ts",
+      "source_location": "L18",
+      "weight": 1.0,
+      "_src": "api_path_getapp",
+      "_tgt": "api_path_loadservermodule",
+      "source": "api_path_loadservermodule",
+      "target": "api_path_getapp",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "api/[...path].ts",
+      "source_location": "L13",
+      "weight": 1.0,
+      "_src": "api_path_ts",
+      "_tgt": "api_path_loadservermodule",
+      "source": "api_path_loadservermodule",
+      "target": "api_path_ts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "api/[...path].ts",
+      "source_location": "L26",
+      "weight": 1.0,
+      "_src": "api_path_handler",
+      "_tgt": "api_path_getapp",
+      "source": "api_path_getapp",
+      "target": "api_path_handler",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "api/[...path].ts",
+      "source_location": "L17",
+      "weight": 1.0,
+      "_src": "api_path_ts",
+      "_tgt": "api_path_getapp",
+      "source": "api_path_getapp",
+      "target": "api_path_ts",
       "confidence_score": 1.0
     },
     {
@@ -5286,18 +5358,6 @@
       "_tgt": "api_path_handler",
       "source": "api_path_handler",
       "target": "api_path_ts",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "source_file": "api/[...path].ts",
-      "source_location": "L26",
-      "weight": 1.0,
-      "_src": "api_path_handler",
-      "_tgt": "api_path_getapp",
-      "source": "api_path_handler",
-      "target": "api_path_getapp",
       "confidence_score": 1.0
     },
     {
@@ -13038,42 +13098,6 @@
       "_tgt": "api_spec_orval_config_titletransformer",
       "source": "lib_api_spec_orval_config_ts",
       "target": "api_spec_orval_config_titletransformer",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "api/[...path].ts",
-      "source_location": "L13",
-      "weight": 1.0,
-      "_src": "api_path_ts",
-      "_tgt": "api_path_loadservermodule",
-      "source": "api_path_ts",
-      "target": "api_path_loadservermodule",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "api/[...path].ts",
-      "source_location": "L17",
-      "weight": 1.0,
-      "_src": "api_path_ts",
-      "_tgt": "api_path_getapp",
-      "source": "api_path_ts",
-      "target": "api_path_getapp",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "source_file": "api/[...path].ts",
-      "source_location": "L18",
-      "weight": 1.0,
-      "_src": "api_path_getapp",
-      "_tgt": "api_path_loadservermodule",
-      "source": "api_path_loadservermodule",
-      "target": "api_path_getapp",
       "confidence_score": 1.0
     }
   ],
