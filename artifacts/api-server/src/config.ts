@@ -15,6 +15,7 @@ export type ApiServerConfig = {
   clerkPublishableKey: string;
   clerkClockSkewInMs: number;
   appOrigins: string[];
+  enforceAuthorizedParties: boolean;
   databaseUrl: string;
   integrationSecretEncryptionKey: string | null;
   port: number;
@@ -90,6 +91,9 @@ export function loadApiServerConfig(): ApiServerConfig {
   const clerkSecretKey = readRequiredEnv("CLERK_SECRET_KEY");
   const databaseUrl = readRequiredEnv("DATABASE_URL");
   const appOrigin = readAppOrigin();
+  const hasConfiguredAllowedOrigins = Boolean(
+    process.env.APP_ALLOWED_ORIGINS?.trim(),
+  );
   const rawClockSkewInMs = process.env.CLERK_CLOCK_SKEW_IN_MS?.trim() ?? "60000";
   const clerkClockSkewInMs = Number(rawClockSkewInMs);
 
@@ -109,6 +113,7 @@ export function loadApiServerConfig(): ApiServerConfig {
     clerkPublishableKey,
     clerkClockSkewInMs,
     appOrigins: parseAllowedOrigins(appOrigin),
+    enforceAuthorizedParties: hasConfiguredAllowedOrigins,
     databaseUrl,
     integrationSecretEncryptionKey:
       process.env.INTEGRATION_SECRET_ENCRYPTION_KEY?.trim() ?? null,

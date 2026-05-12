@@ -40,7 +40,9 @@ export function createApp(config: ApiServerConfig): ReturnType<typeof express> {
     clerkMiddleware({
       secretKey: config.clerkSecretKey,
       publishableKey: config.clerkPublishableKey,
-      authorizedParties: config.appOrigins,
+      ...(config.enforceAuthorizedParties
+        ? { authorizedParties: config.appOrigins }
+        : {}),
       clockSkewInMs: config.clerkClockSkewInMs,
     }),
   );

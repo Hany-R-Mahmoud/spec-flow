@@ -1,6 +1,7 @@
 import { getAuth } from "@clerk/express";
 import type { Request, Response } from "express";
 import { sendError } from "./error-response.js";
+import { logger } from "../lib/logger.js";
 
 export type WorkspaceType = "personal" | "organization";
 
@@ -16,9 +17,18 @@ export type WorkspaceAuthContext = {
 export function getWorkspaceAuthContext(
   req: Request,
 ): WorkspaceAuthContext | null {
-  const auth = getAuth(req);
+  const auth = getAuth(req, { acceptsToken: "session_token" });
 
   if (!auth.isAuthenticated || !auth.userId) {
+    logger.warn(
+      {
+        hasAuthorizationHeader: Boolean(req.get("authorization")),
+        origin: req.get("origin") ?? null,
+        referer: req.get("referer") ?? null,
+        tokenType: auth.tokenType ?? null,
+      },
+      "Unauthenticated API request",
+    );
     return null;
   }
 
