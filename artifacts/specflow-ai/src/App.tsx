@@ -23,6 +23,7 @@ import { ExportsPage } from "@/pages/ExportsPage";
 import { SettingsPage } from "@/pages/SettingsPage";
 import { LoginPage } from "@/pages/LoginPage";
 import NotFound from "@/pages/not-found";
+import { trackPageView } from "@/lib/google-analytics";
 import { resolveApiUrl } from "@/lib/runtime";
 import { syncDocumentMetadata } from "@/lib/metadata";
 
@@ -166,6 +167,10 @@ function Router() {
 
   useEffect(() => {
     syncDocumentMetadata(location);
+  }, [location]);
+
+  useEffect(() => {
+    trackPageView(location);
   }, [location]);
 
   if (status === "loading" && (isLoginRoute || isLegacyRoute || isAppRoute)) {

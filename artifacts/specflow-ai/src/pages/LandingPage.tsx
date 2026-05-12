@@ -20,6 +20,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { ThemeModeToggle } from "@/components/shared/ThemeModeToggle";
 import { cn } from "@/lib/utils";
 
 type RevealProps = {
@@ -246,6 +247,7 @@ function LandingHeader({
         </nav>
 
         <div className="flex items-center gap-2">
+          <ThemeModeToggle className="shrink-0" />
           <Button asChild variant="ghost" className="hidden sm:inline-flex">
             <a href={signInHref}>Sign in</a>
           </Button>

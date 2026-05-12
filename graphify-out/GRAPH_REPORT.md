@@ -1,11 +1,11 @@
 # Graph Report - spec-flow  (2026-05-12)
 
 ## Corpus Check
-- 247 files · ~136,545 words
+- 248 files · ~136,717 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 580 nodes · 650 edges · 31 communities detected
+- 583 nodes · 652 edges · 31 communities detected
 - Extraction: 88% EXTRACTED · 12% INFERRED · 0% AMBIGUOUS · INFERRED: 76 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
@@ -70,19 +70,19 @@
 
 ### Community 0 - "Community 0"
 Cohesion: 0.03
-Nodes (108): createExportPackage(), createProject(), createSession(), exportToGitHub(), exportToJira(), generateClarification(), generateEpics(), generatePrd() (+100 more)
+Nodes (109): createExportPackage(), createProject(), createSession(), exportToGitHub(), exportToJira(), generateClarification(), generateEpics(), generatePrd() (+101 more)
 
 ### Community 1 - "Community 1"
 Cohesion: 0.07
 Nodes (22): addToRemoveQueue(), dispatch(), genId(), reducer(), toast(), useToast(), navigate(), openProjects() (+14 more)
 
 ### Community 2 - "Community 2"
-Cohesion: 0.1
-Nodes (33): getGenerationRuntime(), applyQualityReview(), markGenerationState(), resetDownstream(), resetStep(), runGeneration(), assertWorkspaceId(), buildDefaultSettings() (+25 more)
+Cohesion: 0.11
+Nodes (32): getGenerationRuntime(), markGenerationState(), resetDownstream(), resetStep(), runGeneration(), assertWorkspaceId(), buildDefaultSettings(), buildPhaseUpdate() (+24 more)
 
 ### Community 3 - "Community 3"
-Cohesion: 0.15
-Nodes (19): ApiError, applyBaseUrl(), buildErrorMessage(), getMediaType(), getStringField(), hasNoBody(), inferResponseType(), isJsonMediaType() (+11 more)
+Cohesion: 0.16
+Nodes (18): ApiError, applyBaseUrl(), buildErrorMessage(), getMediaType(), getStringField(), hasNoBody(), inferResponseType(), isJsonMediaType() (+10 more)
 
 ### Community 4 - "Community 4"
 Cohesion: 0.17
@@ -93,8 +93,8 @@ Cohesion: 0.23
 Nodes (6): getWorkspaceAuthContext(), requireAuthContext(), requireMutableWorkspaceContext(), hasZodIssues(), sendError(), sendUnexpectedError()
 
 ### Community 6 - "Community 6"
-Cohesion: 0.33
-Nodes (11): answeredQuestionSummary(), buildReadinessScore(), compactSentences(), generateClarificationQuestions(), generateEpics(), generatePrdSections(), generateStories(), pickConstraint() (+3 more)
+Cohesion: 0.3
+Nodes (12): answeredQuestionSummary(), applyQualityReview(), buildReadinessScore(), compactSentences(), generateClarificationQuestions(), generateEpics(), generatePrdSections(), generateStories() (+4 more)
 
 ### Community 7 - "Community 7"
 Cohesion: 0.27
@@ -234,11 +234,11 @@ Nodes (2): appPath(), joinAppPath()
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `runGeneration()` connect `Community 2` to `Community 0`, `Community 1`, `Community 4`, `Community 6`?**
-  _High betweenness centrality (0.106) - this node is a cross-community bridge._
+  _High betweenness centrality (0.105) - this node is a cross-community bridge._
 - **Why does `customFetch()` connect `Community 0` to `Community 3`?**
-  _High betweenness centrality (0.049) - this node is a cross-community bridge._
+  _High betweenness centrality (0.048) - this node is a cross-community bridge._
 - **Why does `toast()` connect `Community 1` to `Community 8`?**
-  _High betweenness centrality (0.045) - this node is a cross-community bridge._
+  _High betweenness centrality (0.044) - this node is a cross-community bridge._
 - **Are the 24 inferred relationships involving `customFetch()` (e.g. with `healthCheck()` and `listProjects()`) actually correct?**
   _`customFetch()` has 24 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 14 inferred relationships involving `runGeneration()` (e.g. with `requireDatabase()` and `getSessionArtifactsRecord()`) actually correct?**

@@ -6,6 +6,7 @@ import { SpeedInsights } from "@vercel/speed-insights/react";
 import App from "./App";
 import { appPath } from "@/lib/routes";
 import { apiServerUrl } from "@/lib/runtime";
+import { initializeGoogleAnalytics } from "@/lib/google-analytics";
 import { setBaseUrl } from "@workspace/api-client-react";
 import "./index.css";
 
@@ -18,6 +19,7 @@ if (!root) {
 }
 
 setBaseUrl(apiServerUrl);
+initializeGoogleAnalytics();
 
 if (!clerkPublishableKey) {
   root.innerHTML = `
