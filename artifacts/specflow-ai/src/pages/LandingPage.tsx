@@ -223,14 +223,14 @@ function LandingHeader({
 }) {
   return (
     <header className="sticky top-0 z-40 border-b border-border/70 bg-background/80 backdrop-blur">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-4">
-        <a href="#top" className="flex items-center gap-3">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-4 sm:gap-4 sm:px-6">
+        <a href="#top" className="flex min-w-0 items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-card text-primary shadow-sm">
             <ShieldCheck className="h-5 w-5" />
           </div>
-          <div className="leading-tight">
-            <div className="text-sm font-semibold text-foreground">SpecFlow AI</div>
-            <div className="text-xs text-muted-foreground">Structured product flow</div>
+          <div className="min-w-0 leading-tight">
+            <div className="text-sm font-semibold text-foreground sm:text-base">SpecFlow AI</div>
+            <div className="hidden text-xs text-muted-foreground sm:block">Structured product flow</div>
           </div>
         </a>
 
@@ -246,7 +246,7 @@ function LandingHeader({
           </a>
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="hidden items-center gap-2 sm:flex">
           <ThemeModeToggle className="shrink-0" />
           <Button asChild variant="ghost" className="hidden sm:inline-flex">
             <a href={signInHref}>Sign in</a>
