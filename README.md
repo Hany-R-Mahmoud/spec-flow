@@ -15,6 +15,8 @@
     ·
     <a href="#project-graph">Project graph</a>
     ·
+    <a href="#documentation">Documentation</a>
+    ·
     <a href="#local-development">Local development</a>
   </p>
   <p>
@@ -51,6 +53,7 @@ This repository contains:
 - Express API server for auth-scoped application behavior
 - Shared API contracts and generated client packages
 - Shared database schema package for the Supabase-hosted Postgres runtime
+- Repo-owned docs in `docs/`
 
 ## What It Does
 
@@ -174,11 +177,24 @@ flowchart TB
     SPEC --> ZOD
 ```
 
+## Documentation
+
+- [Overview](docs/overview.md)
+- [Architecture](docs/architecture.md)
+- [Tech Stack](docs/tech-stack.md)
+- [Project Structure](docs/project-structure.md)
+- [Local Development](docs/local-development.md)
+- [Key Flows](docs/key-flows.md)
+- [Onboarding](docs/onboarding.md)
+- [AI Agent Guide](docs/ai-agent-guide.md)
+- [Team Decisions](docs/team-decisions/README.md)
+
 ## Main Areas
 
 - `artifacts/specflow-ai`: public site and authenticated product experience
 - `artifacts/api-server`: backend behavior, auth-aware routes, persistence
 - `lib`: shared contracts, generated client, and database package
+- `docs`: repo-owned documentation
 - `specs`: plans, feature definitions, and product context
 
 ## Local Development
