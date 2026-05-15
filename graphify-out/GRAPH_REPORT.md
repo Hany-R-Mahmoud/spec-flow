@@ -1,11 +1,11 @@
 # Graph Report - spec-flow  (2026-05-16)
 
 ## Corpus Check
-- 264 files · ~223,472 words
+- 264 files · ~223,508 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 668 nodes · 803 edges · 34 communities detected
+- 668 nodes · 801 edges · 34 communities detected
 - Extraction: 88% EXTRACTED · 12% INFERRED · 0% AMBIGUOUS · INFERRED: 99 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
