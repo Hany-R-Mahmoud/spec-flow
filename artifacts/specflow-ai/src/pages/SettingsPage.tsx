@@ -100,8 +100,8 @@ function AiProviderSection() {
 
   const status = provider?.status ?? 'not_configured';
   const configured = Boolean(provider?.configured);
-  const hasSavedKey = configured && Boolean(provider?.keySuffix);
-  const showValidationError = Boolean(provider?.validationError);
+  const hasSavedKey = Boolean(provider?.id && (provider.keySuffix || provider.keyFingerprint));
+  const showValidationError = Boolean(provider?.validationError) && !hasSavedKey;
   const apiKeyPlaceholder = hasSavedKey ? 'Paste replacement provider API key' : 'Paste provider API key';
   const apiKeyHelper = hasSavedKey
     ? 'Saved key is already active. Reveal the input only when you want to replace it.'
@@ -195,8 +195,8 @@ function AiProviderSection() {
   return (
     <SettingsSection title="AI Provider">
       <div className="flex flex-wrap items-center gap-2">
-        <Badge variant={configured ? 'default' : 'outline'}>
-          {configured ? 'AI enabled' : 'Manual mode'}
+        <Badge variant={configured || hasSavedKey ? 'default' : 'outline'}>
+          {configured ? 'AI enabled' : hasSavedKey ? 'Key saved' : 'Manual mode'}
         </Badge>
         <span className="text-xs text-muted-foreground">
           {status.replaceAll('_', ' ')}
