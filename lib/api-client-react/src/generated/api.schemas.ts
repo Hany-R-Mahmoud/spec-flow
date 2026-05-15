@@ -117,6 +117,17 @@ export const GenerationMode = {
   unavailable: "unavailable",
 } as const;
 
+export type AiProviderStatus =
+  (typeof AiProviderStatus)[keyof typeof AiProviderStatus];
+
+export const AiProviderStatus = {
+  not_configured: "not_configured",
+  validating: "validating",
+  configured: "configured",
+  validation_failed: "validation_failed",
+  disabled: "disabled",
+} as const;
+
 export type GenerationStatus =
   (typeof GenerationStatus)[keyof typeof GenerationStatus];
 
@@ -134,6 +145,13 @@ export interface GenerationStepState {
   promptVersion: string;
   updatedAt: string | null;
   errorMessage: string | null;
+  provider?: string | null;
+  model?: string | null;
+  providerRequestId?: string | null;
+  inputSnapshotHash?: string | null;
+  tokenEstimate?: number | null;
+  costEstimateCents?: number | null;
+  errorClass?: string | null;
 }
 
 export interface WorkflowGenerationState {
@@ -437,6 +455,57 @@ export interface IntegrationConfig {
 
 export interface IntegrationConfigListResponse {
   integrations: IntegrationConfig[];
+}
+
+export interface AiProviderConfig {
+  id: string | null;
+  provider: string;
+  model: string;
+  enabled: boolean;
+  status: AiProviderStatus;
+  configured: boolean;
+  keyFingerprint: string | null;
+  keySuffix: string | null;
+  lastValidatedAt: string | null;
+  validationError: string | null;
+  updatedAt: string | null;
+}
+
+export type AiCapabilityMode =
+  (typeof AiCapabilityMode)[keyof typeof AiCapabilityMode];
+
+export const AiCapabilityMode = {
+  ai_enabled: "ai_enabled",
+  manual: "manual",
+} as const;
+
+export interface AiCapability {
+  mode: AiCapabilityMode;
+  canGenerate: boolean;
+  canEditSkills: boolean;
+  provider: AiProviderConfig;
+  reason: string;
+}
+
+export type UpdateAiProviderRequestProvider =
+  (typeof UpdateAiProviderRequestProvider)[keyof typeof UpdateAiProviderRequestProvider];
+
+export const UpdateAiProviderRequestProvider = {
+  openai: "openai",
+} as const;
+
+export interface UpdateAiProviderRequest {
+  provider: UpdateAiProviderRequestProvider;
+  /** @minLength 1 */
+  model: string;
+  /** @minLength 8 */
+  apiKey: string;
+  enabled: boolean;
+}
+
+export interface RotateAiProviderRequest {
+  /** @minLength 8 */
+  apiKey: string;
 }
 
 export type UpdateIntegrationConfigRequestConfig = { [key: string]: string };

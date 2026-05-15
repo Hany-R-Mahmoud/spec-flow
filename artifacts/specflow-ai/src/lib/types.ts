@@ -1,5 +1,7 @@
 import type {
   ClarificationQuestion,
+  AiCapability,
+  AiProviderConfig,
   DeveloperReview,
   Epic,
   ExportPackage,
@@ -22,6 +24,7 @@ import type {
 export type { Phase, PhaseStatus, ClarificationQuestion, Epic, Story };
 export type { ReadinessScore, QualityWarning, ReviewStatus, DeveloperReview };
 export type { ExportPackage, WorkspaceSettings, Project };
+export type { AiCapability, AiProviderConfig };
 export type {
   GenerationMode,
   GenerationStatus,

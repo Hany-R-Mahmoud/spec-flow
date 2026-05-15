@@ -7,10 +7,17 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { X } from 'lucide-react';
+import { KeyRound, ShieldCheck, Trash2, X } from 'lucide-react';
 import { useSessionStore } from '@/store/session-store';
 import { ThemeModeToggle } from '@/components/shared/ThemeModeToggle';
 import { StepSkillsSection } from '@/components/settings/StepSkillsSection';
+import { Badge } from '@/components/ui/badge';
+import {
+  deleteAiProvider,
+  rotateAiProvider,
+  updateAiProvider,
+  validateAiProvider,
+} from '@workspace/api-client-react';
 
 type SettingsFormValues = {
   workspaceName: string;
@@ -73,6 +80,187 @@ function SettingsSection({
       </div>
       <div className="p-4 space-y-4">{children}</div>
     </div>
+  );
+}
+
+function AiProviderSection() {
+  const { toast } = useToast();
+  const { state, refreshAiCapability } = useSessionStore();
+  const provider = state.aiCapability?.provider;
+  const [apiKey, setApiKey] = useState('');
+  const [model, setModel] = useState(provider?.model ?? 'gpt-4o-mini');
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    setModel(provider?.model ?? 'gpt-4o-mini');
+  }, [provider?.model]);
+
+  const status = provider?.status ?? 'not_configured';
+  const configured = Boolean(provider?.configured);
+
+  const saveProvider = async () => {
+    try {
+      setIsSaving(true);
+      await updateAiProvider({
+        provider: 'openai',
+        model,
+        apiKey,
+        enabled: true,
+      });
+      setApiKey('');
+      await refreshAiCapability();
+      toast({ title: 'AI provider saved', description: 'Provider key validated and stored securely.' });
+    } catch (error) {
+      toast({
+        title: 'Provider save failed',
+        description: error instanceof Error ? error.message : 'Could not save AI provider.',
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const validateProvider = async () => {
+    try {
+      setIsSaving(true);
+      await validateAiProvider();
+      await refreshAiCapability();
+      toast({ title: 'Validation complete', description: 'AI provider status refreshed.' });
+    } catch (error) {
+      toast({
+        title: 'Validation failed',
+        description: error instanceof Error ? error.message : 'Could not validate AI provider.',
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const rotateProvider = async () => {
+    try {
+      setIsSaving(true);
+      await rotateAiProvider({ apiKey });
+      setApiKey('');
+      await refreshAiCapability();
+      toast({ title: 'Provider key rotated', description: 'New key validated and stored securely.' });
+    } catch (error) {
+      toast({
+        title: 'Rotation failed',
+        description: error instanceof Error ? error.message : 'Could not rotate AI provider key.',
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const removeProvider = async () => {
+    try {
+      setIsSaving(true);
+      await deleteAiProvider();
+      setApiKey('');
+      await refreshAiCapability();
+      toast({ title: 'AI provider removed', description: 'Workspace returned to manual mode.' });
+    } catch (error) {
+      toast({
+        title: 'Remove failed',
+        description: error instanceof Error ? error.message : 'Could not remove AI provider.',
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <SettingsSection title="AI Provider">
+      <div className="flex flex-wrap items-center gap-2">
+        <Badge variant={configured ? 'default' : 'outline'}>
+          {configured ? 'AI enabled' : 'Manual mode'}
+        </Badge>
+        <span className="text-xs text-muted-foreground">
+          {status.replaceAll('_', ' ')}
+          {provider?.keySuffix ? ` · key ending ${provider.keySuffix}` : ''}
+        </span>
+      </div>
+
+      <div className="rounded border border-border bg-muted/30 p-3 text-xs text-muted-foreground">
+        <div className="flex items-center gap-2 font-medium text-foreground">
+          <ShieldCheck className="h-3.5 w-3.5" />
+          BYOK security
+        </div>
+        <p className="mt-1">
+          Keys are submitted once, encrypted on the API server, and never returned to the browser.
+          Removing the provider disables generation immediately and preserves existing artifacts.
+        </p>
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-[1fr_1fr]">
+        <div>
+          <Label className="text-xs font-medium mb-1.5 block">Provider</Label>
+          <Input value="OpenAI" disabled className="h-8 text-xs" />
+        </div>
+        <div>
+          <Label className="text-xs font-medium mb-1.5 block">Model</Label>
+          <Input
+            value={model}
+            onChange={(event) => setModel(event.target.value)}
+            className="h-8 text-xs font-mono"
+            placeholder="gpt-4o-mini"
+            data-testid="input-ai-provider-model"
+          />
+        </div>
+      </div>
+
+      <div>
+        <Label className="text-xs font-medium mb-1.5 block">API Key</Label>
+        <Input
+          value={apiKey}
+          onChange={(event) => setApiKey(event.target.value)}
+          className="h-8 text-xs font-mono"
+          type="password"
+          placeholder={configured ? 'Enter a new key to rotate' : 'sk-...'}
+          autoComplete="off"
+          data-testid="input-ai-provider-key"
+        />
+      </div>
+
+      {provider?.validationError ? (
+        <p className="text-xs text-[var(--color-danger)]">{provider.validationError}</p>
+      ) : null}
+
+      <div className="flex flex-wrap gap-2">
+        <Button
+          type="button"
+          size="sm"
+          className="h-8 text-xs"
+          onClick={configured ? rotateProvider : saveProvider}
+          disabled={isSaving || apiKey.trim().length < 8 || model.trim().length === 0}
+        >
+          <KeyRound className="mr-2 h-3.5 w-3.5" />
+          {configured ? 'Rotate Key' : 'Save Provider'}
+        </Button>
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          className="h-8 text-xs"
+          onClick={validateProvider}
+          disabled={isSaving || !provider?.id}
+        >
+          Validate
+        </Button>
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          className="h-8 text-xs text-[var(--color-danger)]"
+          onClick={removeProvider}
+          disabled={isSaving || !provider?.id}
+        >
+          <Trash2 className="mr-2 h-3.5 w-3.5" />
+          Remove
+        </Button>
+      </div>
+    </SettingsSection>
   );
 }
 
@@ -180,7 +368,7 @@ export function SettingsPage() {
     <div className="max-w-4xl space-y-6">
       <div>
         <h1 className="text-lg font-semibold text-foreground">Settings</h1>
-        <p className="text-xs text-muted-foreground mt-0.5">Configure your workspace and story generation preferences</p>
+        <p className="text-xs text-muted-foreground mt-0.5">Configure workspace defaults, AI provider access, and workflow preferences</p>
       </div>
 
       <SettingsSection title="Appearance">
@@ -190,6 +378,8 @@ export function SettingsPage() {
           <ThemeModeToggle className="w-full justify-start" />
         </div>
       </SettingsSection>
+
+      <AiProviderSection />
 
       <StepSkillsSection />
 

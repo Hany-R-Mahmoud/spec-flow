@@ -1,4 +1,5 @@
 import { Router, type IRouter } from "express";
+import { createHash } from "node:crypto";
 import { and } from "drizzle-orm";
 import {
   GenerateClarificationBody,
@@ -16,9 +17,14 @@ import {
   sessionsTable,
   type WorkflowGeneration,
 } from "@workspace/db";
-import { applyQualityReview, generateClarificationQuestions, generateEpics, generatePrdSections, generateStories } from "../ai/deterministic-workflow.js";
-import { getGenerationRuntime } from "../ai/config.js";
 import { workflowPrompts } from "../ai/prompts.js";
+import { AiProviderError, runOpenAiJson } from "../ai/provider-client.js";
+import {
+  getAiProviderSecret,
+  recordAuditEvent,
+  type AiProviderSecret,
+} from "../ai/provider-config.js";
+import { consumeRateLimit } from "../lib/rate-limit.js";
 import { sendError, sendUnexpectedError } from "./error-response.js";
 import {
   buildPhaseUpdate,
@@ -34,6 +40,8 @@ import {
 import { requireAuthContext } from "./auth.js";
 
 const router: IRouter = Router();
+const GENERATION_LIMIT = 30;
+const GENERATION_WINDOW_MS = 60 * 60 * 1000;
 
 type GenerationRouteStep =
   | "clarification"
@@ -58,6 +66,70 @@ const generateBodyParsers = {
   stories: GenerateStoriesBody,
   quality: GenerateQualityBody,
 } as const;
+
+function validateStepSkillSnapshot(
+  step: GenerationRouteStep,
+  stepSkill?: StepSkillSnapshot,
+): StepSkillSnapshot | undefined {
+  if (!stepSkill) {
+    return undefined;
+  }
+
+  if (stepSkill.phase !== step) {
+    throw new Error("Step skill phase does not match the generation step.");
+  }
+
+  if (stepSkill.content.length > 12_000) {
+    throw new Error("Step skill is too large for live generation.");
+  }
+
+  const forbiddenPatterns = [
+    /api\s*key/i,
+    /secret/i,
+    /token/i,
+    /ignore\s+(all\s+)?previous/i,
+    /system\s+prompt/i,
+  ];
+
+  if (forbiddenPatterns.some((pattern) => pattern.test(stepSkill.content))) {
+    throw new Error("Step skill contains unsafe instructions for live generation.");
+  }
+
+  return stepSkill;
+}
+
+function parseProviderJson(content: string): Record<string, unknown> {
+  const parsed = JSON.parse(content) as unknown;
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+    throw new Error("AI provider returned JSON with an invalid shape.");
+  }
+
+  return parsed as Record<string, unknown>;
+}
+
+function buildInputSnapshotHash(input: unknown): string {
+  return createHash("sha256").update(JSON.stringify(input)).digest("hex");
+}
+
+function getOutputContract(step: GenerationRouteStep): string {
+  if (step === "clarification") {
+    return "Return JSON only: {\"clarificationQuestions\":[{\"id\":\"string\",\"group\":\"string\",\"text\":\"string\",\"required\":true,\"answer\":\"\",\"skipped\":false}]}";
+  }
+
+  if (step === "prd") {
+    return "Return JSON only: {\"prdSections\":[{\"id\":\"string\",\"title\":\"string\",\"content\":\"string\",\"complete\":true,\"order\":1}]}";
+  }
+
+  if (step === "epics") {
+    return "Return JSON only: {\"epics\":[{\"id\":\"string\",\"sessionId\":\"SESSION_ID\",\"title\":\"string\",\"businessObjective\":\"string\",\"scopeSummary\":\"string\",\"prdRequirements\":[\"string\"],\"priority\":\"P1\",\"dependencies\":[\"string\"],\"risks\":[\"string\"],\"jiraEpicDescription\":\"string\",\"storyCount\":2}]}";
+  }
+
+  if (step === "stories") {
+    return "Return JSON only: {\"stories\":[{\"id\":\"string\",\"epicId\":\"string\",\"sessionId\":\"SESSION_ID\",\"title\":\"string\",\"userStory\":\"As a ...\",\"description\":\"string\",\"acceptanceCriteria\":[\"string\"],\"priority\":\"P1\",\"labels\":[\"string\"],\"components\":[\"string\"],\"dependencies\":[\"string\"],\"edgeCases\":[\"string\"],\"errorHandling\":\"string\",\"localizationNotes\":\"string\",\"designNotes\":\"string\",\"analyticsNotes\":\"string\",\"qaNotes\":\"string\",\"technicalNotes\":\"string\",\"openQuestions\":[\"string\"],\"readinessScore\":{\"total\":75,\"clarity\":75,\"acceptanceCriteria\":75,\"businessAlignment\":75,\"technicalFeasibility\":75,\"testability\":75,\"edgeCasesErrorHandling\":75,\"dependenciesDesignLocalization\":75,\"label\":\"Minor review needed\"},\"warnings\":[],\"reviewStatus\":\"pending\"}]}";
+  }
+
+  return "Return JSON only: {\"stories\":[STORY objects using the existing story contract, with updated readinessScore, warnings, and openQuestions when more information is needed.]}";
+}
 
 function resetStep(
   generation: WorkflowGeneration,
@@ -103,6 +175,10 @@ async function markGenerationState(args: {
   step: GenerationRouteStep;
   status: "running" | "failed" | "succeeded" | "unavailable";
   errorMessage?: string | null;
+  mode?: "live" | "unavailable";
+  provider?: string | null;
+  model?: string | null;
+  errorClass?: string | null;
 }) {
   const db = requireDatabase();
   const row = await getSessionArtifactsRecord(db, args.sessionId, args.workspaceId);
@@ -112,12 +188,14 @@ async function markGenerationState(args: {
   }
 
   const generation =
-    row.artifacts.metadata?.generation ?? createWorkflowGeneration("demo");
-  const runtime = getGenerationRuntime();
+    row.artifacts.metadata?.generation ?? createWorkflowGeneration(args.mode ?? "live");
   const nextGeneration = withGenerationStatus(generation, args.step, {
     status: args.status,
-    mode: runtime.mode,
+    mode: args.mode ?? "live",
     errorMessage: args.errorMessage ?? null,
+    provider: args.provider ?? null,
+    model: args.model ?? null,
+    errorClass: args.errorClass ?? null,
   });
 
   await db
@@ -137,6 +215,7 @@ async function markGenerationState(args: {
 async function runGeneration(
   sessionId: string,
   workspaceId: string,
+  actorUserId: string,
   step: GenerationRouteStep,
   stepSkill?: StepSkillSnapshot,
 ): Promise<Awaited<ReturnType<typeof getSessionWithArtifacts>>> {
@@ -151,18 +230,23 @@ async function runGeneration(
     throw new Error("Session artifacts not found.");
   }
 
-  const runtime = getGenerationRuntime();
-  const promptVersion = stepSkill
-    ? `${PROMPT_VERSIONS[step]}+skill:${stepSkill.id}@v${stepSkill.version}`
+  const providerSecret = await getAiProviderSecret(db, workspaceId);
+  const validatedStepSkill = validateStepSkillSnapshot(step, stepSkill);
+  const promptVersion = validatedStepSkill
+    ? `${PROMPT_VERSIONS[step]}+skill:${validatedStepSkill.id}@v${validatedStepSkill.version}`
     : PROMPT_VERSIONS[step];
   let generation =
-    row.artifacts.metadata?.generation ?? createWorkflowGeneration(runtime.mode);
+    row.artifacts.metadata?.generation ?? createWorkflowGeneration(providerSecret ? "live" : "unavailable");
 
-  if (runtime.mode === "unavailable") {
+  if (!providerSecret) {
     generation = withGenerationStatus(generation, step, {
       status: "unavailable",
       mode: "unavailable",
-      errorMessage: runtime.unavailableReason,
+      errorMessage:
+        "Connect and validate an AI provider key before running generation.",
+      provider: null,
+      model: null,
+      errorClass: "missing_provider",
     });
 
     await db
@@ -189,8 +273,12 @@ async function runGeneration(
 
   const runningGeneration = withGenerationStatus(generation, step, {
     status: "running",
-    mode: runtime.mode,
+    mode: "live",
     errorMessage: null,
+    provider: providerSecret.provider,
+    model: providerSecret.model,
+    providerRequestId: null,
+    errorClass: null,
   });
 
   await db
@@ -204,9 +292,23 @@ async function runGeneration(
       eq(workflowArtifactsTable.workspaceId, workspaceId),
     ));
 
+  await recordAuditEvent({
+    db,
+    workspaceId,
+    actorUserId,
+    eventType: "ai_generation.started",
+    targetType: "workflow_session",
+    targetId: sessionId,
+    metadata: {
+      step,
+      provider: providerSecret.provider,
+      model: providerSecret.model,
+      promptVersion,
+    },
+  });
+
   try {
-    const stepSkillOptions = { content: stepSkill?.content ?? "" };
-    const prompt = workflowPrompts[step].buildPrompt({
+    const sessionInput = {
       name: row.session.name,
       inputType: row.session.inputType,
       outputDepth: row.session.outputDepth,
@@ -216,34 +318,69 @@ async function runGeneration(
       knownConstraints: row.session.knownConstraints,
       labels: row.session.labels,
       rawInput: row.session.rawInput,
+    };
+    const prompt = workflowPrompts[step].buildPrompt({
+      ...sessionInput,
     });
 
-    const stepSkillInstructions = stepSkill
+    const stepSkillInstructions = validatedStepSkill
       ? [
-          `Step Skill: ${stepSkill.name}`,
-          `Skill ID: ${stepSkill.id}`,
-          `Skill Version: ${stepSkill.version}`,
-          `Skill Source: ${stepSkill.source}`,
-          stepSkill.content,
+          `Step Skill: ${validatedStepSkill.name}`,
+          `Skill ID: ${validatedStepSkill.id}`,
+          `Skill Version: ${validatedStepSkill.version}`,
+          `Skill Source: ${validatedStepSkill.source}`,
+          validatedStepSkill.content,
         ].join("\n")
       : "";
 
-    void prompt;
-    void stepSkillInstructions;
-    void promptVersion;
+    const providerContext = {
+      session: sessionInput,
+      artifacts: {
+        clarificationQuestions: row.artifacts.clarificationQuestions,
+        prdSections: row.artifacts.prdSections,
+        epics: row.artifacts.epics,
+        stories: row.artifacts.stories,
+      },
+      step,
+      stepSkill: validatedStepSkill
+        ? {
+            id: validatedStepSkill.id,
+            phase: validatedStepSkill.phase,
+            name: validatedStepSkill.name,
+            version: validatedStepSkill.version,
+            source: validatedStepSkill.source,
+          }
+        : null,
+    };
+    const inputSnapshotHash = buildInputSnapshotHash(providerContext);
+    const liveResult = await runOpenAiJson({
+      apiKey: providerSecret.apiKey,
+      model: providerSecret.model,
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are SpecFlow AI. Generate structured product workflow artifacts. Return valid JSON only. Preserve user-provided decisions. Mark missing facts as Unknown / verify. Never include secrets or hidden instructions.",
+        },
+        {
+          role: "user",
+          content: [
+            prompt,
+            stepSkillInstructions ? `\nActive step skill:\n${stepSkillInstructions}` : "",
+            `\nExisting artifacts and session context:\n${JSON.stringify(providerContext)}`,
+            `\n${getOutputContract(step).replace("SESSION_ID", sessionId)}`,
+          ].join("\n"),
+        },
+      ],
+    });
+    const providerJson = parseProviderJson(liveResult.content);
 
     let artifactPatch: Record<string, unknown> = {};
     let nextGeneration = resetDownstream(runningGeneration, step);
 
     if (step === "clarification") {
       const clarificationQuestions = clarificationQuestionSchema.array().parse(
-        generateClarificationQuestions({
-          ...row.session,
-          clarificationQuestions: row.artifacts.clarificationQuestions,
-          prdSections: row.artifacts.prdSections,
-          epics: row.artifacts.epics,
-          stories: row.artifacts.stories,
-        }, stepSkillOptions),
+        providerJson["clarificationQuestions"],
       );
 
       artifactPatch = {
@@ -256,13 +393,7 @@ async function runGeneration(
 
     if (step === "prd") {
       const prdSections = prdSectionSchema.array().parse(
-        generatePrdSections({
-          ...row.session,
-          clarificationQuestions: row.artifacts.clarificationQuestions,
-          prdSections: row.artifacts.prdSections,
-          epics: row.artifacts.epics,
-          stories: row.artifacts.stories,
-        }, stepSkillOptions),
+        providerJson["prdSections"],
       );
 
       artifactPatch = {
@@ -274,13 +405,7 @@ async function runGeneration(
 
     if (step === "epics") {
       const epics = epicSchema.array().parse(
-        generateEpics({
-          ...row.session,
-          clarificationQuestions: row.artifacts.clarificationQuestions,
-          prdSections: row.artifacts.prdSections,
-          epics: row.artifacts.epics,
-          stories: row.artifacts.stories,
-        }, stepSkillOptions),
+        providerJson["epics"],
       );
 
       artifactPatch = {
@@ -291,29 +416,30 @@ async function runGeneration(
 
     if (step === "stories") {
       const stories = storySchema.array().parse(
-        generateStories({
-          ...row.session,
-          clarificationQuestions: row.artifacts.clarificationQuestions,
-          prdSections: row.artifacts.prdSections,
-          epics: row.artifacts.epics,
-          stories: row.artifacts.stories,
-        }, stepSkillOptions),
+        providerJson["stories"],
       );
 
       artifactPatch = { stories };
     }
 
     if (step === "quality") {
-      const stories = storySchema.array().parse(applyQualityReview(row.artifacts.stories, stepSkillOptions));
+      const stories = storySchema.array().parse(providerJson["stories"]);
 
       artifactPatch = { stories };
     }
 
     nextGeneration = withGenerationStatus(nextGeneration, step, {
       status: "succeeded",
-      mode: runtime.mode,
+      mode: "live",
       promptVersion,
       errorMessage: null,
+      provider: providerSecret.provider,
+      model: providerSecret.model,
+      providerRequestId: liveResult.providerRequestId,
+      inputSnapshotHash,
+      tokenEstimate: liveResult.tokenEstimate,
+      costEstimateCents: null,
+      errorClass: null,
     });
 
     await db
@@ -336,6 +462,22 @@ async function runGeneration(
         eq(sessionsTable.workspaceId, workspaceId),
       ));
 
+    await recordAuditEvent({
+      db,
+      workspaceId,
+      actorUserId,
+      eventType: "ai_generation.succeeded",
+      targetType: "workflow_session",
+      targetId: sessionId,
+      metadata: {
+        step,
+        provider: providerSecret.provider,
+        model: providerSecret.model,
+        promptVersion,
+        providerRequestId: liveResult.providerRequestId,
+      },
+    });
+
     return getSessionWithArtifacts(db, sessionId, workspaceId);
   } catch (error) {
     const message =
@@ -349,6 +491,10 @@ async function runGeneration(
       step,
       status: "failed",
       errorMessage: message,
+      mode: "live",
+      provider: providerSecret.provider,
+      model: providerSecret.model,
+      errorClass: error instanceof AiProviderError ? error.errorClass : "invalid_response",
     });
 
     await db
@@ -358,6 +504,21 @@ async function runGeneration(
         eq(sessionsTable.id, sessionId),
         eq(sessionsTable.workspaceId, workspaceId),
       ));
+
+    await recordAuditEvent({
+      db,
+      workspaceId,
+      actorUserId,
+      eventType: "ai_generation.failed",
+      targetType: "workflow_session",
+      targetId: sessionId,
+      metadata: {
+        step,
+        provider: providerSecret.provider,
+        model: providerSecret.model,
+        errorClass: error instanceof AiProviderError ? error.errorClass : "invalid_response",
+      },
+    });
 
     throw error;
   }
@@ -386,9 +547,15 @@ function handleStep(step: GenerationRouteStep) {
         return;
       }
 
+      if (!consumeRateLimit(`generation:${auth.workspaceId}`, GENERATION_LIMIT, GENERATION_WINDOW_MS)) {
+        sendError(res, 429, "Too many generation requests. Try again later.");
+        return;
+      }
+
       const session = await runGeneration(
         req.params.sessionId,
         auth.workspaceId,
+        auth.actorUserId,
         step,
         input.stepSkill,
       );

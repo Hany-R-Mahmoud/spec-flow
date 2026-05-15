@@ -168,9 +168,9 @@ export function HeroGeometric({
             animate="visible"
             className="mt-6 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg"
           >
-            Start a breakdown, shape the project input, generate structured stories, review
-            the output, and export the result downstream without losing the product context
-            that makes the work credible.
+            Start a breakdown, shape the project input, and choose how the work moves:
+            AI-assisted with your own provider key, or manual mode for structured review
+            and export without model calls.
           </motion.p>
 
           <motion.div

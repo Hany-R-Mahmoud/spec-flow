@@ -153,6 +153,8 @@ export function WorkflowWorkspace() {
   const { toast } = useToast();
 
   const session = state.sessions.find(s => s.id === sessionId);
+  const aiCapability = state.aiCapability;
+  const canGenerate = Boolean(aiCapability?.canGenerate);
   const [activePhase, setActivePhase] = useState<Phase>(session?.currentPhase || 'clarification');
 
   useEffect(() => {
@@ -385,6 +387,17 @@ export function WorkflowWorkspace() {
   };
 
   const handleGeneration = async (step: 'clarification' | 'prd' | 'epics' | 'stories' | 'quality') => {
+    if (!canGenerate) {
+      toast({
+        title: 'AI provider required',
+        description:
+          aiCapability?.reason ??
+          'Connect and validate an AI provider key in settings to enable generation.',
+      });
+      setLocation('/settings');
+      return;
+    }
+
     const updatedSession = await runGeneration(session.id, step);
 
     if (!updatedSession) {
@@ -467,16 +480,21 @@ export function WorkflowWorkspace() {
             {activeGenerationStep ? (
               <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-md border border-border bg-muted/30 px-3 py-2">
                 <div className="text-xs text-muted-foreground">
-                  Generation behavior
+                  {canGenerate ? 'AI generation behavior' : 'Manual mode'}
                   <span className="ml-2 font-mono text-foreground">
-                    {activeGenerationStep.promptVersion}
+                    {canGenerate
+                      ? activeGenerationStep.promptVersion
+                      : 'connect provider to enable generation'}
                   </span>
                 </div>
-                {skillProvenance ? (
+                {canGenerate && skillProvenance ? (
                   <Badge variant="outline" className="text-[10px]">
                     skill {skillProvenance}
                   </Badge>
                 ) : null}
+                <Badge variant={canGenerate ? 'default' : 'outline'} className="text-[10px]">
+                  {canGenerate ? 'AI enabled' : 'Manual'}
+                </Badge>
               </div>
             ) : null}
 

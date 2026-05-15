@@ -12,13 +12,16 @@
 ## Flow: Workflow Generation
 
 1. User opens a workspace from the app shell
-2. Session state triggers generation actions in the UI
-3. React client sends the selected step-skill snapshot with the generation
-   request
-4. API validates input, updates generation state, and persists artifacts
-5. Deterministic generation preserves imported/user-kept content when the skill
-   requires it
-6. Shared schema types keep response shape stable
+2. UI checks `/api/ai/capability`
+3. If no provider key is configured, generation controls explain manual mode
+   and route admins to Settings
+4. If AI is enabled, React client sends the selected step-skill snapshot with
+   the generation request
+5. API decrypts the workspace provider key server-side, calls the provider,
+   validates JSON output, updates generation state, and persists artifacts
+6. Invalid provider output preserves the previous trusted artifacts and marks
+   the generation step failed
+7. Shared schema types keep response shape stable
 
 ## Flow: Adaptive Intake
 
@@ -31,10 +34,24 @@
 ## Flow: Step Skills
 
 1. User opens Settings
-2. User selects a workflow phase and edits or duplicates the default skill
-3. Skill saves locally and becomes assigned to that phase
+2. If AI is not enabled, default skills remain visible but custom skill actions
+   are disabled
+3. If AI is enabled, user selects a workflow phase and edits or duplicates the
+   default skill
 4. Future generation requests include the assigned skill snapshot
-5. Generation provenance is stored in `generation.promptVersion`
+5. Server-side validation rejects oversized or unsafe skill instructions before
+   live provider calls
+6. Generation provenance is stored in `generation.promptVersion`
+
+## Flow: BYOK AI Provider
+
+1. Workspace admin opens Settings
+2. Admin enters provider, model, and API key
+3. API encrypts the key, stores only metadata and ciphertext, validates the key,
+   and records audit events
+4. Browser receives only status, provider, model, key suffix/fingerprint, and
+   timestamps
+5. Rotate, validate, and remove actions never return plaintext key material
 
 ## Flow: Export History
 
@@ -49,13 +66,14 @@
 - `ensureWorkspaceSchema()` in `artifacts/api-server/src/server.ts` adds missing
   `workspace_id` columns on startup
 - OpenAPI code generation keeps the shared client and Zod packages aligned
-- Step skills currently persist in browser `localStorage`; API/database-backed
-  skill persistence is `Unknown / verify` future work
+- AI provider keys require `AI_SECRET_ENCRYPTION_KEY` or
+  `INTEGRATION_SECRET_ENCRYPTION_KEY` on the API server
 
 ## External Boundaries
 
 - Clerk auth
 - Supabase Postgres
+- OpenAI-compatible provider calls from the API server when BYOK is configured
 - Jira/GitHub export integrations, with configuration state needing
   deployment-specific verification
 

@@ -29,9 +29,10 @@ artifacts and routes to the recommended phase:
 - story-like content starts at `quality`
 - sparse input starts at `clarification`
 
-Imported content is not silently overwritten. Generation respects the selected
-step skill and preserves user-kept artifacts when the skill asks to preserve or
-avoid repeating existing content.
+Imported content is not silently overwritten. When AI is enabled, generation
+uses the selected step skill and validates provider output before replacing
+artifacts. When no provider key is configured, the workflow remains manual and
+imported/user-kept artifacts stay editable.
 
 ## Step Skills
 
@@ -52,10 +53,12 @@ Each skill contains:
 - output contract
 - quality checks
 
-Users can edit, duplicate, reset, and assign phase skills in Settings. Custom
-skills currently persist in browser `localStorage`. Generation sends a skill
-snapshot with the request and records provenance in `generation.promptVersion`
-using this pattern:
+Users can edit, duplicate, reset, and assign phase skills in Settings only when
+AI generation is enabled for the workspace. In manual mode, defaults remain
+read-only because skills affect provider-backed generation.
+
+Generation sends a skill snapshot with the request, validates it server-side,
+and records provenance in `generation.promptVersion` using this pattern:
 
 ```text
 <prompt-version>+skill:<skill-id>@v<version>
@@ -65,8 +68,8 @@ using this pattern:
 
 - Step skills are local to the browser until API/database-backed persistence is
   added.
-- Skill content affects the deterministic generator through simple rule
-  detection, not full prompt execution.
+- Live generation rejects oversized or unsafe skill instructions before
+  provider calls, but full API-backed skill persistence remains future work.
 - `Unknown / verify` warnings are preserved and surfaced, but there is no
   separate unknowns dashboard yet.
 
@@ -78,5 +81,7 @@ using this pattern:
 - `artifacts/specflow-ai/src/components/settings/StepSkillsSection.tsx`
 - `artifacts/specflow-ai/src/store/session-store.tsx`
 - `artifacts/api-server/src/routes/generation.ts`
+- `artifacts/api-server/src/routes/ai-provider.ts`
+- `artifacts/api-server/src/ai/provider-config.ts`
 - `artifacts/api-server/src/ai/deterministic-workflow.ts`
 - `lib/api-spec/openapi.yaml`

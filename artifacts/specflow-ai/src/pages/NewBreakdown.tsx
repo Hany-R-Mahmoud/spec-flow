@@ -79,6 +79,7 @@ function ChipsInput({ value, onChange, placeholder }: { value: string[]; onChang
 
 export function NewBreakdown() {
   const { createSession, state } = useSessionStore();
+  const canGenerate = Boolean(state.aiCapability?.canGenerate);
   const { toast } = useToast();
   const [, setLocation] = useLocation();
 
@@ -177,7 +178,11 @@ export function NewBreakdown() {
     <div className="max-w-5xl mx-auto space-y-6">
       <div>
         <h1 className="text-lg font-semibold text-foreground">New Breakdown</h1>
-        <p className="text-xs text-muted-foreground mt-0.5">Fill in the intake form to start a guided AI breakdown</p>
+        <p className="text-xs text-muted-foreground mt-0.5">
+          {canGenerate
+            ? 'Fill in the intake form to start an AI-assisted breakdown'
+            : 'Fill in the intake form to organize a manual breakdown. Connect an AI provider key in settings to enable generation.'}
+        </p>
       </div>
 
       <Form {...form}>
@@ -443,7 +448,9 @@ export function NewBreakdown() {
               </Button>
 
               <p className="text-xs text-muted-foreground text-center">
-                AI will generate clarification questions, PRD, epics, and Jira-ready stories based on your input.
+                {canGenerate
+                  ? 'AI will generate clarification questions, PRD, epics, and Jira-ready stories based on your input.'
+                  : 'Manual mode preserves your structure and handoff flow without model calls or custom generation skills.'}
               </p>
             </div>
           </div>

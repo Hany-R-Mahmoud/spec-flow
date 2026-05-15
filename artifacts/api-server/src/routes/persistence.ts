@@ -161,6 +161,13 @@ export function withGenerationStatus(
     promptVersion?: string;
     errorMessage?: string | null;
     updatedAt?: string | null;
+    provider?: string | null;
+    model?: string | null;
+    providerRequestId?: string | null;
+    inputSnapshotHash?: string | null;
+    tokenEstimate?: number | null;
+    costEstimateCents?: number | null;
+    errorClass?: string | null;
   },
 ): WorkflowGeneration {
   return {
@@ -175,6 +182,29 @@ export function withGenerationStatus(
           ? generation[step].errorMessage
           : input.errorMessage,
       updatedAt: input.updatedAt ?? new Date().toISOString(),
+      provider:
+        input.provider === undefined ? generation[step].provider ?? null : input.provider,
+      model: input.model === undefined ? generation[step].model ?? null : input.model,
+      providerRequestId:
+        input.providerRequestId === undefined
+          ? generation[step].providerRequestId ?? null
+          : input.providerRequestId,
+      inputSnapshotHash:
+        input.inputSnapshotHash === undefined
+          ? generation[step].inputSnapshotHash ?? null
+          : input.inputSnapshotHash,
+      tokenEstimate:
+        input.tokenEstimate === undefined
+          ? generation[step].tokenEstimate ?? null
+          : input.tokenEstimate,
+      costEstimateCents:
+        input.costEstimateCents === undefined
+          ? generation[step].costEstimateCents ?? null
+          : input.costEstimateCents,
+      errorClass:
+        input.errorClass === undefined
+          ? generation[step].errorClass ?? null
+          : input.errorClass,
     },
   };
 }

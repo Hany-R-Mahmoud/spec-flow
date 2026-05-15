@@ -6,6 +6,10 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from "./aiCapability";
+export * from "./aiCapabilityMode";
+export * from "./aiProviderConfig";
+export * from "./aiProviderStatus";
 export * from "./apiError";
 export * from "./apiErrorResponse";
 export * from "./clarificationQuestion";
@@ -43,12 +47,15 @@ export * from "./qualityWarning";
 export * from "./readinessLabel";
 export * from "./readinessScore";
 export * from "./reviewStatus";
+export * from "./rotateAiProviderRequest";
 export * from "./sessionListResponse";
 export * from "./stepSkillSnapshot";
 export * from "./stepSkillSnapshotSource";
 export * from "./story";
 export * from "./storyPriority";
 export * from "./unauthorizedResponse";
+export * from "./updateAiProviderRequest";
+export * from "./updateAiProviderRequestProvider";
 export * from "./updateIntegrationConfigRequest";
 export * from "./updateIntegrationConfigRequestConfig";
 export * from "./updateProjectRequest";

@@ -13,9 +13,11 @@ import {
   validateStepSkill,
   type StepSkillPhase,
 } from '@/lib/step-skills';
+import { useSessionStore } from '@/store/session-store';
 
 export function StepSkillsSection() {
   const { toast } = useToast();
+  const { state: sessionState } = useSessionStore();
   const {
     state,
     getSkill,
@@ -27,6 +29,7 @@ export function StepSkillsSection() {
   const [phase, setPhase] = useState<StepSkillPhase>('clarification');
   const activeSkill = getSkill(phase);
   const customSkill = state.customSkills[phase];
+  const aiEnabled = Boolean(sessionState.aiCapability?.canEditSkills);
   const [name, setName] = useState(activeSkill.name);
   const [content, setContent] = useState(activeSkill.content);
   const warnings = useMemo(() => validateStepSkill(content), [content]);
@@ -37,6 +40,9 @@ export function StepSkillsSection() {
   }, [activeSkill.content, activeSkill.name]);
 
   const save = () => {
+    if (!aiEnabled) {
+      return;
+    }
     saveCustomSkill(phase, { name, content });
     toast({
       title: 'Step skill saved',
@@ -45,6 +51,9 @@ export function StepSkillsSection() {
   };
 
   const duplicate = () => {
+    if (!aiEnabled) {
+      return;
+    }
     duplicateDefaultSkill(phase);
     toast({
       title: 'Custom skill created',
@@ -53,6 +62,9 @@ export function StepSkillsSection() {
   };
 
   const useDefault = () => {
+    if (!aiEnabled) {
+      return;
+    }
     assignDefaultSkill(phase);
     toast({
       title: 'Default assigned',
@@ -61,6 +73,9 @@ export function StepSkillsSection() {
   };
 
   const reset = () => {
+    if (!aiEnabled) {
+      return;
+    }
     resetCustomSkill(phase);
     toast({
       title: 'Custom skill reset',
@@ -74,7 +89,9 @@ export function StepSkillsSection() {
         <div>
           <span className="text-sm font-semibold text-foreground">Step Skills</span>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            Edit the behavior guide used by each workflow phase.
+            {aiEnabled
+              ? 'Edit the behavior guide used by each AI workflow phase.'
+              : 'Connect an AI provider key to customize generation skills.'}
           </p>
         </div>
         <Badge variant={activeSkill.source === 'custom' ? 'default' : 'outline'}>
@@ -118,6 +135,7 @@ export function StepSkillsSection() {
               size="sm"
               className="h-8 w-full justify-start text-xs"
               onClick={duplicate}
+              disabled={!aiEnabled}
               data-testid="button-duplicate-step-skill"
             >
               <Copy className="mr-2 h-3.5 w-3.5" />
@@ -129,6 +147,7 @@ export function StepSkillsSection() {
               size="sm"
               className="h-8 w-full justify-start text-xs"
               onClick={useDefault}
+              disabled={!aiEnabled}
               data-testid="button-use-default-step-skill"
             >
               <RotateCcw className="mr-2 h-3.5 w-3.5" />
@@ -140,7 +159,7 @@ export function StepSkillsSection() {
               size="sm"
               className="h-8 w-full justify-start text-xs"
               onClick={reset}
-              disabled={!customSkill}
+              disabled={!aiEnabled || !customSkill}
               data-testid="button-reset-step-skill"
             >
               <RotateCcw className="mr-2 h-3.5 w-3.5" />
@@ -155,6 +174,7 @@ export function StepSkillsSection() {
             <Input
               value={name}
               onChange={(event) => setName(event.target.value)}
+              disabled={!aiEnabled}
               className="h-8 text-xs"
               data-testid="input-step-skill-name"
             />
@@ -165,6 +185,7 @@ export function StepSkillsSection() {
             <Textarea
               value={content}
               onChange={(event) => setContent(event.target.value)}
+              disabled={!aiEnabled}
               className="min-h-[320px] resize-y font-mono text-xs leading-relaxed"
               data-testid="textarea-step-skill-content"
             />
@@ -186,13 +207,16 @@ export function StepSkillsSection() {
 
           <div className="flex items-center justify-between gap-3">
             <p className="text-xs text-muted-foreground">
-              Saved skills persist locally for this workspace until API-backed step skills land.
+              {aiEnabled
+                ? 'Saved skills are validated on the server before live generation runs.'
+                : 'Manual mode keeps skills read-only because they only affect AI generation.'}
             </p>
             <Button
               type="button"
               size="sm"
               className="h-8 text-xs"
               onClick={save}
+              disabled={!aiEnabled}
               data-testid="button-save-step-skill"
             >
               <Save className="mr-2 h-3.5 w-3.5" />

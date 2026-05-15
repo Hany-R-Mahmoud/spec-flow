@@ -14,4 +14,11 @@ export interface GenerationStepState {
   promptVersion: string;
   updatedAt: Date | null;
   errorMessage: string | null;
+  provider?: string | null;
+  model?: string | null;
+  providerRequestId?: string | null;
+  inputSnapshotHash?: string | null;
+  tokenEstimate?: number | null;
+  costEstimateCents?: number | null;
+  errorClass?: string | null;
 }

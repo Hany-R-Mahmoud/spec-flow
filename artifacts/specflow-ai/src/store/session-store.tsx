@@ -14,6 +14,7 @@ import {
   generatePrd as generatePrdRequest,
   generateQuality as generateQualityRequest,
   generateStories as generateStoriesRequest,
+  getAiCapability,
   getSettings,
   listExportPackages,
   listSessions,
@@ -24,6 +25,7 @@ import {
 import { getStepSkillSnapshotForPhase, type StepSkillPhase } from '@/lib/step-skills';
 import type {
   ClarificationQuestion,
+  AiCapability,
   Epic,
   ExportPackage,
   GenerationMode,
@@ -45,6 +47,7 @@ interface State {
   clarificationQuestions: ClarificationQuestion[];
   prdSections: PRDSection[];
   settings: WorkspaceSettings | null;
+  aiCapability: AiCapability | null;
   exportPackages: ExportPackage[];
   isLoading: boolean;
   error: string | null;
@@ -99,6 +102,7 @@ const INITIAL_STATE: State = {
   clarificationQuestions: [],
   prdSections: [],
   settings: null,
+  aiCapability: null,
   exportPackages: [],
   isLoading: true,
   error: null,
@@ -109,6 +113,7 @@ function deriveState(
   sessions: ProjectSession[],
   activeSessionId: string | null,
   settings: WorkspaceSettings | null,
+  aiCapability: AiCapability | null,
   exportPackages: ExportPackage[],
   isLoading: boolean,
   error: string | null,
@@ -129,6 +134,7 @@ function deriveState(
     clarificationQuestions: activeSession?.clarificationQuestions ?? [],
     prdSections: activeSession?.prdSections ?? [],
     settings,
+    aiCapability,
     exportPackages,
     isLoading,
     error,
@@ -210,6 +216,7 @@ const SessionContext = createContext<{
   savePrdSections: (sections: PRDSection[]) => Promise<ProjectSession | null>;
   saveStories: (stories: Story[]) => Promise<ProjectSession | null>;
   saveSettings: (input: WorkspaceSettings) => Promise<WorkspaceSettings>;
+  refreshAiCapability: () => Promise<AiCapability | null>;
   runGeneration: (
     sessionId: string,
     step: GenerationStepKey,
@@ -224,11 +231,17 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     setState((current) => ({ ...current, isLoading: true, error: null }));
 
     try {
-      const [sessionsResponse, settingsResponse, exportPackagesResponse] =
+      const [
+        sessionsResponse,
+        settingsResponse,
+        exportPackagesResponse,
+        aiCapabilityResponse,
+      ] =
         await Promise.all([
           listSessions(),
           getSettings(),
           listExportPackages(),
+          getAiCapability(),
         ]);
 
       setState((current) =>
@@ -236,6 +249,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
           sessionsResponse.sessions,
           current.activeSessionId,
           settingsResponse,
+          aiCapabilityResponse,
           exportPackagesResponse.exportPackages,
           false,
           null,
@@ -246,6 +260,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       setState((current) =>
         deriveState(
           [],
+          null,
           null,
           null,
           [],
@@ -275,6 +290,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
             replaceSession(current.sessions, updatedSession),
             current.activeSessionId,
             current.settings,
+            current.aiCapability,
             current.exportPackages,
             false,
             null,
@@ -311,6 +327,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
             replaceSession(current.sessions, updatedSession),
             current.activeSessionId,
             current.settings,
+            current.aiCapability,
             current.exportPackages,
             false,
             null,
@@ -385,6 +402,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
             current.sessions,
             action.payload,
             current.settings,
+            current.aiCapability,
             current.exportPackages,
             current.isLoading,
             current.error,
@@ -400,6 +418,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
             [...current.sessions, action.payload],
             action.payload.id,
             current.settings,
+            current.aiCapability,
             current.exportPackages,
             false,
             null,
@@ -421,6 +440,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
             nextSessions,
             current.activeSessionId,
             current.settings,
+            current.aiCapability,
             current.exportPackages,
             false,
             null,
@@ -481,6 +501,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
             nextSessions,
             current.activeSessionId,
             current.settings,
+            current.aiCapability,
             current.exportPackages,
             false,
             null,
@@ -531,6 +552,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
             nextSessions,
             current.activeSessionId,
             current.settings,
+            current.aiCapability,
             current.exportPackages,
             false,
             null,
@@ -569,6 +591,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
             nextSessions,
             current.activeSessionId,
             current.settings,
+            current.aiCapability,
             current.exportPackages,
             false,
             null,
@@ -615,6 +638,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
           [...current.sessions, nextSession],
           nextSession.id,
           current.settings,
+          current.aiCapability,
           current.exportPackages,
           false,
           null,
@@ -640,11 +664,32 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     return updatedSettings;
   }, []);
 
+  const refreshAiCapability = useCallback(async () => {
+    const capability = await getAiCapability();
+    setState((current) => ({
+      ...current,
+      aiCapability: capability,
+      error: null,
+    }));
+    return capability;
+  }, []);
+
   const runGeneration = useCallback(
     async (sessionId: string, step: GenerationStepKey) => {
       const activeSession = state.sessions.find((session) => session.id === sessionId);
 
       if (!activeSession) {
+        return null;
+      }
+
+      if (!state.aiCapability?.canGenerate) {
+        const message =
+          state.aiCapability?.reason ??
+          'Connect and validate an AI provider key before running generation.';
+        setState((current) => ({
+          ...current,
+          error: message,
+        }));
         return null;
       }
 
@@ -665,6 +710,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
           })),
           current.activeSessionId,
           current.settings,
+          current.aiCapability,
           current.exportPackages,
           false,
           null,
@@ -691,6 +737,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
             replaceSession(current.sessions, updatedSession),
             current.activeSessionId,
             current.settings,
+            current.aiCapability,
             current.exportPackages,
             false,
             null,
@@ -717,6 +764,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
             })),
             current.activeSessionId,
             current.settings,
+            current.aiCapability,
             current.exportPackages,
             false,
             message,
@@ -727,7 +775,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         return null;
       }
     },
-    [state.sessions],
+    [state.aiCapability, state.sessions],
   );
 
   const value = useMemo(
@@ -740,6 +788,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       savePrdSections,
       saveStories,
       saveSettings,
+      refreshAiCapability,
       runGeneration,
       reload: load,
     }),
@@ -752,6 +801,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       savePrdSections,
       saveStories,
       saveSettings,
+      refreshAiCapability,
       runGeneration,
       load,
     ],

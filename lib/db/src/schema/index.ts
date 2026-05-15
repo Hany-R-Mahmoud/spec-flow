@@ -61,6 +61,13 @@ export const pmRevisionStatusSchema = z.enum([
   "resolved",
 ]);
 export const generationModeSchema = z.enum(["demo", "live", "unavailable"]);
+export const aiProviderStatusSchema = z.enum([
+  "not_configured",
+  "validating",
+  "configured",
+  "validation_failed",
+  "disabled",
+]);
 export const generationStatusSchema = z.enum([
   "idle",
   "running",
@@ -74,6 +81,13 @@ export const generationStepSchema = z.object({
   promptVersion: z.string(),
   updatedAt: z.iso.datetime().nullable(),
   errorMessage: z.string().nullable(),
+  provider: z.string().nullable().optional(),
+  model: z.string().nullable().optional(),
+  providerRequestId: z.string().nullable().optional(),
+  inputSnapshotHash: z.string().nullable().optional(),
+  tokenEstimate: z.number().int().nullable().optional(),
+  costEstimateCents: z.number().int().nullable().optional(),
+  errorClass: z.string().nullable().optional(),
 });
 export const workflowGenerationSchema = z.object({
   clarification: generationStepSchema,
@@ -392,6 +406,59 @@ export const integrationConfigTable = pgTable(
   }),
 );
 
+export const aiProviderConfigTable = pgTable(
+  "ai_provider_config",
+  {
+    id: text("id").primaryKey(),
+    workspaceId: text("workspace_id").notNull(),
+    provider: text("provider").notNull(),
+    model: text("model").notNull(),
+    enabled: boolean("enabled").notNull().default(false),
+    status: text("status").notNull().default("not_configured"),
+    encryptedApiKey: text("encrypted_api_key"),
+    keyVersion: text("key_version"),
+    keyFingerprint: text("key_fingerprint"),
+    keySuffix: text("key_suffix"),
+    lastValidatedAt: timestamp("last_validated_at", { withTimezone: true }),
+    validationError: text("validation_error"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => ({
+    aiProviderConfigWorkspaceUnique: uniqueIndex(
+      "ai_provider_config_workspace_id_unique",
+    ).on(table.workspaceId),
+    aiProviderConfigWorkspaceIdx: index("ai_provider_config_workspace_id_idx").on(
+      table.workspaceId,
+    ),
+  }),
+);
+
+export const auditEventsTable = pgTable(
+  "audit_events",
+  {
+    id: text("id").primaryKey(),
+    workspaceId: text("workspace_id").notNull(),
+    actorUserId: text("actor_user_id").notNull(),
+    eventType: text("event_type").notNull(),
+    targetType: text("target_type").notNull(),
+    targetId: text("target_id"),
+    metadata: jsonb("metadata").$type<Record<string, unknown>>().notNull().default({}),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => ({
+    auditEventsWorkspaceCreatedIdx: index(
+      "audit_events_workspace_id_created_at_idx",
+    ).on(table.workspaceId, table.createdAt),
+  }),
+);
+
 export const projectsRelations = relations(projectsTable, ({ many }) => ({
   sessions: many(sessionsTable),
 }));
@@ -444,6 +511,8 @@ export const insertSettingsSchema = createInsertSchema(settingsTable);
 export const insertExportPackageSchema = createInsertSchema(exportPackagesTable);
 export const insertExportItemSchema = createInsertSchema(exportItemsTable);
 export const insertIntegrationConfigSchema = createInsertSchema(integrationConfigTable);
+export const insertAiProviderConfigSchema = createInsertSchema(aiProviderConfigTable);
+export const insertAuditEventSchema = createInsertSchema(auditEventsTable);
 
 export type Phase = z.infer<typeof phaseSchema>;
 export type PhaseStatus = z.infer<typeof phaseStatusSchema>;
@@ -457,6 +526,7 @@ export type Epic = z.infer<typeof epicSchema>;
 export type Story = z.infer<typeof storySchema>;
 export type ExportPackage = z.infer<typeof exportPackageSchema>;
 export type GenerationMode = z.infer<typeof generationModeSchema>;
+export type AiProviderStatus = z.infer<typeof aiProviderStatusSchema>;
 export type GenerationStatus = z.infer<typeof generationStatusSchema>;
 export type GenerationStep = z.infer<typeof generationStepSchema>;
 export type WorkflowGeneration = z.infer<typeof workflowGenerationSchema>;
@@ -476,3 +546,7 @@ export type ExportItemRow = typeof exportItemsTable.$inferSelect;
 export type InsertExportItem = z.infer<typeof insertExportItemSchema>;
 export type IntegrationConfigRow = typeof integrationConfigTable.$inferSelect;
 export type InsertIntegrationConfig = z.infer<typeof insertIntegrationConfigSchema>;
+export type AiProviderConfigRow = typeof aiProviderConfigTable.$inferSelect;
+export type InsertAiProviderConfig = z.infer<typeof insertAiProviderConfigSchema>;
+export type AuditEvent = typeof auditEventsTable.$inferSelect;
+export type InsertAuditEvent = z.infer<typeof insertAuditEventSchema>;

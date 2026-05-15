@@ -17,6 +17,8 @@ tags:
     description: Workflow session persistence operations
   - name: settings
     description: Workspace settings operations
+  - name: ai
+    description: AI provider and capability operations
   - name: exports
     description: Export package history operations
 paths:
@@ -403,6 +405,124 @@ paths:
           $ref: "#/components/responses/Forbidden"
         default:
           $ref: "#/components/responses/ApiError"
+  /ai/provider:
+    get:
+      operationId: getAiProvider
+      tags: [ai]
+      summary: Get AI provider configuration status
+      responses:
+        "200":
+          description: AI provider status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiProviderConfig"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        default:
+          $ref: "#/components/responses/ApiError"
+    put:
+      operationId: updateAiProvider
+      tags: [ai]
+      summary: Save or update AI provider credentials
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAiProviderRequest"
+      responses:
+        "200":
+          description: Updated AI provider status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiProviderConfig"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        default:
+          $ref: "#/components/responses/ApiError"
+    delete:
+      operationId: deleteAiProvider
+      tags: [ai]
+      summary: Remove AI provider credentials
+      responses:
+        "200":
+          description: AI provider removed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiProviderConfig"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        default:
+          $ref: "#/components/responses/ApiError"
+  /ai/provider/validate:
+    post:
+      operationId: validateAiProvider
+      tags: [ai]
+      summary: Validate saved AI provider credentials
+      responses:
+        "200":
+          description: AI provider validation status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiProviderConfig"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        default:
+          $ref: "#/components/responses/ApiError"
+  /ai/provider/rotate:
+    post:
+      operationId: rotateAiProvider
+      tags: [ai]
+      summary: Rotate AI provider credentials
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RotateAiProviderRequest"
+      responses:
+        "200":
+          description: Rotated AI provider status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiProviderConfig"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        default:
+          $ref: "#/components/responses/ApiError"
+  /ai/capability:
+    get:
+      operationId: getAiCapability
+      tags: [ai]
+      summary: Get AI capability mode for the workspace
+      responses:
+        "200":
+          description: AI capability
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiCapability"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        default:
+          $ref: "#/components/responses/ApiError"
   /export-packages:
     get:
       operationId: listExportPackages
@@ -684,6 +804,14 @@ components:
     GenerationMode:
       type: string
       enum: [demo, live, unavailable]
+    AiProviderStatus:
+      type: string
+      enum:
+        - not_configured
+        - validating
+        - configured
+        - validation_failed
+        - disabled
     GenerationStatus:
       type: string
       enum: [idle, running, succeeded, failed, unavailable]
@@ -702,6 +830,34 @@ components:
               format: date-time
             - type: "null"
         errorMessage:
+          oneOf:
+            - type: string
+            - type: "null"
+        provider:
+          oneOf:
+            - type: string
+            - type: "null"
+        model:
+          oneOf:
+            - type: string
+            - type: "null"
+        providerRequestId:
+          oneOf:
+            - type: string
+            - type: "null"
+        inputSnapshotHash:
+          oneOf:
+            - type: string
+            - type: "null"
+        tokenEstimate:
+          oneOf:
+            - type: integer
+            - type: "null"
+        costEstimateCents:
+          oneOf:
+            - type: integer
+            - type: "null"
+        errorClass:
           oneOf:
             - type: string
             - type: "null"
@@ -1408,6 +1564,96 @@ components:
           items:
             $ref: "#/components/schemas/IntegrationConfig"
       required: [integrations]
+    AiProviderConfig:
+      type: object
+      properties:
+        id:
+          oneOf:
+            - type: string
+            - type: "null"
+        provider:
+          type: string
+        model:
+          type: string
+        enabled:
+          type: boolean
+        status:
+          $ref: "#/components/schemas/AiProviderStatus"
+        configured:
+          type: boolean
+        keyFingerprint:
+          oneOf:
+            - type: string
+            - type: "null"
+        keySuffix:
+          oneOf:
+            - type: string
+            - type: "null"
+        lastValidatedAt:
+          oneOf:
+            - type: string
+              format: date-time
+            - type: "null"
+        validationError:
+          oneOf:
+            - type: string
+            - type: "null"
+        updatedAt:
+          oneOf:
+            - type: string
+              format: date-time
+            - type: "null"
+      required:
+        - id
+        - provider
+        - model
+        - enabled
+        - status
+        - configured
+        - keyFingerprint
+        - keySuffix
+        - lastValidatedAt
+        - validationError
+        - updatedAt
+    AiCapability:
+      type: object
+      properties:
+        mode:
+          type: string
+          enum: [ai_enabled, manual]
+        canGenerate:
+          type: boolean
+        canEditSkills:
+          type: boolean
+        provider:
+          $ref: "#/components/schemas/AiProviderConfig"
+        reason:
+          type: string
+      required: [mode, canGenerate, canEditSkills, provider, reason]
+    UpdateAiProviderRequest:
+      type: object
+      properties:
+        provider:
+          type: string
+          enum: [openai]
+        model:
+          type: string
+          minLength: 1
+        apiKey:
+          type: string
+          minLength: 8
+        enabled:
+          type: boolean
+      required: [provider, model, apiKey, enabled]
+      additionalProperties: false
+    RotateAiProviderRequest:
+      type: object
+      properties:
+        apiKey:
+          type: string
+          minLength: 8
+      required: [apiKey]
+      additionalProperties: false
     UpdateIntegrationConfigRequest:
       type: object
       properties:

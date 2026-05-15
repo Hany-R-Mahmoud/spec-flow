@@ -121,8 +121,8 @@ const features = [
     icon: ClipboardList,
   },
   {
-    title: "Story generation",
-    description: "Turn project input into structured stories with sane defaults and clear scope.",
+    title: "BYOK generation",
+    description: "Connect your own AI provider key to turn project input into structured stories.",
     icon: GitBranch,
   },
   {
@@ -190,7 +190,7 @@ const faqs = [
   {
     question: "What does SpecFlow AI generate?",
     answer:
-      "It turns a project brief into a structured breakdown, stories, review context, and export-ready output.",
+      "With a connected provider key, it turns a project brief into a structured breakdown, stories, review context, and export-ready output. Without a key, the same flow stays manual and organizational.",
   },
   {
     question: "Can I review before exporting?",
@@ -403,7 +403,7 @@ export function LandingPage() {
               <SectionHeading
                 eyebrow="Feature grid"
                 title="Everything centers on the breakdown workflow."
-                description="Each feature is shaped around the core loop: start a breakdown, configure project input, generate stories, review, and export."
+                description="Each feature is shaped around the core loop: start a breakdown, configure project input, use BYOK generation when enabled, review, and export."
               />
             </Reveal>
 
@@ -648,8 +648,8 @@ export function LandingPage() {
                   SpecFlow <span className="text-primary">AI</span>
                 </div>
                 <p className="mt-3 max-w-sm text-sm leading-6 text-muted-foreground">
-                  AI-powered spec breakdowns for product teams. Turn ideas into structured stories, review, and
-                  export with less handoff friction.
+                  BYOK spec breakdowns for product teams. Connect your provider key for generation, or use manual
+                  mode to organize, review, and export with less handoff friction.
                 </p>
               </div>
             </div>

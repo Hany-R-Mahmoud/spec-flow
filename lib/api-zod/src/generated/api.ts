@@ -283,6 +283,13 @@ export const ListSessionsResponse = zod.object({
           promptVersion: zod.string(),
           updatedAt: zod.union([zod.coerce.date(), zod.null()]),
           errorMessage: zod.union([zod.string(), zod.null()]),
+          provider: zod.union([zod.string(), zod.null()]).optional(),
+          model: zod.union([zod.string(), zod.null()]).optional(),
+          providerRequestId: zod.union([zod.string(), zod.null()]).optional(),
+          inputSnapshotHash: zod.union([zod.string(), zod.null()]).optional(),
+          tokenEstimate: zod.union([zod.number(), zod.null()]).optional(),
+          costEstimateCents: zod.union([zod.number(), zod.null()]).optional(),
+          errorClass: zod.union([zod.string(), zod.null()]).optional(),
         }),
         prd: zod.object({
           status: zod.enum([
@@ -296,6 +303,13 @@ export const ListSessionsResponse = zod.object({
           promptVersion: zod.string(),
           updatedAt: zod.union([zod.coerce.date(), zod.null()]),
           errorMessage: zod.union([zod.string(), zod.null()]),
+          provider: zod.union([zod.string(), zod.null()]).optional(),
+          model: zod.union([zod.string(), zod.null()]).optional(),
+          providerRequestId: zod.union([zod.string(), zod.null()]).optional(),
+          inputSnapshotHash: zod.union([zod.string(), zod.null()]).optional(),
+          tokenEstimate: zod.union([zod.number(), zod.null()]).optional(),
+          costEstimateCents: zod.union([zod.number(), zod.null()]).optional(),
+          errorClass: zod.union([zod.string(), zod.null()]).optional(),
         }),
         epics: zod.object({
           status: zod.enum([
@@ -309,6 +323,13 @@ export const ListSessionsResponse = zod.object({
           promptVersion: zod.string(),
           updatedAt: zod.union([zod.coerce.date(), zod.null()]),
           errorMessage: zod.union([zod.string(), zod.null()]),
+          provider: zod.union([zod.string(), zod.null()]).optional(),
+          model: zod.union([zod.string(), zod.null()]).optional(),
+          providerRequestId: zod.union([zod.string(), zod.null()]).optional(),
+          inputSnapshotHash: zod.union([zod.string(), zod.null()]).optional(),
+          tokenEstimate: zod.union([zod.number(), zod.null()]).optional(),
+          costEstimateCents: zod.union([zod.number(), zod.null()]).optional(),
+          errorClass: zod.union([zod.string(), zod.null()]).optional(),
         }),
         stories: zod.object({
           status: zod.enum([
@@ -322,6 +343,13 @@ export const ListSessionsResponse = zod.object({
           promptVersion: zod.string(),
           updatedAt: zod.union([zod.coerce.date(), zod.null()]),
           errorMessage: zod.union([zod.string(), zod.null()]),
+          provider: zod.union([zod.string(), zod.null()]).optional(),
+          model: zod.union([zod.string(), zod.null()]).optional(),
+          providerRequestId: zod.union([zod.string(), zod.null()]).optional(),
+          inputSnapshotHash: zod.union([zod.string(), zod.null()]).optional(),
+          tokenEstimate: zod.union([zod.number(), zod.null()]).optional(),
+          costEstimateCents: zod.union([zod.number(), zod.null()]).optional(),
+          errorClass: zod.union([zod.string(), zod.null()]).optional(),
         }),
         quality: zod.object({
           status: zod.enum([
@@ -335,6 +363,13 @@ export const ListSessionsResponse = zod.object({
           promptVersion: zod.string(),
           updatedAt: zod.union([zod.coerce.date(), zod.null()]),
           errorMessage: zod.union([zod.string(), zod.null()]),
+          provider: zod.union([zod.string(), zod.null()]).optional(),
+          model: zod.union([zod.string(), zod.null()]).optional(),
+          providerRequestId: zod.union([zod.string(), zod.null()]).optional(),
+          inputSnapshotHash: zod.union([zod.string(), zod.null()]).optional(),
+          tokenEstimate: zod.union([zod.number(), zod.null()]).optional(),
+          costEstimateCents: zod.union([zod.number(), zod.null()]).optional(),
+          errorClass: zod.union([zod.string(), zod.null()]).optional(),
         }),
       }),
     }),
@@ -568,6 +603,13 @@ export const GetSessionResponse = zod.object({
       promptVersion: zod.string(),
       updatedAt: zod.union([zod.coerce.date(), zod.null()]),
       errorMessage: zod.union([zod.string(), zod.null()]),
+      provider: zod.union([zod.string(), zod.null()]).optional(),
+      model: zod.union([zod.string(), zod.null()]).optional(),
+      providerRequestId: zod.union([zod.string(), zod.null()]).optional(),
+      inputSnapshotHash: zod.union([zod.string(), zod.null()]).optional(),
+      tokenEstimate: zod.union([zod.number(), zod.null()]).optional(),
+      costEstimateCents: zod.union([zod.number(), zod.null()]).optional(),
+      errorClass: zod.union([zod.string(), zod.null()]).optional(),
     }),
     prd: zod.object({
       status: zod.enum([
@@ -581,6 +623,13 @@ export const GetSessionResponse = zod.object({
       promptVersion: zod.string(),
       updatedAt: zod.union([zod.coerce.date(), zod.null()]),
       errorMessage: zod.union([zod.string(), zod.null()]),
+      provider: zod.union([zod.string(), zod.null()]).optional(),
+      model: zod.union([zod.string(), zod.null()]).optional(),
+      providerRequestId: zod.union([zod.string(), zod.null()]).optional(),
+      inputSnapshotHash: zod.union([zod.string(), zod.null()]).optional(),
+      tokenEstimate: zod.union([zod.number(), zod.null()]).optional(),
+      costEstimateCents: zod.union([zod.number(), zod.null()]).optional(),
+      errorClass: zod.union([zod.string(), zod.null()]).optional(),
     }),
     epics: zod.object({
       status: zod.enum([
@@ -594,6 +643,13 @@ export const GetSessionResponse = zod.object({
       promptVersion: zod.string(),
       updatedAt: zod.union([zod.coerce.date(), zod.null()]),
       errorMessage: zod.union([zod.string(), zod.null()]),
+      provider: zod.union([zod.string(), zod.null()]).optional(),
+      model: zod.union([zod.string(), zod.null()]).optional(),
+      providerRequestId: zod.union([zod.string(), zod.null()]).optional(),
+      inputSnapshotHash: zod.union([zod.string(), zod.null()]).optional(),
+      tokenEstimate: zod.union([zod.number(), zod.null()]).optional(),
+      costEstimateCents: zod.union([zod.number(), zod.null()]).optional(),
+      errorClass: zod.union([zod.string(), zod.null()]).optional(),
     }),
     stories: zod.object({
       status: zod.enum([
@@ -607,6 +663,13 @@ export const GetSessionResponse = zod.object({
       promptVersion: zod.string(),
       updatedAt: zod.union([zod.coerce.date(), zod.null()]),
       errorMessage: zod.union([zod.string(), zod.null()]),
+      provider: zod.union([zod.string(), zod.null()]).optional(),
+      model: zod.union([zod.string(), zod.null()]).optional(),
+      providerRequestId: zod.union([zod.string(), zod.null()]).optional(),
+      inputSnapshotHash: zod.union([zod.string(), zod.null()]).optional(),
+      tokenEstimate: zod.union([zod.number(), zod.null()]).optional(),
+      costEstimateCents: zod.union([zod.number(), zod.null()]).optional(),
+      errorClass: zod.union([zod.string(), zod.null()]).optional(),
     }),
     quality: zod.object({
       status: zod.enum([
@@ -620,6 +683,13 @@ export const GetSessionResponse = zod.object({
       promptVersion: zod.string(),
       updatedAt: zod.union([zod.coerce.date(), zod.null()]),
       errorMessage: zod.union([zod.string(), zod.null()]),
+      provider: zod.union([zod.string(), zod.null()]).optional(),
+      model: zod.union([zod.string(), zod.null()]).optional(),
+      providerRequestId: zod.union([zod.string(), zod.null()]).optional(),
+      inputSnapshotHash: zod.union([zod.string(), zod.null()]).optional(),
+      tokenEstimate: zod.union([zod.number(), zod.null()]).optional(),
+      costEstimateCents: zod.union([zod.number(), zod.null()]).optional(),
+      errorClass: zod.union([zod.string(), zod.null()]).optional(),
     }),
   }),
 });
@@ -903,6 +973,13 @@ export const UpdateSessionResponse = zod.object({
       promptVersion: zod.string(),
       updatedAt: zod.union([zod.coerce.date(), zod.null()]),
       errorMessage: zod.union([zod.string(), zod.null()]),
+      provider: zod.union([zod.string(), zod.null()]).optional(),
+      model: zod.union([zod.string(), zod.null()]).optional(),
+      providerRequestId: zod.union([zod.string(), zod.null()]).optional(),
+      inputSnapshotHash: zod.union([zod.string(), zod.null()]).optional(),
+      tokenEstimate: zod.union([zod.number(), zod.null()]).optional(),
+      costEstimateCents: zod.union([zod.number(), zod.null()]).optional(),
+      errorClass: zod.union([zod.string(), zod.null()]).optional(),
     }),
     prd: zod.object({
       status: zod.enum([
@@ -916,6 +993,13 @@ export const UpdateSessionResponse = zod.object({
       promptVersion: zod.string(),
       updatedAt: zod.union([zod.coerce.date(), zod.null()]),
       errorMessage: zod.union([zod.string(), zod.null()]),
+      provider: zod.union([zod.string(), zod.null()]).optional(),
+      model: zod.union([zod.string(), zod.null()]).optional(),
+      providerRequestId: zod.union([zod.string(), zod.null()]).optional(),
+      inputSnapshotHash: zod.union([zod.string(), zod.null()]).optional(),
+      tokenEstimate: zod.union([zod.number(), zod.null()]).optional(),
+      costEstimateCents: zod.union([zod.number(), zod.null()]).optional(),
+      errorClass: zod.union([zod.string(), zod.null()]).optional(),
     }),
     epics: zod.object({
       status: zod.enum([
@@ -929,6 +1013,13 @@ export const UpdateSessionResponse = zod.object({
       promptVersion: zod.string(),
       updatedAt: zod.union([zod.coerce.date(), zod.null()]),
       errorMessage: zod.union([zod.string(), zod.null()]),
+      provider: zod.union([zod.string(), zod.null()]).optional(),
+      model: zod.union([zod.string(), zod.null()]).optional(),
+      providerRequestId: zod.union([zod.string(), zod.null()]).optional(),
+      inputSnapshotHash: zod.union([zod.string(), zod.null()]).optional(),
+      tokenEstimate: zod.union([zod.number(), zod.null()]).optional(),
+      costEstimateCents: zod.union([zod.number(), zod.null()]).optional(),
+      errorClass: zod.union([zod.string(), zod.null()]).optional(),
     }),
     stories: zod.object({
       status: zod.enum([
@@ -942,6 +1033,13 @@ export const UpdateSessionResponse = zod.object({
       promptVersion: zod.string(),
       updatedAt: zod.union([zod.coerce.date(), zod.null()]),
       errorMessage: zod.union([zod.string(), zod.null()]),
+      provider: zod.union([zod.string(), zod.null()]).optional(),
+      model: zod.union([zod.string(), zod.null()]).optional(),
+      providerRequestId: zod.union([zod.string(), zod.null()]).optional(),
+      inputSnapshotHash: zod.union([zod.string(), zod.null()]).optional(),
+      tokenEstimate: zod.union([zod.number(), zod.null()]).optional(),
+      costEstimateCents: zod.union([zod.number(), zod.null()]).optional(),
+      errorClass: zod.union([zod.string(), zod.null()]).optional(),
     }),
     quality: zod.object({
       status: zod.enum([
@@ -955,6 +1053,13 @@ export const UpdateSessionResponse = zod.object({
       promptVersion: zod.string(),
       updatedAt: zod.union([zod.coerce.date(), zod.null()]),
       errorMessage: zod.union([zod.string(), zod.null()]),
+      provider: zod.union([zod.string(), zod.null()]).optional(),
+      model: zod.union([zod.string(), zod.null()]).optional(),
+      providerRequestId: zod.union([zod.string(), zod.null()]).optional(),
+      inputSnapshotHash: zod.union([zod.string(), zod.null()]).optional(),
+      tokenEstimate: zod.union([zod.number(), zod.null()]).optional(),
+      costEstimateCents: zod.union([zod.number(), zod.null()]).optional(),
+      errorClass: zod.union([zod.string(), zod.null()]).optional(),
     }),
   }),
 });
@@ -1292,6 +1397,13 @@ export const UpdateSessionArtifactsResponse = zod.object({
       promptVersion: zod.string(),
       updatedAt: zod.union([zod.coerce.date(), zod.null()]),
       errorMessage: zod.union([zod.string(), zod.null()]),
+      provider: zod.union([zod.string(), zod.null()]).optional(),
+      model: zod.union([zod.string(), zod.null()]).optional(),
+      providerRequestId: zod.union([zod.string(), zod.null()]).optional(),
+      inputSnapshotHash: zod.union([zod.string(), zod.null()]).optional(),
+      tokenEstimate: zod.union([zod.number(), zod.null()]).optional(),
+      costEstimateCents: zod.union([zod.number(), zod.null()]).optional(),
+      errorClass: zod.union([zod.string(), zod.null()]).optional(),
     }),
     prd: zod.object({
       status: zod.enum([
@@ -1305,6 +1417,13 @@ export const UpdateSessionArtifactsResponse = zod.object({
       promptVersion: zod.string(),
       updatedAt: zod.union([zod.coerce.date(), zod.null()]),
       errorMessage: zod.union([zod.string(), zod.null()]),
+      provider: zod.union([zod.string(), zod.null()]).optional(),
+      model: zod.union([zod.string(), zod.null()]).optional(),
+      providerRequestId: zod.union([zod.string(), zod.null()]).optional(),
+      inputSnapshotHash: zod.union([zod.string(), zod.null()]).optional(),
+      tokenEstimate: zod.union([zod.number(), zod.null()]).optional(),
+      costEstimateCents: zod.union([zod.number(), zod.null()]).optional(),
+      errorClass: zod.union([zod.string(), zod.null()]).optional(),
     }),
     epics: zod.object({
       status: zod.enum([
@@ -1318,6 +1437,13 @@ export const UpdateSessionArtifactsResponse = zod.object({
       promptVersion: zod.string(),
       updatedAt: zod.union([zod.coerce.date(), zod.null()]),
       errorMessage: zod.union([zod.string(), zod.null()]),
+      provider: zod.union([zod.string(), zod.null()]).optional(),
+      model: zod.union([zod.string(), zod.null()]).optional(),
+      providerRequestId: zod.union([zod.string(), zod.null()]).optional(),
+      inputSnapshotHash: zod.union([zod.string(), zod.null()]).optional(),
+      tokenEstimate: zod.union([zod.number(), zod.null()]).optional(),
+      costEstimateCents: zod.union([zod.number(), zod.null()]).optional(),
+      errorClass: zod.union([zod.string(), zod.null()]).optional(),
     }),
     stories: zod.object({
       status: zod.enum([
@@ -1331,6 +1457,13 @@ export const UpdateSessionArtifactsResponse = zod.object({
       promptVersion: zod.string(),
       updatedAt: zod.union([zod.coerce.date(), zod.null()]),
       errorMessage: zod.union([zod.string(), zod.null()]),
+      provider: zod.union([zod.string(), zod.null()]).optional(),
+      model: zod.union([zod.string(), zod.null()]).optional(),
+      providerRequestId: zod.union([zod.string(), zod.null()]).optional(),
+      inputSnapshotHash: zod.union([zod.string(), zod.null()]).optional(),
+      tokenEstimate: zod.union([zod.number(), zod.null()]).optional(),
+      costEstimateCents: zod.union([zod.number(), zod.null()]).optional(),
+      errorClass: zod.union([zod.string(), zod.null()]).optional(),
     }),
     quality: zod.object({
       status: zod.enum([
@@ -1344,6 +1477,13 @@ export const UpdateSessionArtifactsResponse = zod.object({
       promptVersion: zod.string(),
       updatedAt: zod.union([zod.coerce.date(), zod.null()]),
       errorMessage: zod.union([zod.string(), zod.null()]),
+      provider: zod.union([zod.string(), zod.null()]).optional(),
+      model: zod.union([zod.string(), zod.null()]).optional(),
+      providerRequestId: zod.union([zod.string(), zod.null()]).optional(),
+      inputSnapshotHash: zod.union([zod.string(), zod.null()]).optional(),
+      tokenEstimate: zod.union([zod.number(), zod.null()]).optional(),
+      costEstimateCents: zod.union([zod.number(), zod.null()]).optional(),
+      errorClass: zod.union([zod.string(), zod.null()]).optional(),
     }),
   }),
 });
@@ -1579,6 +1719,13 @@ export const GenerateClarificationResponse = zod.object({
       promptVersion: zod.string(),
       updatedAt: zod.union([zod.coerce.date(), zod.null()]),
       errorMessage: zod.union([zod.string(), zod.null()]),
+      provider: zod.union([zod.string(), zod.null()]).optional(),
+      model: zod.union([zod.string(), zod.null()]).optional(),
+      providerRequestId: zod.union([zod.string(), zod.null()]).optional(),
+      inputSnapshotHash: zod.union([zod.string(), zod.null()]).optional(),
+      tokenEstimate: zod.union([zod.number(), zod.null()]).optional(),
+      costEstimateCents: zod.union([zod.number(), zod.null()]).optional(),
+      errorClass: zod.union([zod.string(), zod.null()]).optional(),
     }),
     prd: zod.object({
       status: zod.enum([
@@ -1592,6 +1739,13 @@ export const GenerateClarificationResponse = zod.object({
       promptVersion: zod.string(),
       updatedAt: zod.union([zod.coerce.date(), zod.null()]),
       errorMessage: zod.union([zod.string(), zod.null()]),
+      provider: zod.union([zod.string(), zod.null()]).optional(),
+      model: zod.union([zod.string(), zod.null()]).optional(),
+      providerRequestId: zod.union([zod.string(), zod.null()]).optional(),
+      inputSnapshotHash: zod.union([zod.string(), zod.null()]).optional(),
+      tokenEstimate: zod.union([zod.number(), zod.null()]).optional(),
+      costEstimateCents: zod.union([zod.number(), zod.null()]).optional(),
+      errorClass: zod.union([zod.string(), zod.null()]).optional(),
     }),
     epics: zod.object({
       status: zod.enum([
@@ -1605,6 +1759,13 @@ export const GenerateClarificationResponse = zod.object({
       promptVersion: zod.string(),
       updatedAt: zod.union([zod.coerce.date(), zod.null()]),
       errorMessage: zod.union([zod.string(), zod.null()]),
+      provider: zod.union([zod.string(), zod.null()]).optional(),
+      model: zod.union([zod.string(), zod.null()]).optional(),
+      providerRequestId: zod.union([zod.string(), zod.null()]).optional(),
+      inputSnapshotHash: zod.union([zod.string(), zod.null()]).optional(),
+      tokenEstimate: zod.union([zod.number(), zod.null()]).optional(),
+      costEstimateCents: zod.union([zod.number(), zod.null()]).optional(),
+      errorClass: zod.union([zod.string(), zod.null()]).optional(),
     }),
     stories: zod.object({
       status: zod.enum([
@@ -1618,6 +1779,13 @@ export const GenerateClarificationResponse = zod.object({
       promptVersion: zod.string(),
       updatedAt: zod.union([zod.coerce.date(), zod.null()]),
       errorMessage: zod.union([zod.string(), zod.null()]),
+      provider: zod.union([zod.string(), zod.null()]).optional(),
+      model: zod.union([zod.string(), zod.null()]).optional(),
+      providerRequestId: zod.union([zod.string(), zod.null()]).optional(),
+      inputSnapshotHash: zod.union([zod.string(), zod.null()]).optional(),
+      tokenEstimate: zod.union([zod.number(), zod.null()]).optional(),
+      costEstimateCents: zod.union([zod.number(), zod.null()]).optional(),
+      errorClass: zod.union([zod.string(), zod.null()]).optional(),
     }),
     quality: zod.object({
       status: zod.enum([
@@ -1631,6 +1799,13 @@ export const GenerateClarificationResponse = zod.object({
       promptVersion: zod.string(),
       updatedAt: zod.union([zod.coerce.date(), zod.null()]),
       errorMessage: zod.union([zod.string(), zod.null()]),
+      provider: zod.union([zod.string(), zod.null()]).optional(),
+      model: zod.union([zod.string(), zod.null()]).optional(),
+      providerRequestId: zod.union([zod.string(), zod.null()]).optional(),
+      inputSnapshotHash: zod.union([zod.string(), zod.null()]).optional(),
+      tokenEstimate: zod.union([zod.number(), zod.null()]).optional(),
+      costEstimateCents: zod.union([zod.number(), zod.null()]).optional(),
+      errorClass: zod.union([zod.string(), zod.null()]).optional(),
     }),
   }),
 });
@@ -1866,6 +2041,13 @@ export const GeneratePrdResponse = zod.object({
       promptVersion: zod.string(),
       updatedAt: zod.union([zod.coerce.date(), zod.null()]),
       errorMessage: zod.union([zod.string(), zod.null()]),
+      provider: zod.union([zod.string(), zod.null()]).optional(),
+      model: zod.union([zod.string(), zod.null()]).optional(),
+      providerRequestId: zod.union([zod.string(), zod.null()]).optional(),
+      inputSnapshotHash: zod.union([zod.string(), zod.null()]).optional(),
+      tokenEstimate: zod.union([zod.number(), zod.null()]).optional(),
+      costEstimateCents: zod.union([zod.number(), zod.null()]).optional(),
+      errorClass: zod.union([zod.string(), zod.null()]).optional(),
     }),
     prd: zod.object({
       status: zod.enum([
@@ -1879,6 +2061,13 @@ export const GeneratePrdResponse = zod.object({
       promptVersion: zod.string(),
       updatedAt: zod.union([zod.coerce.date(), zod.null()]),
       errorMessage: zod.union([zod.string(), zod.null()]),
+      provider: zod.union([zod.string(), zod.null()]).optional(),
+      model: zod.union([zod.string(), zod.null()]).optional(),
+      providerRequestId: zod.union([zod.string(), zod.null()]).optional(),
+      inputSnapshotHash: zod.union([zod.string(), zod.null()]).optional(),
+      tokenEstimate: zod.union([zod.number(), zod.null()]).optional(),
+      costEstimateCents: zod.union([zod.number(), zod.null()]).optional(),
+      errorClass: zod.union([zod.string(), zod.null()]).optional(),
     }),
     epics: zod.object({
       status: zod.enum([
@@ -1892,6 +2081,13 @@ export const GeneratePrdResponse = zod.object({
       promptVersion: zod.string(),
       updatedAt: zod.union([zod.coerce.date(), zod.null()]),
       errorMessage: zod.union([zod.string(), zod.null()]),
+      provider: zod.union([zod.string(), zod.null()]).optional(),
+      model: zod.union([zod.string(), zod.null()]).optional(),
+      providerRequestId: zod.union([zod.string(), zod.null()]).optional(),
+      inputSnapshotHash: zod.union([zod.string(), zod.null()]).optional(),
+      tokenEstimate: zod.union([zod.number(), zod.null()]).optional(),
+      costEstimateCents: zod.union([zod.number(), zod.null()]).optional(),
+      errorClass: zod.union([zod.string(), zod.null()]).optional(),
     }),
     stories: zod.object({
       status: zod.enum([
@@ -1905,6 +2101,13 @@ export const GeneratePrdResponse = zod.object({
       promptVersion: zod.string(),
       updatedAt: zod.union([zod.coerce.date(), zod.null()]),
       errorMessage: zod.union([zod.string(), zod.null()]),
+      provider: zod.union([zod.string(), zod.null()]).optional(),
+      model: zod.union([zod.string(), zod.null()]).optional(),
+      providerRequestId: zod.union([zod.string(), zod.null()]).optional(),
+      inputSnapshotHash: zod.union([zod.string(), zod.null()]).optional(),
+      tokenEstimate: zod.union([zod.number(), zod.null()]).optional(),
+      costEstimateCents: zod.union([zod.number(), zod.null()]).optional(),
+      errorClass: zod.union([zod.string(), zod.null()]).optional(),
     }),
     quality: zod.object({
       status: zod.enum([
@@ -1918,6 +2121,13 @@ export const GeneratePrdResponse = zod.object({
       promptVersion: zod.string(),
       updatedAt: zod.union([zod.coerce.date(), zod.null()]),
       errorMessage: zod.union([zod.string(), zod.null()]),
+      provider: zod.union([zod.string(), zod.null()]).optional(),
+      model: zod.union([zod.string(), zod.null()]).optional(),
+      providerRequestId: zod.union([zod.string(), zod.null()]).optional(),
+      inputSnapshotHash: zod.union([zod.string(), zod.null()]).optional(),
+      tokenEstimate: zod.union([zod.number(), zod.null()]).optional(),
+      costEstimateCents: zod.union([zod.number(), zod.null()]).optional(),
+      errorClass: zod.union([zod.string(), zod.null()]).optional(),
     }),
   }),
 });
@@ -2153,6 +2363,13 @@ export const GenerateEpicsResponse = zod.object({
       promptVersion: zod.string(),
       updatedAt: zod.union([zod.coerce.date(), zod.null()]),
       errorMessage: zod.union([zod.string(), zod.null()]),
+      provider: zod.union([zod.string(), zod.null()]).optional(),
+      model: zod.union([zod.string(), zod.null()]).optional(),
+      providerRequestId: zod.union([zod.string(), zod.null()]).optional(),
+      inputSnapshotHash: zod.union([zod.string(), zod.null()]).optional(),
+      tokenEstimate: zod.union([zod.number(), zod.null()]).optional(),
+      costEstimateCents: zod.union([zod.number(), zod.null()]).optional(),
+      errorClass: zod.union([zod.string(), zod.null()]).optional(),
     }),
     prd: zod.object({
       status: zod.enum([
@@ -2166,6 +2383,13 @@ export const GenerateEpicsResponse = zod.object({
       promptVersion: zod.string(),
       updatedAt: zod.union([zod.coerce.date(), zod.null()]),
       errorMessage: zod.union([zod.string(), zod.null()]),
+      provider: zod.union([zod.string(), zod.null()]).optional(),
+      model: zod.union([zod.string(), zod.null()]).optional(),
+      providerRequestId: zod.union([zod.string(), zod.null()]).optional(),
+      inputSnapshotHash: zod.union([zod.string(), zod.null()]).optional(),
+      tokenEstimate: zod.union([zod.number(), zod.null()]).optional(),
+      costEstimateCents: zod.union([zod.number(), zod.null()]).optional(),
+      errorClass: zod.union([zod.string(), zod.null()]).optional(),
     }),
     epics: zod.object({
       status: zod.enum([
@@ -2179,6 +2403,13 @@ export const GenerateEpicsResponse = zod.object({
       promptVersion: zod.string(),
       updatedAt: zod.union([zod.coerce.date(), zod.null()]),
       errorMessage: zod.union([zod.string(), zod.null()]),
+      provider: zod.union([zod.string(), zod.null()]).optional(),
+      model: zod.union([zod.string(), zod.null()]).optional(),
+      providerRequestId: zod.union([zod.string(), zod.null()]).optional(),
+      inputSnapshotHash: zod.union([zod.string(), zod.null()]).optional(),
+      tokenEstimate: zod.union([zod.number(), zod.null()]).optional(),
+      costEstimateCents: zod.union([zod.number(), zod.null()]).optional(),
+      errorClass: zod.union([zod.string(), zod.null()]).optional(),
     }),
     stories: zod.object({
       status: zod.enum([
@@ -2192,6 +2423,13 @@ export const GenerateEpicsResponse = zod.object({
       promptVersion: zod.string(),
       updatedAt: zod.union([zod.coerce.date(), zod.null()]),
       errorMessage: zod.union([zod.string(), zod.null()]),
+      provider: zod.union([zod.string(), zod.null()]).optional(),
+      model: zod.union([zod.string(), zod.null()]).optional(),
+      providerRequestId: zod.union([zod.string(), zod.null()]).optional(),
+      inputSnapshotHash: zod.union([zod.string(), zod.null()]).optional(),
+      tokenEstimate: zod.union([zod.number(), zod.null()]).optional(),
+      costEstimateCents: zod.union([zod.number(), zod.null()]).optional(),
+      errorClass: zod.union([zod.string(), zod.null()]).optional(),
     }),
     quality: zod.object({
       status: zod.enum([
@@ -2205,6 +2443,13 @@ export const GenerateEpicsResponse = zod.object({
       promptVersion: zod.string(),
       updatedAt: zod.union([zod.coerce.date(), zod.null()]),
       errorMessage: zod.union([zod.string(), zod.null()]),
+      provider: zod.union([zod.string(), zod.null()]).optional(),
+      model: zod.union([zod.string(), zod.null()]).optional(),
+      providerRequestId: zod.union([zod.string(), zod.null()]).optional(),
+      inputSnapshotHash: zod.union([zod.string(), zod.null()]).optional(),
+      tokenEstimate: zod.union([zod.number(), zod.null()]).optional(),
+      costEstimateCents: zod.union([zod.number(), zod.null()]).optional(),
+      errorClass: zod.union([zod.string(), zod.null()]).optional(),
     }),
   }),
 });
@@ -2440,6 +2685,13 @@ export const GenerateStoriesResponse = zod.object({
       promptVersion: zod.string(),
       updatedAt: zod.union([zod.coerce.date(), zod.null()]),
       errorMessage: zod.union([zod.string(), zod.null()]),
+      provider: zod.union([zod.string(), zod.null()]).optional(),
+      model: zod.union([zod.string(), zod.null()]).optional(),
+      providerRequestId: zod.union([zod.string(), zod.null()]).optional(),
+      inputSnapshotHash: zod.union([zod.string(), zod.null()]).optional(),
+      tokenEstimate: zod.union([zod.number(), zod.null()]).optional(),
+      costEstimateCents: zod.union([zod.number(), zod.null()]).optional(),
+      errorClass: zod.union([zod.string(), zod.null()]).optional(),
     }),
     prd: zod.object({
       status: zod.enum([
@@ -2453,6 +2705,13 @@ export const GenerateStoriesResponse = zod.object({
       promptVersion: zod.string(),
       updatedAt: zod.union([zod.coerce.date(), zod.null()]),
       errorMessage: zod.union([zod.string(), zod.null()]),
+      provider: zod.union([zod.string(), zod.null()]).optional(),
+      model: zod.union([zod.string(), zod.null()]).optional(),
+      providerRequestId: zod.union([zod.string(), zod.null()]).optional(),
+      inputSnapshotHash: zod.union([zod.string(), zod.null()]).optional(),
+      tokenEstimate: zod.union([zod.number(), zod.null()]).optional(),
+      costEstimateCents: zod.union([zod.number(), zod.null()]).optional(),
+      errorClass: zod.union([zod.string(), zod.null()]).optional(),
     }),
     epics: zod.object({
       status: zod.enum([
@@ -2466,6 +2725,13 @@ export const GenerateStoriesResponse = zod.object({
       promptVersion: zod.string(),
       updatedAt: zod.union([zod.coerce.date(), zod.null()]),
       errorMessage: zod.union([zod.string(), zod.null()]),
+      provider: zod.union([zod.string(), zod.null()]).optional(),
+      model: zod.union([zod.string(), zod.null()]).optional(),
+      providerRequestId: zod.union([zod.string(), zod.null()]).optional(),
+      inputSnapshotHash: zod.union([zod.string(), zod.null()]).optional(),
+      tokenEstimate: zod.union([zod.number(), zod.null()]).optional(),
+      costEstimateCents: zod.union([zod.number(), zod.null()]).optional(),
+      errorClass: zod.union([zod.string(), zod.null()]).optional(),
     }),
     stories: zod.object({
       status: zod.enum([
@@ -2479,6 +2745,13 @@ export const GenerateStoriesResponse = zod.object({
       promptVersion: zod.string(),
       updatedAt: zod.union([zod.coerce.date(), zod.null()]),
       errorMessage: zod.union([zod.string(), zod.null()]),
+      provider: zod.union([zod.string(), zod.null()]).optional(),
+      model: zod.union([zod.string(), zod.null()]).optional(),
+      providerRequestId: zod.union([zod.string(), zod.null()]).optional(),
+      inputSnapshotHash: zod.union([zod.string(), zod.null()]).optional(),
+      tokenEstimate: zod.union([zod.number(), zod.null()]).optional(),
+      costEstimateCents: zod.union([zod.number(), zod.null()]).optional(),
+      errorClass: zod.union([zod.string(), zod.null()]).optional(),
     }),
     quality: zod.object({
       status: zod.enum([
@@ -2492,6 +2765,13 @@ export const GenerateStoriesResponse = zod.object({
       promptVersion: zod.string(),
       updatedAt: zod.union([zod.coerce.date(), zod.null()]),
       errorMessage: zod.union([zod.string(), zod.null()]),
+      provider: zod.union([zod.string(), zod.null()]).optional(),
+      model: zod.union([zod.string(), zod.null()]).optional(),
+      providerRequestId: zod.union([zod.string(), zod.null()]).optional(),
+      inputSnapshotHash: zod.union([zod.string(), zod.null()]).optional(),
+      tokenEstimate: zod.union([zod.number(), zod.null()]).optional(),
+      costEstimateCents: zod.union([zod.number(), zod.null()]).optional(),
+      errorClass: zod.union([zod.string(), zod.null()]).optional(),
     }),
   }),
 });
@@ -2727,6 +3007,13 @@ export const GenerateQualityResponse = zod.object({
       promptVersion: zod.string(),
       updatedAt: zod.union([zod.coerce.date(), zod.null()]),
       errorMessage: zod.union([zod.string(), zod.null()]),
+      provider: zod.union([zod.string(), zod.null()]).optional(),
+      model: zod.union([zod.string(), zod.null()]).optional(),
+      providerRequestId: zod.union([zod.string(), zod.null()]).optional(),
+      inputSnapshotHash: zod.union([zod.string(), zod.null()]).optional(),
+      tokenEstimate: zod.union([zod.number(), zod.null()]).optional(),
+      costEstimateCents: zod.union([zod.number(), zod.null()]).optional(),
+      errorClass: zod.union([zod.string(), zod.null()]).optional(),
     }),
     prd: zod.object({
       status: zod.enum([
@@ -2740,6 +3027,13 @@ export const GenerateQualityResponse = zod.object({
       promptVersion: zod.string(),
       updatedAt: zod.union([zod.coerce.date(), zod.null()]),
       errorMessage: zod.union([zod.string(), zod.null()]),
+      provider: zod.union([zod.string(), zod.null()]).optional(),
+      model: zod.union([zod.string(), zod.null()]).optional(),
+      providerRequestId: zod.union([zod.string(), zod.null()]).optional(),
+      inputSnapshotHash: zod.union([zod.string(), zod.null()]).optional(),
+      tokenEstimate: zod.union([zod.number(), zod.null()]).optional(),
+      costEstimateCents: zod.union([zod.number(), zod.null()]).optional(),
+      errorClass: zod.union([zod.string(), zod.null()]).optional(),
     }),
     epics: zod.object({
       status: zod.enum([
@@ -2753,6 +3047,13 @@ export const GenerateQualityResponse = zod.object({
       promptVersion: zod.string(),
       updatedAt: zod.union([zod.coerce.date(), zod.null()]),
       errorMessage: zod.union([zod.string(), zod.null()]),
+      provider: zod.union([zod.string(), zod.null()]).optional(),
+      model: zod.union([zod.string(), zod.null()]).optional(),
+      providerRequestId: zod.union([zod.string(), zod.null()]).optional(),
+      inputSnapshotHash: zod.union([zod.string(), zod.null()]).optional(),
+      tokenEstimate: zod.union([zod.number(), zod.null()]).optional(),
+      costEstimateCents: zod.union([zod.number(), zod.null()]).optional(),
+      errorClass: zod.union([zod.string(), zod.null()]).optional(),
     }),
     stories: zod.object({
       status: zod.enum([
@@ -2766,6 +3067,13 @@ export const GenerateQualityResponse = zod.object({
       promptVersion: zod.string(),
       updatedAt: zod.union([zod.coerce.date(), zod.null()]),
       errorMessage: zod.union([zod.string(), zod.null()]),
+      provider: zod.union([zod.string(), zod.null()]).optional(),
+      model: zod.union([zod.string(), zod.null()]).optional(),
+      providerRequestId: zod.union([zod.string(), zod.null()]).optional(),
+      inputSnapshotHash: zod.union([zod.string(), zod.null()]).optional(),
+      tokenEstimate: zod.union([zod.number(), zod.null()]).optional(),
+      costEstimateCents: zod.union([zod.number(), zod.null()]).optional(),
+      errorClass: zod.union([zod.string(), zod.null()]).optional(),
     }),
     quality: zod.object({
       status: zod.enum([
@@ -2779,6 +3087,13 @@ export const GenerateQualityResponse = zod.object({
       promptVersion: zod.string(),
       updatedAt: zod.union([zod.coerce.date(), zod.null()]),
       errorMessage: zod.union([zod.string(), zod.null()]),
+      provider: zod.union([zod.string(), zod.null()]).optional(),
+      model: zod.union([zod.string(), zod.null()]).optional(),
+      providerRequestId: zod.union([zod.string(), zod.null()]).optional(),
+      inputSnapshotHash: zod.union([zod.string(), zod.null()]).optional(),
+      tokenEstimate: zod.union([zod.number(), zod.null()]).optional(),
+      costEstimateCents: zod.union([zod.number(), zod.null()]).optional(),
+      errorClass: zod.union([zod.string(), zod.null()]).optional(),
     }),
   }),
 });
@@ -2836,6 +3151,166 @@ export const UpdateSettingsResponse = zod.object({
   showReadinessWarnings: zod.boolean(),
   createdAt: zod.coerce.date(),
   updatedAt: zod.coerce.date(),
+});
+
+/**
+ * @summary Get AI provider configuration status
+ */
+export const GetAiProviderResponse = zod.object({
+  id: zod.union([zod.string(), zod.null()]),
+  provider: zod.string(),
+  model: zod.string(),
+  enabled: zod.boolean(),
+  status: zod.enum([
+    "not_configured",
+    "validating",
+    "configured",
+    "validation_failed",
+    "disabled",
+  ]),
+  configured: zod.boolean(),
+  keyFingerprint: zod.union([zod.string(), zod.null()]),
+  keySuffix: zod.union([zod.string(), zod.null()]),
+  lastValidatedAt: zod.union([zod.coerce.date(), zod.null()]),
+  validationError: zod.union([zod.string(), zod.null()]),
+  updatedAt: zod.union([zod.coerce.date(), zod.null()]),
+});
+
+/**
+ * @summary Save or update AI provider credentials
+ */
+
+export const updateAiProviderBodyApiKeyMin = 8;
+
+export const UpdateAiProviderBody = zod.object({
+  provider: zod.enum(["openai"]),
+  model: zod.string().min(1),
+  apiKey: zod.string().min(updateAiProviderBodyApiKeyMin),
+  enabled: zod.boolean(),
+});
+
+export const UpdateAiProviderResponse = zod.object({
+  id: zod.union([zod.string(), zod.null()]),
+  provider: zod.string(),
+  model: zod.string(),
+  enabled: zod.boolean(),
+  status: zod.enum([
+    "not_configured",
+    "validating",
+    "configured",
+    "validation_failed",
+    "disabled",
+  ]),
+  configured: zod.boolean(),
+  keyFingerprint: zod.union([zod.string(), zod.null()]),
+  keySuffix: zod.union([zod.string(), zod.null()]),
+  lastValidatedAt: zod.union([zod.coerce.date(), zod.null()]),
+  validationError: zod.union([zod.string(), zod.null()]),
+  updatedAt: zod.union([zod.coerce.date(), zod.null()]),
+});
+
+/**
+ * @summary Remove AI provider credentials
+ */
+export const DeleteAiProviderResponse = zod.object({
+  id: zod.union([zod.string(), zod.null()]),
+  provider: zod.string(),
+  model: zod.string(),
+  enabled: zod.boolean(),
+  status: zod.enum([
+    "not_configured",
+    "validating",
+    "configured",
+    "validation_failed",
+    "disabled",
+  ]),
+  configured: zod.boolean(),
+  keyFingerprint: zod.union([zod.string(), zod.null()]),
+  keySuffix: zod.union([zod.string(), zod.null()]),
+  lastValidatedAt: zod.union([zod.coerce.date(), zod.null()]),
+  validationError: zod.union([zod.string(), zod.null()]),
+  updatedAt: zod.union([zod.coerce.date(), zod.null()]),
+});
+
+/**
+ * @summary Validate saved AI provider credentials
+ */
+export const ValidateAiProviderResponse = zod.object({
+  id: zod.union([zod.string(), zod.null()]),
+  provider: zod.string(),
+  model: zod.string(),
+  enabled: zod.boolean(),
+  status: zod.enum([
+    "not_configured",
+    "validating",
+    "configured",
+    "validation_failed",
+    "disabled",
+  ]),
+  configured: zod.boolean(),
+  keyFingerprint: zod.union([zod.string(), zod.null()]),
+  keySuffix: zod.union([zod.string(), zod.null()]),
+  lastValidatedAt: zod.union([zod.coerce.date(), zod.null()]),
+  validationError: zod.union([zod.string(), zod.null()]),
+  updatedAt: zod.union([zod.coerce.date(), zod.null()]),
+});
+
+/**
+ * @summary Rotate AI provider credentials
+ */
+export const rotateAiProviderBodyApiKeyMin = 8;
+
+export const RotateAiProviderBody = zod.object({
+  apiKey: zod.string().min(rotateAiProviderBodyApiKeyMin),
+});
+
+export const RotateAiProviderResponse = zod.object({
+  id: zod.union([zod.string(), zod.null()]),
+  provider: zod.string(),
+  model: zod.string(),
+  enabled: zod.boolean(),
+  status: zod.enum([
+    "not_configured",
+    "validating",
+    "configured",
+    "validation_failed",
+    "disabled",
+  ]),
+  configured: zod.boolean(),
+  keyFingerprint: zod.union([zod.string(), zod.null()]),
+  keySuffix: zod.union([zod.string(), zod.null()]),
+  lastValidatedAt: zod.union([zod.coerce.date(), zod.null()]),
+  validationError: zod.union([zod.string(), zod.null()]),
+  updatedAt: zod.union([zod.coerce.date(), zod.null()]),
+});
+
+/**
+ * @summary Get AI capability mode for the workspace
+ */
+export const GetAiCapabilityResponse = zod.object({
+  mode: zod.enum(["ai_enabled", "manual"]),
+  canGenerate: zod.boolean(),
+  canEditSkills: zod.boolean(),
+  provider: zod.object({
+    id: zod.union([zod.string(), zod.null()]),
+    provider: zod.string(),
+    model: zod.string(),
+    enabled: zod.boolean(),
+    status: zod.enum([
+      "not_configured",
+      "validating",
+      "configured",
+      "validation_failed",
+      "disabled",
+    ]),
+    configured: zod.boolean(),
+    keyFingerprint: zod.union([zod.string(), zod.null()]),
+    keySuffix: zod.union([zod.string(), zod.null()]),
+    lastValidatedAt: zod.union([zod.coerce.date(), zod.null()]),
+    validationError: zod.union([zod.string(), zod.null()]),
+    updatedAt: zod.union([zod.coerce.date(), zod.null()]),
+  }),
+  reason: zod.string(),
 });
 
 /**

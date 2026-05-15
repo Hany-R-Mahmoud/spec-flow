@@ -17,6 +17,8 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
+  AiCapability,
+  AiProviderConfig,
   ApiErrorResponse,
   CreateExportPackageRequest,
   CreateProjectRequest,
@@ -32,8 +34,10 @@ import type {
   IntegrationConfigListResponse,
   Project,
   ProjectListResponse,
+  RotateAiProviderRequest,
   SessionListResponse,
   UnauthorizedResponse,
+  UpdateAiProviderRequest,
   UpdateIntegrationConfigRequest,
   UpdateProjectRequest,
   UpdateSessionArtifactsRequest,
@@ -1578,6 +1582,526 @@ export const useUpdateSettings = <
 > => {
   return useMutation(getUpdateSettingsMutationOptions(options));
 };
+
+/**
+ * @summary Get AI provider configuration status
+ */
+export const getGetAiProviderUrl = () => {
+  return `/api/ai/provider`;
+};
+
+export const getAiProvider = async (
+  options?: RequestInit,
+): Promise<AiProviderConfig> => {
+  return customFetch<AiProviderConfig>(getGetAiProviderUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetAiProviderQueryKey = () => {
+  return [`/api/ai/provider`] as const;
+};
+
+export const getGetAiProviderQueryOptions = <
+  TData = Awaited<ReturnType<typeof getAiProvider>>,
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getAiProvider>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetAiProviderQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getAiProvider>>> = ({
+    signal,
+  }) => getAiProvider({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getAiProvider>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetAiProviderQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getAiProvider>>
+>;
+export type GetAiProviderQueryError = ErrorType<
+  UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+>;
+
+/**
+ * @summary Get AI provider configuration status
+ */
+
+export function useGetAiProvider<
+  TData = Awaited<ReturnType<typeof getAiProvider>>,
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getAiProvider>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetAiProviderQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Save or update AI provider credentials
+ */
+export const getUpdateAiProviderUrl = () => {
+  return `/api/ai/provider`;
+};
+
+export const updateAiProvider = async (
+  updateAiProviderRequest: UpdateAiProviderRequest,
+  options?: RequestInit,
+): Promise<AiProviderConfig> => {
+  return customFetch<AiProviderConfig>(getUpdateAiProviderUrl(), {
+    ...options,
+    method: "PUT",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(updateAiProviderRequest),
+  });
+};
+
+export const getUpdateAiProviderMutationOptions = <
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateAiProvider>>,
+    TError,
+    { data: BodyType<UpdateAiProviderRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateAiProvider>>,
+  TError,
+  { data: BodyType<UpdateAiProviderRequest> },
+  TContext
+> => {
+  const mutationKey = ["updateAiProvider"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateAiProvider>>,
+    { data: BodyType<UpdateAiProviderRequest> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return updateAiProvider(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateAiProviderMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateAiProvider>>
+>;
+export type UpdateAiProviderMutationBody = BodyType<UpdateAiProviderRequest>;
+export type UpdateAiProviderMutationError = ErrorType<
+  UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+>;
+
+/**
+ * @summary Save or update AI provider credentials
+ */
+export const useUpdateAiProvider = <
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateAiProvider>>,
+    TError,
+    { data: BodyType<UpdateAiProviderRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof updateAiProvider>>,
+  TError,
+  { data: BodyType<UpdateAiProviderRequest> },
+  TContext
+> => {
+  return useMutation(getUpdateAiProviderMutationOptions(options));
+};
+
+/**
+ * @summary Remove AI provider credentials
+ */
+export const getDeleteAiProviderUrl = () => {
+  return `/api/ai/provider`;
+};
+
+export const deleteAiProvider = async (
+  options?: RequestInit,
+): Promise<AiProviderConfig> => {
+  return customFetch<AiProviderConfig>(getDeleteAiProviderUrl(), {
+    ...options,
+    method: "DELETE",
+  });
+};
+
+export const getDeleteAiProviderMutationOptions = <
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteAiProvider>>,
+    TError,
+    void,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteAiProvider>>,
+  TError,
+  void,
+  TContext
+> => {
+  const mutationKey = ["deleteAiProvider"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteAiProvider>>,
+    void
+  > = () => {
+    return deleteAiProvider(requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteAiProviderMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteAiProvider>>
+>;
+
+export type DeleteAiProviderMutationError = ErrorType<
+  UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+>;
+
+/**
+ * @summary Remove AI provider credentials
+ */
+export const useDeleteAiProvider = <
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteAiProvider>>,
+    TError,
+    void,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof deleteAiProvider>>,
+  TError,
+  void,
+  TContext
+> => {
+  return useMutation(getDeleteAiProviderMutationOptions(options));
+};
+
+/**
+ * @summary Validate saved AI provider credentials
+ */
+export const getValidateAiProviderUrl = () => {
+  return `/api/ai/provider/validate`;
+};
+
+export const validateAiProvider = async (
+  options?: RequestInit,
+): Promise<AiProviderConfig> => {
+  return customFetch<AiProviderConfig>(getValidateAiProviderUrl(), {
+    ...options,
+    method: "POST",
+  });
+};
+
+export const getValidateAiProviderMutationOptions = <
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof validateAiProvider>>,
+    TError,
+    void,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof validateAiProvider>>,
+  TError,
+  void,
+  TContext
+> => {
+  const mutationKey = ["validateAiProvider"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof validateAiProvider>>,
+    void
+  > = () => {
+    return validateAiProvider(requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ValidateAiProviderMutationResult = NonNullable<
+  Awaited<ReturnType<typeof validateAiProvider>>
+>;
+
+export type ValidateAiProviderMutationError = ErrorType<
+  UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+>;
+
+/**
+ * @summary Validate saved AI provider credentials
+ */
+export const useValidateAiProvider = <
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof validateAiProvider>>,
+    TError,
+    void,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof validateAiProvider>>,
+  TError,
+  void,
+  TContext
+> => {
+  return useMutation(getValidateAiProviderMutationOptions(options));
+};
+
+/**
+ * @summary Rotate AI provider credentials
+ */
+export const getRotateAiProviderUrl = () => {
+  return `/api/ai/provider/rotate`;
+};
+
+export const rotateAiProvider = async (
+  rotateAiProviderRequest: RotateAiProviderRequest,
+  options?: RequestInit,
+): Promise<AiProviderConfig> => {
+  return customFetch<AiProviderConfig>(getRotateAiProviderUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(rotateAiProviderRequest),
+  });
+};
+
+export const getRotateAiProviderMutationOptions = <
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof rotateAiProvider>>,
+    TError,
+    { data: BodyType<RotateAiProviderRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof rotateAiProvider>>,
+  TError,
+  { data: BodyType<RotateAiProviderRequest> },
+  TContext
+> => {
+  const mutationKey = ["rotateAiProvider"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof rotateAiProvider>>,
+    { data: BodyType<RotateAiProviderRequest> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return rotateAiProvider(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type RotateAiProviderMutationResult = NonNullable<
+  Awaited<ReturnType<typeof rotateAiProvider>>
+>;
+export type RotateAiProviderMutationBody = BodyType<RotateAiProviderRequest>;
+export type RotateAiProviderMutationError = ErrorType<
+  UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+>;
+
+/**
+ * @summary Rotate AI provider credentials
+ */
+export const useRotateAiProvider = <
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof rotateAiProvider>>,
+    TError,
+    { data: BodyType<RotateAiProviderRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof rotateAiProvider>>,
+  TError,
+  { data: BodyType<RotateAiProviderRequest> },
+  TContext
+> => {
+  return useMutation(getRotateAiProviderMutationOptions(options));
+};
+
+/**
+ * @summary Get AI capability mode for the workspace
+ */
+export const getGetAiCapabilityUrl = () => {
+  return `/api/ai/capability`;
+};
+
+export const getAiCapability = async (
+  options?: RequestInit,
+): Promise<AiCapability> => {
+  return customFetch<AiCapability>(getGetAiCapabilityUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetAiCapabilityQueryKey = () => {
+  return [`/api/ai/capability`] as const;
+};
+
+export const getGetAiCapabilityQueryOptions = <
+  TData = Awaited<ReturnType<typeof getAiCapability>>,
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getAiCapability>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetAiCapabilityQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getAiCapability>>> = ({
+    signal,
+  }) => getAiCapability({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getAiCapability>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetAiCapabilityQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getAiCapability>>
+>;
+export type GetAiCapabilityQueryError = ErrorType<
+  UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+>;
+
+/**
+ * @summary Get AI capability mode for the workspace
+ */
+
+export function useGetAiCapability<
+  TData = Awaited<ReturnType<typeof getAiCapability>>,
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | ApiErrorResponse
+  >,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getAiCapability>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetAiCapabilityQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
 
 /**
  * @summary List export packages
