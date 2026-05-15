@@ -48,9 +48,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { isLoaded: isOrganizationLoaded, organization } = useOrganization();
   const { user } = useUser();
   const [isTokenReady, setIsTokenReady] = React.useState(false);
+  const isOrganizationReady = !orgId || isOrganizationLoaded;
 
   React.useEffect(() => {
-    if (!isLoaded || !isSignedIn || !isOrganizationLoaded) {
+    if (!isLoaded || !isSignedIn || !isOrganizationReady) {
       setAuthTokenGetter(null);
       setIsTokenReady(false);
       return;
@@ -63,7 +64,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setAuthTokenGetter(null);
       setIsTokenReady(false);
     };
-  }, [getToken, isLoaded, isOrganizationLoaded, isSignedIn, orgId, orgRole, sessionId]);
+  }, [getToken, isLoaded, isOrganizationReady, isSignedIn, orgId, orgRole, sessionId]);
 
   const status: AuthStatus = !isLoaded ? "loading" : isSignedIn ? "authenticated" : "anonymous";
 

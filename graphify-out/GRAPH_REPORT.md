@@ -1,7 +1,7 @@
 # Graph Report - spec-flow  (2026-05-16)
 
 ## Corpus Check
-- 264 files · ~223,025 words
+- 264 files · ~223,472 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
