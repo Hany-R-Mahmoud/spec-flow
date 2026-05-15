@@ -89,20 +89,26 @@ function AiProviderSection() {
   const provider = state.aiCapability?.provider;
   const [apiKey, setApiKey] = useState('');
   const [model, setModel] = useState(provider?.model ?? 'gpt-4o-mini');
+  const [showKeyInput, setShowKeyInput] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     setModel(provider?.model ?? 'gpt-4o-mini');
-  }, [provider?.model]);
+    setApiKey('');
+    setShowKeyInput(false);
+  }, [provider?.configured, provider?.id, provider?.keySuffix, provider?.model]);
 
   const status = provider?.status ?? 'not_configured';
   const configured = Boolean(provider?.configured);
-  const showValidationError =
-    status === 'validation_failed' && !configured && Boolean(provider?.validationError);
-  const apiKeyPlaceholder = configured ? '' : 'Paste provider API key';
-  const apiKeyHelper = configured
-    ? 'Provider key already saved. Enter a new key below to rotate it.'
+  const hasSavedKey = configured && Boolean(provider?.keySuffix);
+  const showValidationError = Boolean(provider?.validationError);
+  const apiKeyPlaceholder = hasSavedKey ? 'Paste replacement provider API key' : 'Paste provider API key';
+  const apiKeyHelper = hasSavedKey
+    ? 'Saved key is already active. Reveal the input only when you want to replace it.'
     : 'Use your own key for generation. The key is stored securely on the API server.';
+  const lastValidatedLabel = provider?.lastValidatedAt
+    ? new Date(provider.lastValidatedAt).toLocaleString()
+    : null;
 
   const saveProvider = async () => {
     try {
@@ -159,6 +165,16 @@ function AiProviderSection() {
     }
   };
 
+  const beginKeyRotation = () => {
+    setShowKeyInput(true);
+    setApiKey('');
+  };
+
+  const cancelKeyRotation = () => {
+    setShowKeyInput(false);
+    setApiKey('');
+  };
+
   const removeProvider = async () => {
     try {
       setIsSaving(true);
@@ -199,6 +215,45 @@ function AiProviderSection() {
         </p>
       </div>
 
+      {hasSavedKey ? (
+        <div className="rounded-md border border-border bg-background p-3">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="space-y-1">
+              <div className="text-sm font-medium text-foreground">Saved provider key active</div>
+              <div className="text-xs text-muted-foreground">
+                {provider?.keySuffix ? `Key ending ${provider.keySuffix}` : 'Key stored securely'}
+                {lastValidatedLabel ? ` · validated ${lastValidatedLabel}` : ''}
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="h-8 text-xs"
+                onClick={beginKeyRotation}
+                disabled={isSaving}
+              >
+                Replace key
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="h-8 text-xs"
+                onClick={validateProvider}
+                disabled={isSaving || !provider?.id}
+              >
+                Refresh status
+              </Button>
+            </div>
+          </div>
+          {showValidationError && provider?.validationError ? (
+            <p className="mt-2 text-xs text-[var(--color-danger)]">{provider.validationError}</p>
+          ) : null}
+        </div>
+      ) : null}
+
       <div className="grid gap-3 md:grid-cols-[1fr_1fr]">
         <div>
           <Label className="text-xs font-medium mb-1.5 block">Provider</Label>
@@ -216,44 +271,50 @@ function AiProviderSection() {
         </div>
       </div>
 
-      <div>
-        <Label className="text-xs font-medium mb-1.5 block">API Key</Label>
-        <Input
-          value={apiKey}
-          onChange={(event) => setApiKey(event.target.value)}
-          className="h-8 text-xs font-mono"
-          type="password"
-          placeholder={apiKeyPlaceholder}
-          autoComplete="off"
-          aria-describedby="ai-provider-key-help"
-          data-testid="input-ai-provider-key"
-        />
-        <p id="ai-provider-key-help" className="mt-1 text-xs text-muted-foreground">
-          {apiKeyHelper}
-        </p>
-      </div>
-
-      {showValidationError && provider?.validationError ? (
-        <p className="text-xs text-[var(--color-danger)]">{provider.validationError}</p>
-      ) : null}
-
-      {configured ? (
-        <p className="text-xs text-muted-foreground">
-          Current key is active. Validation is only needed after you rotate it.
-        </p>
+      {(!hasSavedKey || showKeyInput) ? (
+        <div>
+          <Label className="text-xs font-medium mb-1.5 block">API Key</Label>
+          <Input
+            value={apiKey}
+            onChange={(event) => setApiKey(event.target.value)}
+            className="h-8 text-xs font-mono"
+            type="password"
+            placeholder={apiKeyPlaceholder}
+            autoComplete="off"
+            aria-describedby="ai-provider-key-help"
+            data-testid="input-ai-provider-key"
+          />
+          <p id="ai-provider-key-help" className="mt-1 text-xs text-muted-foreground">
+            {apiKeyHelper}
+          </p>
+        </div>
       ) : null}
 
       <div className="flex flex-wrap gap-2">
-        <Button
-          type="button"
-          size="sm"
-          className="h-8 text-xs"
-          onClick={configured ? rotateProvider : saveProvider}
-          disabled={isSaving || apiKey.trim().length < 8 || model.trim().length === 0}
-        >
-          <KeyRound className="mr-2 h-3.5 w-3.5" />
-          {configured ? 'Rotate Key' : 'Save Provider'}
-        </Button>
+        {!hasSavedKey || showKeyInput ? (
+          <Button
+            type="button"
+            size="sm"
+            className="h-8 text-xs"
+            onClick={hasSavedKey ? rotateProvider : saveProvider}
+            disabled={isSaving || apiKey.trim().length < 8 || model.trim().length === 0}
+          >
+            <KeyRound className="mr-2 h-3.5 w-3.5" />
+            {hasSavedKey ? 'Save Replacement' : 'Save Provider'}
+          </Button>
+        ) : null}
+        {hasSavedKey && showKeyInput ? (
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            className="h-8 text-xs"
+            onClick={cancelKeyRotation}
+            disabled={isSaving}
+          >
+            Cancel
+          </Button>
+        ) : null}
         <Button
           type="button"
           size="sm"
@@ -276,6 +337,10 @@ function AiProviderSection() {
           Remove
         </Button>
       </div>
+
+      {!hasSavedKey && showValidationError && provider?.validationError ? (
+        <p className="text-xs text-[var(--color-danger)]">{provider.validationError}</p>
+      ) : null}
     </SettingsSection>
   );
 }
