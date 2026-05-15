@@ -101,7 +101,7 @@ function AiProviderSection() {
   const status = provider?.status ?? 'not_configured';
   const configured = Boolean(provider?.configured);
   const hasSavedKey = Boolean(provider?.id && (provider.keySuffix || provider.keyFingerprint));
-  const showValidationError = Boolean(provider?.validationError) && !hasSavedKey;
+  const showValidationError = Boolean(provider?.validationError);
   const apiKeyPlaceholder = hasSavedKey ? 'Paste replacement provider API key' : 'Paste provider API key';
   const apiKeyHelper = hasSavedKey
     ? 'Saved key is already active. Reveal the input only when you want to replace it.'
@@ -109,6 +109,8 @@ function AiProviderSection() {
   const lastValidatedLabel = provider?.lastValidatedAt
     ? new Date(provider.lastValidatedAt).toLocaleString()
     : null;
+  const providerStateLabel = configured ? 'AI enabled' : hasSavedKey ? 'Key saved' : 'Manual mode';
+  const providerStateTone = configured ? 'default' : 'outline';
 
   const saveProvider = async () => {
     try {
@@ -135,9 +137,16 @@ function AiProviderSection() {
   const validateProvider = async () => {
     try {
       setIsSaving(true);
-      await validateAiProvider();
+      const validated = await validateAiProvider();
       await refreshAiCapability();
-      toast({ title: 'Validation complete', description: 'AI provider status refreshed.' });
+      if (validated.status === 'configured') {
+        toast({ title: 'Validation complete', description: 'AI provider validated successfully.' });
+      } else {
+        toast({
+          title: 'Validation failed',
+          description: validated.validationError ?? 'AI provider is not validated yet.',
+        });
+      }
     } catch (error) {
       toast({
         title: 'Validation failed',
@@ -195,11 +204,9 @@ function AiProviderSection() {
   return (
     <SettingsSection title="AI Provider">
       <div className="flex flex-wrap items-center gap-2">
-        <Badge variant={configured || hasSavedKey ? 'default' : 'outline'}>
-          {configured ? 'AI enabled' : hasSavedKey ? 'Key saved' : 'Manual mode'}
-        </Badge>
+        <Badge variant={providerStateTone}>{providerStateLabel}</Badge>
         <span className="text-xs text-muted-foreground">
-          {status.replaceAll('_', ' ')}
+          {configured ? 'configured' : hasSavedKey ? 'saved key active' : status.replaceAll('_', ' ')}
           {provider?.keySuffix ? ` · key ending ${provider.keySuffix}` : ''}
         </span>
       </div>
