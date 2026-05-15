@@ -6,6 +6,9 @@
 - `docs/overview.md`
 - `docs/architecture.md`
 - `docs/project-structure.md`
+- `docs/manus/project-brief.md`
+- `docs/manus/spec-index.md`
+- `docs/adaptive-intake-and-step-skills.md`
 - `docs/team-decisions/README.md`
 - `AGENTS.md`
 
@@ -38,3 +41,5 @@ pnpm build
   convention behavior.
 - Update docs when durable behavior changes.
 - Use `Unknown / verify` when facts are unclear.
+- When changing generation behavior, keep adaptive intake and step-skill
+  provenance aligned with `lib/api-spec/openapi.yaml`.

@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { X } from 'lucide-react';
 import { useSessionStore } from '@/store/session-store';
 import { ThemeModeToggle } from '@/components/shared/ThemeModeToggle';
+import { StepSkillsSection } from '@/components/settings/StepSkillsSection';
 
 type SettingsFormValues = {
   workspaceName: string;
@@ -176,7 +177,7 @@ export function SettingsPage() {
   }
 
   return (
-    <div className="max-w-2xl space-y-6">
+    <div className="max-w-4xl space-y-6">
       <div>
         <h1 className="text-lg font-semibold text-foreground">Settings</h1>
         <p className="text-xs text-muted-foreground mt-0.5">Configure your workspace and story generation preferences</p>
@@ -189,6 +190,8 @@ export function SettingsPage() {
           <ThemeModeToggle className="w-full justify-start" />
         </div>
       </SettingsSection>
+
+      <StepSkillsSection />
 
       <form onSubmit={e => e.preventDefault()} className="space-y-6">
         <SettingsSection title="Workspace" onSave={saveWorkspace}>

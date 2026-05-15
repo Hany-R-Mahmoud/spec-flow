@@ -42,6 +42,15 @@ type GenerationRouteStep =
   | "stories"
   | "quality";
 
+type StepSkillSnapshot = {
+  id: string;
+  phase: string;
+  name: string;
+  version: number;
+  source: "default" | "custom";
+  content: string;
+};
+
 const generateBodyParsers = {
   clarification: GenerateClarificationBody,
   prd: GeneratePrdBody,
@@ -129,6 +138,7 @@ async function runGeneration(
   sessionId: string,
   workspaceId: string,
   step: GenerationRouteStep,
+  stepSkill?: StepSkillSnapshot,
 ): Promise<Awaited<ReturnType<typeof getSessionWithArtifacts>>> {
   const db = requireDatabase();
   const row = await getSessionArtifactsRecord(db, sessionId, workspaceId);
@@ -142,7 +152,9 @@ async function runGeneration(
   }
 
   const runtime = getGenerationRuntime();
-  const promptVersion = PROMPT_VERSIONS[step];
+  const promptVersion = stepSkill
+    ? `${PROMPT_VERSIONS[step]}+skill:${stepSkill.id}@v${stepSkill.version}`
+    : PROMPT_VERSIONS[step];
   let generation =
     row.artifacts.metadata?.generation ?? createWorkflowGeneration(runtime.mode);
 
@@ -193,6 +205,7 @@ async function runGeneration(
     ));
 
   try {
+    const stepSkillOptions = { content: stepSkill?.content ?? "" };
     const prompt = workflowPrompts[step].buildPrompt({
       name: row.session.name,
       inputType: row.session.inputType,
@@ -205,7 +218,18 @@ async function runGeneration(
       rawInput: row.session.rawInput,
     });
 
+    const stepSkillInstructions = stepSkill
+      ? [
+          `Step Skill: ${stepSkill.name}`,
+          `Skill ID: ${stepSkill.id}`,
+          `Skill Version: ${stepSkill.version}`,
+          `Skill Source: ${stepSkill.source}`,
+          stepSkill.content,
+        ].join("\n")
+      : "";
+
     void prompt;
+    void stepSkillInstructions;
     void promptVersion;
 
     let artifactPatch: Record<string, unknown> = {};
@@ -219,7 +243,7 @@ async function runGeneration(
           prdSections: row.artifacts.prdSections,
           epics: row.artifacts.epics,
           stories: row.artifacts.stories,
-        }),
+        }, stepSkillOptions),
       );
 
       artifactPatch = {
@@ -238,7 +262,7 @@ async function runGeneration(
           prdSections: row.artifacts.prdSections,
           epics: row.artifacts.epics,
           stories: row.artifacts.stories,
-        }),
+        }, stepSkillOptions),
       );
 
       artifactPatch = {
@@ -256,7 +280,7 @@ async function runGeneration(
           prdSections: row.artifacts.prdSections,
           epics: row.artifacts.epics,
           stories: row.artifacts.stories,
-        }),
+        }, stepSkillOptions),
       );
 
       artifactPatch = {
@@ -273,14 +297,14 @@ async function runGeneration(
           prdSections: row.artifacts.prdSections,
           epics: row.artifacts.epics,
           stories: row.artifacts.stories,
-        }),
+        }, stepSkillOptions),
       );
 
       artifactPatch = { stories };
     }
 
     if (step === "quality") {
-      const stories = storySchema.array().parse(applyQualityReview(row.artifacts.stories));
+      const stories = storySchema.array().parse(applyQualityReview(row.artifacts.stories, stepSkillOptions));
 
       artifactPatch = { stories };
     }
@@ -288,6 +312,7 @@ async function runGeneration(
     nextGeneration = withGenerationStatus(nextGeneration, step, {
       status: "succeeded",
       mode: runtime.mode,
+      promptVersion,
       errorMessage: null,
     });
 
@@ -341,7 +366,7 @@ async function runGeneration(
 function handleStep(step: GenerationRouteStep) {
   router.post(`/sessions/:sessionId/generate/${step}`, async (req, res) => {
     try {
-      generateBodyParsers[step].parse(req.body ?? {});
+      const input = generateBodyParsers[step].parse(req.body ?? {});
 
       const db = requireDatabase();
       const auth = requireAuthContext(req, res);
@@ -361,7 +386,12 @@ function handleStep(step: GenerationRouteStep) {
         return;
       }
 
-      const session = await runGeneration(req.params.sessionId, auth.workspaceId, step);
+      const session = await runGeneration(
+        req.params.sessionId,
+        auth.workspaceId,
+        step,
+        input.stepSkill,
+      );
       res.json(session);
     } catch (error) {
       sendUnexpectedError(res, error);

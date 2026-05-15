@@ -341,8 +341,26 @@ export interface UpdateSessionArtifactsRequest {
   stories?: Story[];
 }
 
+export type StepSkillSnapshotSource =
+  (typeof StepSkillSnapshotSource)[keyof typeof StepSkillSnapshotSource];
+
+export const StepSkillSnapshotSource = {
+  default: "default",
+  custom: "custom",
+} as const;
+
+export interface StepSkillSnapshot {
+  id: string;
+  phase: Phase;
+  name: string;
+  version: number;
+  source: StepSkillSnapshotSource;
+  content: string;
+}
+
 export interface GenerateWorkflowStepRequest {
   force?: boolean;
+  stepSkill?: StepSkillSnapshot;
 }
 
 export interface UpdateSettingsRequest {

@@ -1231,6 +1231,32 @@ components:
       properties:
         force:
           type: boolean
+        stepSkill:
+          $ref: "#/components/schemas/StepSkillSnapshot"
+      additionalProperties: false
+    StepSkillSnapshot:
+      type: object
+      properties:
+        id:
+          type: string
+        phase:
+          $ref: "#/components/schemas/Phase"
+        name:
+          type: string
+        version:
+          type: integer
+        source:
+          type: string
+          enum: [default, custom]
+        content:
+          type: string
+      required:
+        - id
+        - phase
+        - name
+        - version
+        - source
+        - content
       additionalProperties: false
     UpdateSettingsRequest:
       type: object

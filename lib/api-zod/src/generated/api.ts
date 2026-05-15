@@ -1357,6 +1357,25 @@ export const GenerateClarificationParams = zod.object({
 
 export const GenerateClarificationBody = zod.object({
   force: zod.boolean().optional(),
+  stepSkill: zod
+    .object({
+      id: zod.string(),
+      phase: zod.enum([
+        "intake",
+        "clarification",
+        "prd",
+        "epics",
+        "stories",
+        "quality",
+        "devReview",
+        "export",
+      ]),
+      name: zod.string(),
+      version: zod.number(),
+      source: zod.enum(["default", "custom"]),
+      content: zod.string(),
+    })
+    .optional(),
 });
 
 export const GenerateClarificationResponse = zod.object({
@@ -1625,6 +1644,25 @@ export const GeneratePrdParams = zod.object({
 
 export const GeneratePrdBody = zod.object({
   force: zod.boolean().optional(),
+  stepSkill: zod
+    .object({
+      id: zod.string(),
+      phase: zod.enum([
+        "intake",
+        "clarification",
+        "prd",
+        "epics",
+        "stories",
+        "quality",
+        "devReview",
+        "export",
+      ]),
+      name: zod.string(),
+      version: zod.number(),
+      source: zod.enum(["default", "custom"]),
+      content: zod.string(),
+    })
+    .optional(),
 });
 
 export const GeneratePrdResponse = zod.object({
@@ -1893,6 +1931,25 @@ export const GenerateEpicsParams = zod.object({
 
 export const GenerateEpicsBody = zod.object({
   force: zod.boolean().optional(),
+  stepSkill: zod
+    .object({
+      id: zod.string(),
+      phase: zod.enum([
+        "intake",
+        "clarification",
+        "prd",
+        "epics",
+        "stories",
+        "quality",
+        "devReview",
+        "export",
+      ]),
+      name: zod.string(),
+      version: zod.number(),
+      source: zod.enum(["default", "custom"]),
+      content: zod.string(),
+    })
+    .optional(),
 });
 
 export const GenerateEpicsResponse = zod.object({
@@ -2161,6 +2218,25 @@ export const GenerateStoriesParams = zod.object({
 
 export const GenerateStoriesBody = zod.object({
   force: zod.boolean().optional(),
+  stepSkill: zod
+    .object({
+      id: zod.string(),
+      phase: zod.enum([
+        "intake",
+        "clarification",
+        "prd",
+        "epics",
+        "stories",
+        "quality",
+        "devReview",
+        "export",
+      ]),
+      name: zod.string(),
+      version: zod.number(),
+      source: zod.enum(["default", "custom"]),
+      content: zod.string(),
+    })
+    .optional(),
 });
 
 export const GenerateStoriesResponse = zod.object({
@@ -2429,6 +2505,25 @@ export const GenerateQualityParams = zod.object({
 
 export const GenerateQualityBody = zod.object({
   force: zod.boolean().optional(),
+  stepSkill: zod
+    .object({
+      id: zod.string(),
+      phase: zod.enum([
+        "intake",
+        "clarification",
+        "prd",
+        "epics",
+        "stories",
+        "quality",
+        "devReview",
+        "export",
+      ]),
+      name: zod.string(),
+      version: zod.number(),
+      source: zod.enum(["default", "custom"]),
+      content: zod.string(),
+    })
+    .optional(),
 });
 
 export const GenerateQualityResponse = zod.object({

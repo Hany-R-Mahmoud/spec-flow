@@ -187,6 +187,8 @@ flowchart TB
 - [Key Flows](docs/key-flows.md)
 - [Onboarding](docs/onboarding.md)
 - [AI Agent Guide](docs/ai-agent-guide.md)
+- [Manus Project Brief](docs/manus/project-brief.md)
+- [Manus Spec Index](docs/manus/spec-index.md)
 - [Team Decisions](docs/team-decisions/README.md)
 
 ## Main Areas

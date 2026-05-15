@@ -158,6 +158,7 @@ export function withGenerationStatus(
   input: {
     status: GenerationStatus;
     mode?: GenerationMode;
+    promptVersion?: string;
     errorMessage?: string | null;
     updatedAt?: string | null;
   },
@@ -168,6 +169,7 @@ export function withGenerationStatus(
       ...generation[step],
       status: input.status,
       mode: input.mode ?? generation[step].mode,
+      promptVersion: input.promptVersion ?? generation[step].promptVersion,
       errorMessage:
         input.errorMessage === undefined
           ? generation[step].errorMessage

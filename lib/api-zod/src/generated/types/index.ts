@@ -44,6 +44,8 @@ export * from "./readinessLabel";
 export * from "./readinessScore";
 export * from "./reviewStatus";
 export * from "./sessionListResponse";
+export * from "./stepSkillSnapshot";
+export * from "./stepSkillSnapshotSource";
 export * from "./story";
 export * from "./storyPriority";
 export * from "./unauthorizedResponse";

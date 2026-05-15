@@ -24,6 +24,22 @@ type WorkflowDraft = {
   stories: Story[];
 };
 
+type StepSkillOptions = {
+  content?: string;
+};
+
+function wantsPreserveExisting(options?: StepSkillOptions): boolean {
+  return /\b(preserve|reuse|avoid repeating|skip already|unless regenerate)\b/i.test(
+    options?.content ?? "",
+  );
+}
+
+function wantsUnknownWarnings(options?: StepSkillOptions): boolean {
+  return /Unknown \/ verify|unknowns?|uncertain|assumptions?/i.test(
+    options?.content ?? "",
+  );
+}
+
 function compactSentences(input: string): string[] {
   return input
     .split(/[\n.!?]+/)
@@ -50,12 +66,15 @@ function prdRequirementId(index: number): string {
   return `REQ-${index + 1}`;
 }
 
-export function generateClarificationQuestions(session: WorkflowDraft): ClarificationQuestion[] {
+export function generateClarificationQuestions(
+  session: WorkflowDraft,
+  options?: StepSkillOptions,
+): ClarificationQuestion[] {
   const goal = pickPrimarySentence(session);
   const constraint = pickConstraint(session);
   const primaryUser = session.targetUsers[0] ?? "the primary workflow owner";
 
-  return [
+  const generated = [
     {
       id: "clarification-scope-primary",
       group: "Scope",
@@ -97,6 +116,18 @@ export function generateClarificationQuestions(session: WorkflowDraft): Clarific
       skipped: false,
     },
   ];
+
+  if (!wantsPreserveExisting(options)) {
+    return generated;
+  }
+
+  const existingByGroup = new Map(
+    session.clarificationQuestions
+      .filter((question) => question.answer.trim() || question.skipped)
+      .map((question) => [question.group, question]),
+  );
+
+  return generated.map((question) => existingByGroup.get(question.group) ?? question);
 }
 
 function answeredQuestionSummary(session: WorkflowDraft): string[] {
@@ -114,7 +145,23 @@ function answeredQuestionSummary(session: WorkflowDraft): string[] {
   ];
 }
 
-export function generatePrdSections(session: WorkflowDraft): PRDSection[] {
+export function generatePrdSections(
+  session: WorkflowDraft,
+  options?: StepSkillOptions,
+): PRDSection[] {
+  if (wantsPreserveExisting(options)) {
+    const completeSections = session.prdSections.filter((section) =>
+      section.content.trim(),
+    );
+
+    if (completeSections.length >= 2) {
+      return session.prdSections.map((section) => ({
+        ...section,
+        complete: section.complete || section.content.trim().length > 0,
+      }));
+    }
+  }
+
   const answered = answeredQuestionSummary(session);
   const scopeBullets = [
     `Deliver the first workable slice for ${session.targetUsers[0] ?? "the team"}.`,
@@ -165,10 +212,17 @@ export function generatePrdSections(session: WorkflowDraft): PRDSection[] {
   ];
 }
 
-export function generateEpics(session: WorkflowDraft): Epic[] {
+export function generateEpics(
+  session: WorkflowDraft,
+  options?: StepSkillOptions,
+): Epic[] {
+  if (wantsPreserveExisting(options) && session.epics.length > 0) {
+    return session.epics;
+  }
+
   const sections = session.prdSections.length > 0
     ? session.prdSections
-    : generatePrdSections(session);
+    : generatePrdSections(session, options);
 
   const scope = sections.find((section) => section.id === "prd-scope")?.content ?? "";
   const risks = sections.find((section) => section.id === "prd-risks")?.content ?? "";
@@ -250,7 +304,10 @@ function buildReadinessScore(story: Omit<Story, "readinessScore" | "warnings">):
   };
 }
 
-function detectWarnings(story: Omit<Story, "warnings" | "readinessScore">): QualityWarning[] {
+function detectWarnings(
+  story: Omit<Story, "warnings" | "readinessScore">,
+  options?: StepSkillOptions,
+): QualityWarning[] {
   const warnings: QualityWarning[] = [];
 
   if (story.acceptanceCriteria.length < 2) {
@@ -289,13 +346,43 @@ function detectWarnings(story: Omit<Story, "warnings" | "readinessScore">): Qual
     });
   }
 
+  if (
+    wantsUnknownWarnings(options) &&
+    [
+      story.description,
+      story.errorHandling,
+      story.localizationNotes,
+      story.designNotes,
+      story.analyticsNotes,
+      story.qaNotes,
+      story.technicalNotes,
+      ...story.acceptanceCriteria,
+      ...story.edgeCases,
+      ...story.openQuestions,
+    ].some((value) => /Unknown \/ verify/i.test(value))
+  ) {
+    warnings.push({
+      id: `${story.id}-warning-unknown-verify`,
+      type: "unknown-verify",
+      message: "Imported content still contains Unknown / verify assumptions.",
+      severity: "info",
+    });
+  }
+
   return warnings;
 }
 
 type StoryDraft = Omit<Story, "readinessScore" | "warnings">;
 
-export function generateStories(session: WorkflowDraft): Story[] {
-  const epics = session.epics.length > 0 ? session.epics : generateEpics(session);
+export function generateStories(
+  session: WorkflowDraft,
+  options?: StepSkillOptions,
+): Story[] {
+  if (wantsPreserveExisting(options) && session.stories.length > 0) {
+    return applyQualityReview(session.stories, options);
+  }
+
+  const epics = session.epics.length > 0 ? session.epics : generateEpics(session, options);
 
   const baseStories: StoryDraft[] = epics.flatMap((epic, epicIndex) => {
     const foundation = epicIndex * 2;
@@ -425,7 +512,7 @@ export function generateStories(session: WorkflowDraft): Story[] {
   });
 
   return baseStories.map((story) => {
-    const warnings = detectWarnings(story);
+    const warnings = detectWarnings(story, options);
     return {
       ...story,
       warnings,
@@ -434,13 +521,16 @@ export function generateStories(session: WorkflowDraft): Story[] {
   });
 }
 
-export function applyQualityReview(stories: Story[]): Story[] {
+export function applyQualityReview(
+  stories: Story[],
+  options?: StepSkillOptions,
+): Story[] {
   return stories.map((story) => {
     const draft: StoryDraft = { ...story };
 
     return {
       ...draft,
-      warnings: detectWarnings(draft),
+      warnings: detectWarnings(draft, options),
       readinessScore: buildReadinessScore(draft),
     };
   });

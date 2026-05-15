@@ -3,3 +3,4 @@
 | Date | Status | Area | Decision | Owner | Link |
 |---|---|---|---|---|---|
 | 2026-05-15 | Accepted | Docs | Create repo-owned docs under `docs/` and use them as the canonical onboarding surface | Codex | [overview](../overview.md) |
+| 2026-05-15 | Accepted | Workflow | Support adaptive intake from existing content and phase-level step skills with local skill persistence first | Codex | [adaptive intake](../adaptive-intake-and-step-skills.md) |

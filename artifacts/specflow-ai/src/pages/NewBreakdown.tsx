@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'wouter';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -7,11 +7,14 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { useSessionStore } from '@/store/session-store';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowRight, X } from 'lucide-react';
+import { analyzeAdaptiveIntake, buildAdaptiveArtifacts, buildAdaptivePhasePatch } from '@/lib/adaptive-intake';
+import { ArrowRight, FileSearch, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const schema = z.object({
@@ -24,6 +27,7 @@ const schema = z.object({
   targetUsers: z.array(z.string()),
   labels: z.array(z.string()),
   rawInput: z.string().min(10, 'Product input is required (min 10 characters)'),
+  reuseDetectedContent: z.boolean(),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -90,6 +94,7 @@ export function NewBreakdown() {
       targetUsers: [],
       labels: [],
       rawInput: '',
+      reuseDetectedContent: true,
     },
   });
 
@@ -108,14 +113,38 @@ export function NewBreakdown() {
       targetUsers: [],
       labels: state.settings.defaultLabels ?? [],
       rawInput: '',
+      reuseDetectedContent: true,
     });
   }, [form, state.settings]);
 
   const rawInput = useWatch({ control: form.control, name: 'rawInput' }) ?? '';
+  const inputType = useWatch({ control: form.control, name: 'inputType' }) ?? '';
+  const businessGoal = useWatch({ control: form.control, name: 'businessGoal' }) ?? '';
+  const knownConstraints = useWatch({ control: form.control, name: 'knownConstraints' }) ?? '';
+  const targetUsers = useWatch({ control: form.control, name: 'targetUsers' }) ?? [];
+  const labels = useWatch({ control: form.control, name: 'labels' }) ?? [];
+  const reuseDetectedContent = useWatch({ control: form.control, name: 'reuseDetectedContent' }) ?? true;
   const charCount = rawInput.length;
+  const adaptiveAnalysis = useMemo(
+    () =>
+      analyzeAdaptiveIntake({
+        rawInput,
+        inputType,
+        businessGoal,
+        knownConstraints,
+        targetUsers,
+        labels,
+      }),
+    [businessGoal, inputType, knownConstraints, labels, rawInput, targetUsers],
+  );
 
   const onSubmit = async (data: FormValues) => {
     try {
+      const analysis = analyzeAdaptiveIntake(data);
+      const adaptivePatch =
+        data.reuseDetectedContent && analysis.hasDetectedContent
+          ? buildAdaptivePhasePatch(analysis)
+          : null;
       const session = await createSession({
         name: data.name,
         inputType: data.inputType,
@@ -126,6 +155,12 @@ export function NewBreakdown() {
         knownConstraints: data.knownConstraints || '',
         labels: data.labels,
         rawInput: data.rawInput,
+        initialArtifacts:
+          data.reuseDetectedContent && analysis.hasDetectedContent
+            ? (sessionId) => buildAdaptiveArtifacts(data, sessionId)
+            : undefined,
+        initialPhase: adaptivePatch?.currentPhase,
+        initialPhases: adaptivePatch?.phases,
       });
 
       setLocation(`/workspace/${session.id}`);
@@ -318,13 +353,92 @@ export function NewBreakdown() {
                 </div>
               </div>
 
+              {adaptiveAnalysis.hasDetectedContent && (
+                <div className="bg-card border border-border rounded-md p-4 space-y-3">
+                  <div className="flex items-start justify-between gap-3 border-b border-border pb-2">
+                    <div className="flex items-center gap-2">
+                      <FileSearch className="h-4 w-4 text-primary" />
+                      <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                        Detected Progress
+                      </div>
+                    </div>
+                    <Badge variant="outline" className="text-[10px]">
+                      Start at {adaptiveAnalysis.recommendedPhase}
+                    </Badge>
+                  </div>
+
+                  <p className="text-xs text-muted-foreground">
+                    {adaptiveAnalysis.summary}
+                  </p>
+
+                  <div className="grid grid-cols-4 gap-2">
+                    {[
+                      ['PRD', adaptiveAnalysis.detected.prdSections],
+                      ['Stories', adaptiveAnalysis.detected.stories],
+                      ['Answers', adaptiveAnalysis.detected.clarificationAnswers],
+                      ['Unknowns', adaptiveAnalysis.detected.unknownNotes],
+                    ].map(([label, count]) => (
+                      <div key={label} className="rounded border border-border bg-background p-2 text-center">
+                        <div className="text-sm font-semibold text-foreground">{count}</div>
+                        <div className="text-[10px] text-muted-foreground">{label}</div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    {adaptiveAnalysis.phasePlan.map((item) => (
+                      <div key={item.phase} className="rounded border border-border bg-muted/30 p-2">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-xs font-medium text-foreground">{item.label}</span>
+                          <span className={cn(
+                            'rounded px-1.5 py-0.5 text-[10px]',
+                            item.action === 'reuse'
+                              ? 'bg-[var(--color-success-soft)] text-[var(--color-success)]'
+                              : item.readiness === 'partial'
+                                ? 'bg-[var(--color-warning-soft)] text-[var(--color-warning)]'
+                                : 'bg-muted text-muted-foreground',
+                          )}>
+                            {item.action}
+                          </span>
+                        </div>
+                        <p className="mt-1 line-clamp-2 text-[11px] text-muted-foreground">
+                          {item.evidence}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+
+                  <FormField control={form.control} name="reuseDetectedContent" render={({ field }) => (
+                    <FormItem className="flex items-start gap-2 rounded border border-border bg-background p-2">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={(checked) => field.onChange(checked === true)}
+                          data-testid="checkbox-reuse-detected-content"
+                        />
+                      </FormControl>
+                      <div className="space-y-0.5">
+                        <FormLabel className="text-xs font-medium">
+                          Reuse detected content and skip completed steps
+                        </FormLabel>
+                        <p className="text-[11px] text-muted-foreground">
+                          Imported content is preserved. Missing parts can still be generated later.
+                        </p>
+                      </div>
+                    </FormItem>
+                  )} />
+                </div>
+              )}
+
               <Button
                 type="submit"
                 className="w-full"
                 size="sm"
                 data-testid="button-start-breakdown"
               >
-                Start Guided Breakdown
+                {reuseDetectedContent && adaptiveAnalysis.hasDetectedContent
+                  ? `Start at ${adaptiveAnalysis.recommendedPhase}`
+                  : 'Start Guided Breakdown'}
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
 

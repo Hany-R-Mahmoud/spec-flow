@@ -13,9 +13,28 @@
 
 1. User opens a workspace from the app shell
 2. Session state triggers generation actions in the UI
-3. React client calls `artifacts/api-server/src/routes/generation.ts`
+3. React client sends the selected step-skill snapshot with the generation
+   request
 4. API validates input, updates generation state, and persists artifacts
-5. Shared schema types keep response shape stable
+5. Deterministic generation preserves imported/user-kept content when the skill
+   requires it
+6. Shared schema types keep response shape stable
+
+## Flow: Adaptive Intake
+
+1. User pastes rough, partial, or complete content into New Breakdown
+2. Browser classifies detected PRD sections, stories, answers, and unknowns
+3. User confirms whether to reuse detected content
+4. Session creation persists imported artifacts and phase state
+5. Workspace opens at the recommended next phase, such as `epics` or `quality`
+
+## Flow: Step Skills
+
+1. User opens Settings
+2. User selects a workflow phase and edits or duplicates the default skill
+3. Skill saves locally and becomes assigned to that phase
+4. Future generation requests include the assigned skill snapshot
+5. Generation provenance is stored in `generation.promptVersion`
 
 ## Flow: Export History
 
@@ -30,6 +49,8 @@
 - `ensureWorkspaceSchema()` in `artifacts/api-server/src/server.ts` adds missing
   `workspace_id` columns on startup
 - OpenAPI code generation keeps the shared client and Zod packages aligned
+- Step skills currently persist in browser `localStorage`; API/database-backed
+  skill persistence is `Unknown / verify` future work
 
 ## External Boundaries
 

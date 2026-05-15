@@ -21,6 +21,7 @@ import {
   updateSessionArtifacts,
   updateSettings,
 } from '@workspace/api-client-react';
+import { getStepSkillSnapshotForPhase, type StepSkillPhase } from '@/lib/step-skills';
 import type {
   ClarificationQuestion,
   Epic,
@@ -69,6 +70,23 @@ type CreateSessionInput = {
   knownConstraints?: string;
   labels: string[];
   rawInput: string;
+  initialArtifacts?:
+    | Partial<
+        Pick<
+          ProjectSession,
+          'clarificationQuestions' | 'prdSections' | 'epics' | 'stories'
+        >
+      >
+    | ((
+        sessionId: string,
+      ) => Partial<
+        Pick<
+          ProjectSession,
+          'clarificationQuestions' | 'prdSections' | 'epics' | 'stories'
+        >
+      >);
+  initialPhase?: Phase;
+  initialPhases?: ProjectSession['phases'];
 };
 
 type GenerationStepKey = keyof WorkflowGenerationState;
@@ -564,12 +582,38 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 
   const createSession = useCallback(
     async (input: CreateSessionInput) => {
-      const createdSession = await createSessionRequest(input);
+      const {
+        initialArtifacts,
+        initialPhase,
+        initialPhases,
+        ...createInput
+      } = input;
+      const createdSession = await createSessionRequest(createInput);
+      let nextSession = createdSession;
+
+      const artifactsPatch =
+        typeof initialArtifacts === 'function'
+          ? initialArtifacts(createdSession.id)
+          : initialArtifacts;
+
+      if (artifactsPatch && Object.keys(artifactsPatch).length > 0) {
+        nextSession = await updateSessionArtifacts(
+          createdSession.id,
+          artifactsPatch,
+        );
+      }
+
+      if (initialPhase || initialPhases) {
+        nextSession = await updateSession(createdSession.id, {
+          currentPhase: initialPhase ?? nextSession.currentPhase,
+          phases: initialPhases ?? nextSession.phases,
+        });
+      }
 
       setState((current) =>
         deriveState(
-          [...current.sessions, createdSession],
-          createdSession.id,
+          [...current.sessions, nextSession],
+          nextSession.id,
           current.settings,
           current.exportPackages,
           false,
@@ -578,7 +622,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         ),
       );
 
-      return createdSession;
+      return nextSession;
     },
     [],
   );
@@ -629,7 +673,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       );
 
       try {
-        const request = { force: true };
+        const stepSkill = getStepSkillSnapshotForPhase(step as StepSkillPhase);
+        const request = { force: true, stepSkill };
         const updatedSession =
           step === 'clarification'
             ? await generateClarificationRequest(sessionId, request)

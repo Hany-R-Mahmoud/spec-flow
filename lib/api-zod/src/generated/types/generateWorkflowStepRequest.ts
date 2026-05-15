@@ -5,7 +5,9 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { StepSkillSnapshot } from "./stepSkillSnapshot";
 
 export interface GenerateWorkflowStepRequest {
   force?: boolean;
+  stepSkill?: StepSkillSnapshot;
 }

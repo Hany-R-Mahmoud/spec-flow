@@ -11,9 +11,10 @@ import { StoriesPanel } from '@/components/workspace/StoriesPanel';
 import { QualityReviewPanel } from '@/components/workspace/QualityReviewPanel';
 import { DeveloperReviewPanel } from '@/components/workspace/DeveloperReviewPanel';
 import { ExportPanel } from '@/components/workspace/ExportPanel';
+import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import type { GuidanceItem } from '@/components/workspace/GuidancePanel';
-import type { ClarificationQuestion, PRDSection, Story } from '@/lib/types';
+import type { ClarificationQuestion, GenerationStepState, PRDSection, Story } from '@/lib/types';
 
 type GuidanceActions = {
   onGeneratePRD: () => void;
@@ -23,6 +24,13 @@ type GuidanceActions = {
   onSendToDevReview: () => void;
   onCompleteReview: () => void;
 };
+
+type GenerationPhase = 'clarification' | 'prd' | 'epics' | 'stories' | 'quality';
+
+function getSkillProvenance(promptVersion: string): string | null {
+  const match = promptVersion.match(/\+skill:(.+)$/);
+  return match?.[1] ?? null;
+}
 
 function buildGuidanceItems(
   phase: Phase,
@@ -430,6 +438,18 @@ export function WorkflowWorkspace() {
     onSendToDevReview: () => advancePhase('devReview'),
     onCompleteReview: handleCompleteReview,
   });
+  const activeGenerationStep: GenerationStepState | null =
+    activePhase === 'clarification' ||
+    activePhase === 'prd' ||
+    activePhase === 'epics' ||
+    activePhase === 'stories' ||
+    activePhase === 'quality'
+      ? session.generation[activePhase as GenerationPhase]
+      : null;
+  const skillProvenance = activeGenerationStep
+    ? getSkillProvenance(activeGenerationStep.promptVersion)
+    : null;
+
   return (
     <div className="flex flex-col h-full -m-4 sm:-m-6 md:-m-8">
       {/* Phase tracker */}
@@ -444,6 +464,22 @@ export function WorkflowWorkspace() {
         {/* Main content */}
         <div className="flex-1 overflow-y-auto p-6">
           <div className="max-w-4xl mx-auto">
+            {activeGenerationStep ? (
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-md border border-border bg-muted/30 px-3 py-2">
+                <div className="text-xs text-muted-foreground">
+                  Generation behavior
+                  <span className="ml-2 font-mono text-foreground">
+                    {activeGenerationStep.promptVersion}
+                  </span>
+                </div>
+                {skillProvenance ? (
+                  <Badge variant="outline" className="text-[10px]">
+                    skill {skillProvenance}
+                  </Badge>
+                ) : null}
+              </div>
+            ) : null}
+
             {activePhase === 'intake' && (
               <div className="text-center py-16">
                 <div className="text-sm font-medium text-foreground mb-2">Intake Complete</div>
