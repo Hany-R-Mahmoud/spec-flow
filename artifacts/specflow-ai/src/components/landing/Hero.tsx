@@ -168,9 +168,7 @@ export function HeroGeometric({
             animate="visible"
             className="mt-6 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg"
           >
-            Start a breakdown, shape the project input, and choose how the work moves:
-            AI-assisted with your own provider key, or manual mode for structured review
-            and export without model calls.
+            Start a breakdown, shape the project input, and move the work forward with BYOK or manual mode.
           </motion.p>
 
           <motion.div
@@ -208,6 +206,7 @@ export function HeroGeometric({
               "5-step guided workflow",
               "Review-first story output",
               "Export-ready handoff",
+              "BYOK supported",
             ].map((item) => (
               <span key={item} className="rounded-full border border-border bg-card/70 px-3 py-1.5 text-muted-foreground shadow-sm">
                 {item}

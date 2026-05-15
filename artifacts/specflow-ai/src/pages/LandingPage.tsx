@@ -20,6 +20,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ThemeModeToggle } from "@/components/shared/ThemeModeToggle";
 import { cn } from "@/lib/utils";
 
@@ -80,10 +81,10 @@ const trustChips = [
 ];
 
 const adoptionTabs = [
-  { label: "Why it breaks", active: true },
-  { label: "Why SpecFlow", active: false },
-  { label: "What changes", active: false },
-];
+  { value: "why-it-breaks", label: "Why it breaks" },
+  { value: "why-specflow", label: "Why SpecFlow" },
+  { value: "what-changes", label: "What changes" },
+] as const;
 
 const problemPoints = [
   {
@@ -276,6 +277,7 @@ export function LandingPage() {
 
       <main>
         <HeroGeometric
+          badge="BYOK supported"
           primaryHref={startHref}
           primaryLabel="Start a breakdown"
           secondaryHref={secondaryHeroHref}
@@ -305,6 +307,7 @@ export function LandingPage() {
                   ))}
                 </div>
               </div>
+
             </div>
           </div>
         </section>
@@ -317,84 +320,191 @@ export function LandingPage() {
                 title="Replace scattered notes with one guided product flow."
                 description="SpecFlow AI keeps the work moving from rough input to structured output without making the team fight the format."
               />
-              <div className="inline-flex flex-wrap rounded-full border border-border bg-card p-1 shadow-sm">
-                {adoptionTabs.map((tab) => (
-                  <span
-                    key={tab.label}
-                    className={cn(
-                      "rounded-full px-4 py-2 text-xs font-medium transition-colors",
-                      tab.active
-                        ? "bg-primary text-primary-foreground shadow-sm"
-                        : "text-muted-foreground hover:text-foreground",
-                    )}
-                  >
-                    {tab.label}
-                  </span>
-                ))}
-              </div>
             </div>
           </Reveal>
 
-          <div className="mt-12 grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
-            <Reveal>
-              <Card className="h-full overflow-hidden border-border/70 bg-card/80">
-                <div className="border-b border-border/70 bg-muted/30 px-6 py-4">
-                  <div className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                    Planning friction
-                  </div>
-                </div>
-                <CardContent className="space-y-4 p-6">
-                  {problemPoints.map((point) => {
-                    const Icon = point.icon;
-                    return (
-                      <div key={point.title} className="flex gap-4 rounded-2xl border border-border bg-background/70 p-4">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--color-primary-soft)] text-primary">
-                          <Icon className="h-4 w-4" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-semibold text-foreground">{point.title}</p>
-                          <p className="mt-1 text-sm leading-6 text-muted-foreground">{point.description}</p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </CardContent>
-              </Card>
-            </Reveal>
-
-            <Reveal delay={0.05}>
-              <Card className="relative overflow-hidden border-border/70 bg-gradient-to-br from-primary/[0.08] via-card to-card">
-                <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-sky-400 to-emerald-400" />
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-xl">What SpecFlow AI does instead</CardTitle>
-                  <CardDescription>One flow. One spec. Less cleanup later.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-5">
-                  <div className="rounded-3xl border border-border bg-background/80 p-5 shadow-sm">
-                    <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                      <BadgeCheck className="h-4 w-4 text-emerald-500" />
-                      Outcome
-                    </div>
-                    <p className="mt-3 text-base leading-7 text-muted-foreground">
-                      A guided breakdown turns the rough idea into structured stories, review context, and export-ready
-                      work that fits the team’s delivery process.
-                    </p>
-                  </div>
-
-                  <div className="grid gap-3 sm:grid-cols-3">
-                    {solutionPoints.map((point, index) => (
-                      <div key={point} className="rounded-2xl border border-border bg-background/75 p-4">
-                        <div className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                          0{index + 1}
-                        </div>
-                        <p className="mt-2 text-sm leading-6 text-foreground">{point}</p>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </Reveal>
+          <div className="mt-12 flex flex-wrap gap-2 text-xs">
+            {["5-step guided workflow", "Review-first story output", "Export-ready handoff", "BYOK supported"].map(
+              (item) => (
+                <span key={item} className="rounded-full border border-border bg-card/70 px-3 py-1.5 text-muted-foreground shadow-sm">
+                  {item}
+                </span>
+              ),
+            )}
           </div>
+
+          <Tabs defaultValue={adoptionTabs[0].value} className="mt-12 space-y-6">
+            <TabsList className="inline-flex h-auto flex-wrap rounded-full border border-border bg-card p-1 shadow-sm">
+              {adoptionTabs.map((tab) => (
+                <TabsTrigger
+                  key={tab.value}
+                  value={tab.value}
+                  className="rounded-full px-4 py-2 text-xs font-medium text-muted-foreground transition-colors data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
+                >
+                  {tab.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+
+            <TabsContent value="why-it-breaks" className="mt-0">
+              <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
+                <Reveal>
+                  <Card className="h-full overflow-hidden border-border/70 bg-card/80">
+                    <div className="border-b border-border/70 bg-muted/30 px-6 py-4">
+                      <div className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                        Planning friction
+                      </div>
+                    </div>
+                    <CardContent className="space-y-4 p-6">
+                      {problemPoints.map((point) => {
+                        const Icon = point.icon;
+                        return (
+                          <div key={point.title} className="flex gap-4 rounded-2xl border border-border bg-background/70 p-4">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--color-primary-soft)] text-primary">
+                              <Icon className="h-4 w-4" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-semibold text-foreground">{point.title}</p>
+                              <p className="mt-1 text-sm leading-6 text-muted-foreground">{point.description}</p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </CardContent>
+                  </Card>
+                </Reveal>
+
+                <Reveal delay={0.05}>
+                  <Card className="relative overflow-hidden border-border/70 bg-gradient-to-br from-primary/[0.08] via-card to-card">
+                    <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-sky-400 to-emerald-400" />
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-xl">What SpecFlow AI does instead</CardTitle>
+                      <CardDescription>One flow. One spec. Less cleanup later.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-5">
+                      <div className="rounded-3xl border border-border bg-background/80 p-5 shadow-sm">
+                        <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                          <BadgeCheck className="h-4 w-4 text-emerald-500" />
+                          Outcome
+                        </div>
+                        <p className="mt-3 text-base leading-7 text-muted-foreground">
+                          A guided breakdown turns the rough idea into structured stories, review context, and export-ready
+                          work that fits the team’s delivery process.
+                        </p>
+                      </div>
+
+                      <div className="grid gap-3 sm:grid-cols-3">
+                        {solutionPoints.map((point, index) => (
+                          <div key={point} className="rounded-2xl border border-border bg-background/75 p-4">
+                            <div className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                              0{index + 1}
+                            </div>
+                            <p className="mt-2 text-sm leading-6 text-foreground">{point}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Reveal>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="why-specflow" className="mt-0">
+              <div className="grid gap-6 lg:grid-cols-[1fr_0.95fr]">
+                <Reveal>
+                  <Card className="h-full overflow-hidden border-border/70 bg-card/80">
+                    <div className="border-b border-border/70 bg-muted/30 px-6 py-4">
+                      <div className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                        Why teams keep it
+                      </div>
+                    </div>
+                    <CardContent className="space-y-3 p-6">
+                      {solutionPoints.map((point, index) => (
+                        <div key={point} className="rounded-2xl border border-border bg-background/75 p-4">
+                          <div className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                            0{index + 1}
+                          </div>
+                          <p className="mt-2 text-sm leading-6 text-foreground">{point}</p>
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                </Reveal>
+
+                <Reveal delay={0.05}>
+                  <Card className="relative overflow-hidden border-border/70 bg-gradient-to-br from-primary/[0.08] via-card to-card">
+                    <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-sky-400 to-emerald-400" />
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-xl">What changes in practice</CardTitle>
+                      <CardDescription>The workflow stays readable from start to finish.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="grid gap-3">
+                      {steps.slice(0, 3).map((step, index) => (
+                        <div key={step.title} className="flex gap-4 rounded-2xl border border-border bg-background/75 p-4">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--color-primary-soft)] text-sm font-semibold text-primary">
+                            0{index + 1}
+                          </div>
+                          <div>
+                            <p className="text-sm font-semibold text-foreground">{step.title}</p>
+                            <p className="mt-1 text-sm leading-6 text-muted-foreground">{step.description}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                </Reveal>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="what-changes" className="mt-0">
+              <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
+                <Reveal>
+                  <Card className="h-full overflow-hidden border-border/70 bg-card/80">
+                    <div className="border-b border-border/70 bg-muted/30 px-6 py-4">
+                      <div className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                        What the workflow changes
+                      </div>
+                    </div>
+                    <CardContent className="space-y-4 p-6">
+                      {steps.map((step, index) => (
+                        <div key={step.title} className="flex gap-4 rounded-2xl border border-border bg-background/70 p-4">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--color-primary-soft)] text-sm font-semibold text-primary">
+                            0{index + 1}
+                          </div>
+                          <div>
+                            <p className="text-sm font-semibold text-foreground">{step.title}</p>
+                            <p className="mt-1 text-sm leading-6 text-muted-foreground">{step.description}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                </Reveal>
+
+                <Reveal delay={0.05}>
+                  <Card className="relative overflow-hidden border-border/70 bg-gradient-to-br from-primary/[0.08] via-card to-card">
+                    <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-sky-400 to-emerald-400" />
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-xl">What it enables</CardTitle>
+                      <CardDescription>Cleaner specs, less rewriting, and better delivery alignment.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      {["A single source of truth for the breakdown.", "Structured output that stays easy to review.", "Exports that need less cleanup before shipping."].map(
+                        (point, index) => (
+                          <div key={point} className="rounded-2xl border border-border bg-background/75 p-4">
+                            <div className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                              0{index + 1}
+                            </div>
+                            <p className="mt-2 text-sm leading-6 text-foreground">{point}</p>
+                          </div>
+                        ),
+                      )}
+                    </CardContent>
+                  </Card>
+                </Reveal>
+              </div>
+            </TabsContent>
+          </Tabs>
         </section>
 
         <section id="features" className="border-y border-border/70 bg-muted/20">

@@ -97,6 +97,12 @@ function AiProviderSection() {
 
   const status = provider?.status ?? 'not_configured';
   const configured = Boolean(provider?.configured);
+  const showValidationError =
+    status === 'validation_failed' && !configured && Boolean(provider?.validationError);
+  const apiKeyPlaceholder = configured ? '' : 'Paste provider API key';
+  const apiKeyHelper = configured
+    ? 'Provider key already saved. Enter a new key below to rotate it.'
+    : 'Use your own key for generation. The key is stored securely on the API server.';
 
   const saveProvider = async () => {
     try {
@@ -217,14 +223,24 @@ function AiProviderSection() {
           onChange={(event) => setApiKey(event.target.value)}
           className="h-8 text-xs font-mono"
           type="password"
-          placeholder={configured ? 'Enter a new key to rotate' : 'sk-...'}
+          placeholder={apiKeyPlaceholder}
           autoComplete="off"
+          aria-describedby="ai-provider-key-help"
           data-testid="input-ai-provider-key"
         />
+        <p id="ai-provider-key-help" className="mt-1 text-xs text-muted-foreground">
+          {apiKeyHelper}
+        </p>
       </div>
 
-      {provider?.validationError ? (
+      {showValidationError && provider?.validationError ? (
         <p className="text-xs text-[var(--color-danger)]">{provider.validationError}</p>
+      ) : null}
+
+      {configured ? (
+        <p className="text-xs text-muted-foreground">
+          Current key is active. Validation is only needed after you rotate it.
+        </p>
       ) : null}
 
       <div className="flex flex-wrap gap-2">
