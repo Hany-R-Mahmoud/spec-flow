@@ -14,12 +14,14 @@ import {
   getAiCapabilityFromConfig,
   getAiProviderConfigRow,
   getAiProviderSecret,
+  isAiProviderStorageMissingError,
   markAiProviderValidation,
   recordAuditEvent,
   saveAiProviderConfig,
   toPublicAiProviderConfig,
 } from "../ai/provider-config.js";
 import { AiProviderError, validateOpenAiKey } from "../ai/provider-client.js";
+import { IntegrationSecretSetupError } from "../lib/integration-secrets.js";
 import { consumeRateLimit } from "../lib/rate-limit.js";
 import { sendError, sendUnexpectedError } from "./error-response.js";
 import { requireAuthContext, requireMutableWorkspaceContext } from "./auth.js";
@@ -28,6 +30,20 @@ import { requireDatabase } from "./persistence.js";
 const router: IRouter = Router();
 const VALIDATION_LIMIT = 8;
 const VALIDATION_WINDOW_MS = 10 * 60 * 1000;
+
+function sendAiProviderRouteError(res: Parameters<typeof sendUnexpectedError>[0], error: unknown) {
+  if (error instanceof IntegrationSecretSetupError) {
+    sendError(res, 503, "AI secret encryption is not configured on the server.");
+    return;
+  }
+
+  if (isAiProviderStorageMissingError(error)) {
+    sendError(res, 503, "AI provider storage is not ready. Apply the latest database schema before saving provider credentials.");
+    return;
+  }
+
+  sendUnexpectedError(res, error);
+}
 
 async function validateSavedProvider(args: {
   workspaceId: string;
@@ -97,7 +113,7 @@ router.get("/ai/provider", async (req, res) => {
     const row = await getAiProviderConfigRow(db, auth.workspaceId);
     res.json(GetAiProviderResponse.parse(toPublicAiProviderConfig(row)));
   } catch (error) {
-    sendUnexpectedError(res, error);
+    sendAiProviderRouteError(res, error);
   }
 });
 
@@ -138,7 +154,7 @@ router.put("/ai/provider", async (req, res) => {
     });
     res.json(UpdateAiProviderResponse.parse(validated));
   } catch (error) {
-    sendUnexpectedError(res, error);
+    sendAiProviderRouteError(res, error);
   }
 });
 
@@ -164,7 +180,7 @@ router.delete("/ai/provider", async (req, res) => {
 
     res.json(DeleteAiProviderResponse.parse(toPublicAiProviderConfig(null)));
   } catch (error) {
-    sendUnexpectedError(res, error);
+    sendAiProviderRouteError(res, error);
   }
 });
 
@@ -186,7 +202,7 @@ router.post("/ai/provider/validate", async (req, res) => {
     });
     res.json(ValidateAiProviderResponse.parse(validated));
   } catch (error) {
-    sendUnexpectedError(res, error);
+    sendAiProviderRouteError(res, error);
   }
 });
 
@@ -227,7 +243,7 @@ router.post("/ai/provider/rotate", async (req, res) => {
     });
     res.json(RotateAiProviderResponse.parse(validated));
   } catch (error) {
-    sendUnexpectedError(res, error);
+    sendAiProviderRouteError(res, error);
   }
 });
 
@@ -243,7 +259,7 @@ router.get("/ai/capability", async (req, res) => {
     const config = toPublicAiProviderConfig(row);
     res.json(GetAiCapabilityResponse.parse(getAiCapabilityFromConfig(config)));
   } catch (error) {
-    sendUnexpectedError(res, error);
+    sendAiProviderRouteError(res, error);
   }
 });
 

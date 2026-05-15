@@ -19,7 +19,7 @@ import { eq, randomUUID } from "../routes/persistence.js";
 
 type Database = ReturnType<typeof getDb>;
 
-function isMissingTableError(error: unknown): boolean {
+export function isAiProviderStorageMissingError(error: unknown): boolean {
   if (!error || typeof error !== "object") {
     return false;
   }
@@ -124,7 +124,7 @@ export async function getAiProviderConfigRow(
 
     return row ?? null;
   } catch (error) {
-    if (isMissingTableError(error)) {
+    if (isAiProviderStorageMissingError(error)) {
       return null;
     }
 
@@ -248,7 +248,7 @@ export async function recordAuditEvent(args: {
       createdAt: new Date(),
     });
   } catch (error) {
-    if (isMissingTableError(error)) {
+    if (isAiProviderStorageMissingError(error)) {
       return;
     }
 
