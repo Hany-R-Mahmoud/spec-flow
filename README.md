@@ -61,9 +61,10 @@ SpecFlow AI helps a team move through one clear path:
 
 1. Start a breakdown from a rough idea, brief, or notes.
 2. Capture project input like goals, users, labels, and constraints.
-3. Generate structured stories and workflow artifacts.
-4. Review, refine, and tighten quality before handoff.
-5. Export clean output for downstream delivery workflows.
+3. Generate structured stories and workflow artifacts when BYOK AI is enabled.
+4. Keep the flow usable in manual mode when no provider key is configured.
+5. Review, refine, and tighten quality before handoff.
+6. Export clean output for downstream delivery workflows.
 
 ## Why It Exists
 
@@ -218,6 +219,8 @@ pnpm dev
 ```
 
 Open local app in browser after start.
+
+Fresh workspaces start empty until you create a breakdown. No demo project data is seeded into a new account.
 
 ### Other Targets
 

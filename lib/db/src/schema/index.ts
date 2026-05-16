@@ -413,6 +413,7 @@ export const aiProviderConfigTable = pgTable(
     workspaceId: text("workspace_id").notNull(),
     provider: text("provider").notNull(),
     model: text("model").notNull(),
+    baseUrl: text("base_url").notNull().default("https://api.openai.com/v1"),
     enabled: boolean("enabled").notNull().default(false),
     status: text("status").notNull().default("not_configured"),
     encryptedApiKey: text("encrypted_api_key"),

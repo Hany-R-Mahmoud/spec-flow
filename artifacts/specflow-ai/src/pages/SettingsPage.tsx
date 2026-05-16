@@ -11,8 +11,8 @@ import { KeyRound, ShieldCheck, Trash2, X } from 'lucide-react';
 import { useSessionStore } from '@/store/session-store';
 import { ThemeModeToggle } from '@/components/shared/ThemeModeToggle';
 import { StepSkillsSection } from '@/components/settings/StepSkillsSection';
+import { DEFAULT_AI_PROVIDER_BASE_URL, getAiProviderUiState } from '@/lib/ai-capability';
 import { STEP_SKILL_PHASES, type StepSkillPhase } from '@/lib/step-skills';
-import { getAiProviderUiState } from '@/lib/ai-capability';
 import { Badge } from '@/components/ui/badge';
 import {
   deleteAiProvider,
@@ -107,14 +107,16 @@ function AiProviderSection() {
   const providerUi = getAiProviderUiState(state.aiCapability);
   const [apiKey, setApiKey] = useState('');
   const [model, setModel] = useState(provider?.model ?? 'gpt-4o-mini');
+  const [baseUrl, setBaseUrl] = useState(provider?.baseUrl ?? DEFAULT_AI_PROVIDER_BASE_URL);
   const [showKeyInput, setShowKeyInput] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     setModel(provider?.model ?? 'gpt-4o-mini');
+    setBaseUrl(provider?.baseUrl ?? DEFAULT_AI_PROVIDER_BASE_URL);
     setApiKey('');
     setShowKeyInput(false);
-  }, [provider?.configured, provider?.id, provider?.keySuffix, provider?.model]);
+  }, [provider?.baseUrl, provider?.configured, provider?.id, provider?.keySuffix, provider?.model]);
 
   const status = provider?.status ?? 'not_configured';
   const configured = providerUi.isValidated;
@@ -123,12 +125,13 @@ function AiProviderSection() {
   const apiKeyPlaceholder = hasSavedKey ? 'Paste replacement provider API key' : 'Paste provider API key';
   const apiKeyHelper = hasSavedKey
     ? providerUi.helperText
-    : 'Use your own key for generation. The key is stored securely on the API server.';
+    : 'Use your own key and endpoint for generation. The key is stored securely on the API server.';
   const lastValidatedLabel = provider?.lastValidatedAt
     ? new Date(provider.lastValidatedAt).toLocaleString()
     : null;
   const providerStateLabel = providerUi.label;
   const providerStateTone = providerUi.badgeVariant;
+  const normalizedBaseUrl = baseUrl.trim() || DEFAULT_AI_PROVIDER_BASE_URL;
 
   useEffect(() => {
     void refreshAiCapability();
@@ -137,12 +140,29 @@ function AiProviderSection() {
   const saveProvider = async () => {
     try {
       setIsSaving(true);
-      await updateAiProvider({
-        provider: 'openai',
-        model,
-        apiKey,
-        enabled: true,
-      });
+      if (hasSavedKey && !showKeyInput) {
+        await updateAiProvider({
+          provider: 'openai',
+          model,
+          baseUrl: normalizedBaseUrl,
+          enabled: true,
+        });
+      } else if (hasSavedKey) {
+        await rotateAiProvider({
+          apiKey,
+          baseUrl: normalizedBaseUrl,
+        });
+        setShowKeyInput(false);
+        setApiKey('');
+      } else {
+        await updateAiProvider({
+          provider: 'openai',
+          model,
+          baseUrl: normalizedBaseUrl,
+          apiKey,
+          enabled: true,
+        });
+      }
       setApiKey('');
       await refreshAiCapability();
       toast({ title: 'AI provider saved', description: 'Provider key validated and stored securely.' });
@@ -182,7 +202,7 @@ function AiProviderSection() {
   const rotateProvider = async () => {
     try {
       setIsSaving(true);
-      await rotateAiProvider({ apiKey });
+      await rotateAiProvider({ apiKey, baseUrl: normalizedBaseUrl });
       setApiKey('');
       await refreshAiCapability();
       toast({ title: 'Provider key rotated', description: 'New key validated and stored securely.' });
@@ -246,10 +266,11 @@ function AiProviderSection() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="space-y-1">
               <div className="text-sm font-medium text-foreground">
-                {configured ? 'Validated provider key' : 'Saved provider key needs validation'}
+                {configured ? 'Validated provider' : 'Saved provider needs validation'}
               </div>
               <div className="text-xs text-muted-foreground">
                 {provider?.keySuffix ? `Key ending ${provider.keySuffix}` : 'Key stored securely'}
+                {provider?.baseUrl ? ` · endpoint ${provider.baseUrl}` : ''}
                 {lastValidatedLabel ? ` · validated ${lastValidatedLabel}` : ''}
               </div>
               <p className="text-xs text-muted-foreground">{providerUi.helperText}</p>
@@ -283,7 +304,7 @@ function AiProviderSection() {
         </div>
       ) : null}
 
-      <div className="grid gap-3 md:grid-cols-[1fr_1fr]">
+      <div className="grid gap-3 md:grid-cols-2">
         <div>
           <Label className="text-xs font-medium mb-1.5 block">Provider</Label>
           <Input value="OpenAI" disabled className="h-8 text-xs" />
@@ -297,6 +318,21 @@ function AiProviderSection() {
             placeholder="gpt-4o-mini"
             data-testid="input-ai-provider-model"
           />
+        </div>
+        <div className="md:col-span-2">
+          <Label className="text-xs font-medium mb-1.5 block">API Base URL</Label>
+          <Input
+            value={baseUrl}
+            onChange={(event) => setBaseUrl(event.target.value)}
+            className="h-8 text-xs font-mono"
+            type="url"
+            placeholder={DEFAULT_AI_PROVIDER_BASE_URL}
+            autoComplete="off"
+            data-testid="input-ai-provider-base-url"
+          />
+          <p className="mt-1 text-xs text-muted-foreground">
+            Used for validation and generation. Leave the default for OpenAI, or point to another OpenAI-compatible endpoint.
+          </p>
         </div>
       </div>
 
@@ -320,13 +356,25 @@ function AiProviderSection() {
       ) : null}
 
       <div className="flex flex-wrap gap-2">
+        {hasSavedKey && !showKeyInput ? (
+          <Button
+            type="button"
+            size="sm"
+            className="h-8 text-xs"
+            onClick={saveProvider}
+            disabled={isSaving || model.trim().length === 0 || normalizedBaseUrl.trim().length === 0}
+          >
+            <KeyRound className="mr-2 h-3.5 w-3.5" />
+            Save Changes
+          </Button>
+        ) : null}
         {!hasSavedKey || showKeyInput ? (
           <Button
             type="button"
             size="sm"
             className="h-8 text-xs"
             onClick={hasSavedKey ? rotateProvider : saveProvider}
-            disabled={isSaving || apiKey.trim().length < 8 || model.trim().length === 0}
+            disabled={isSaving || apiKey.trim().length < 8 || model.trim().length === 0 || normalizedBaseUrl.trim().length === 0}
           >
             <KeyRound className="mr-2 h-3.5 w-3.5" />
             {hasSavedKey ? 'Save Replacement' : 'Save Provider'}

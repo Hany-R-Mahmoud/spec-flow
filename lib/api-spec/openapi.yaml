@@ -1575,6 +1575,8 @@ components:
           type: string
         model:
           type: string
+        baseUrl:
+          type: string
         enabled:
           type: boolean
         status:
@@ -1607,6 +1609,7 @@ components:
         - id
         - provider
         - model
+        - baseUrl
         - enabled
         - status
         - configured
@@ -1639,20 +1642,26 @@ components:
         model:
           type: string
           minLength: 1
+        baseUrl:
+          type: string
+          minLength: 1
         apiKey:
           type: string
           minLength: 8
         enabled:
           type: boolean
-      required: [provider, model, apiKey, enabled]
+      required: [provider, model, baseUrl, enabled]
       additionalProperties: false
     RotateAiProviderRequest:
       type: object
       properties:
+        baseUrl:
+          type: string
+          minLength: 1
         apiKey:
           type: string
           minLength: 8
-      required: [apiKey]
+      required: [baseUrl, apiKey]
       additionalProperties: false
     UpdateIntegrationConfigRequest:
       type: object

@@ -7,6 +7,8 @@
  */
 
 export interface RotateAiProviderRequest {
+  /** @minLength 1 */
+  baseUrl: string;
   /** @minLength 8 */
   apiKey: string;
 }

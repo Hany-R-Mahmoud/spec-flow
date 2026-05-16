@@ -19,6 +19,28 @@ import { eq, randomUUID } from "../routes/persistence.js";
 
 type Database = ReturnType<typeof getDb>;
 
+export const DEFAULT_AI_PROVIDER_BASE_URL = "https://api.openai.com/v1";
+
+export function normalizeAiProviderBaseUrl(baseUrl: string | null | undefined): string {
+  const trimmed = baseUrl?.trim();
+  if (!trimmed) {
+    return DEFAULT_AI_PROVIDER_BASE_URL;
+  }
+
+  let url: URL;
+  try {
+    url = new URL(trimmed);
+  } catch {
+    throw new Error("AI provider base URL must be a valid absolute URL.");
+  }
+
+  if (url.protocol !== "https:" && url.protocol !== "http:") {
+    throw new Error("AI provider base URL must start with http:// or https://.");
+  }
+
+  return url.toString().replace(/\/+$/, "");
+}
+
 export function isAiProviderStorageMissingError(error: unknown): boolean {
   if (!error || typeof error !== "object") {
     return false;
@@ -44,13 +66,15 @@ export function isAiProviderStorageMissingError(error: unknown): boolean {
 export type AiProviderInput = {
   provider: "openai";
   model: string;
-  apiKey: string;
+  baseUrl?: string;
+  apiKey?: string;
   enabled: boolean;
 };
 
 export type AiProviderSecret = {
   provider: "openai";
   model: string;
+  baseUrl: string;
   apiKey: string;
   row: AiProviderConfigRow;
 };
@@ -60,6 +84,7 @@ export function defaultAiProviderConfig(): AiProviderConfig {
     id: null,
     provider: "openai",
     model: "gpt-4o-mini",
+    baseUrl: DEFAULT_AI_PROVIDER_BASE_URL,
     enabled: false,
     status: "not_configured",
     configured: false,
@@ -86,6 +111,7 @@ export function toPublicAiProviderConfig(
     id: row.id,
     provider: row.provider,
     model: row.model,
+    baseUrl: normalizeAiProviderBaseUrl(row.baseUrl),
     enabled: row.enabled,
     status,
     configured: Boolean(row.enabled && row.encryptedApiKey && status === "configured"),
@@ -108,7 +134,7 @@ export function getAiCapabilityFromConfig(
     provider: config,
     reason: canGenerate
       ? "AI generation is enabled for this workspace."
-      : "Connect and validate an AI provider key to enable generation and custom skills.",
+      : "Connect and validate an AI provider endpoint and key to enable generation and custom skills.",
   };
 }
 
@@ -150,6 +176,7 @@ export async function getAiProviderSecret(
   return {
     provider: "openai",
     model: row.model,
+    baseUrl: normalizeAiProviderBaseUrl(row.baseUrl),
     apiKey: decryptManagedSecret(row.encryptedApiKey),
     row,
   };
@@ -162,19 +189,33 @@ export async function saveAiProviderConfig(
 ): Promise<AiProviderConfigRow> {
   const existing = await getAiProviderConfigRow(db, workspaceId);
   const now = new Date();
+  const baseUrl = normalizeAiProviderBaseUrl(input.baseUrl ?? existing?.baseUrl);
+  const apiKey = input.apiKey?.trim();
+  const hasSecret = Boolean(existing?.encryptedApiKey && existing.keyVersion && existing.keyFingerprint && existing.keySuffix);
+  const encryptedApiKey = apiKey
+    ? encryptManagedSecret(apiKey)
+    : existing?.encryptedApiKey ?? null;
+  const keyVersion = apiKey ? getSecretKeyVersion() : existing?.keyVersion ?? null;
+  const keyFingerprint = apiKey ? getSecretFingerprint(apiKey) : existing?.keyFingerprint ?? null;
+  const keySuffix = apiKey ? getSecretSuffix(apiKey) : existing?.keySuffix ?? null;
   const values = {
     provider: input.provider,
     model: input.model.trim(),
+    baseUrl,
     enabled: input.enabled,
     status: "validating",
-    encryptedApiKey: encryptManagedSecret(input.apiKey),
-    keyVersion: getSecretKeyVersion(),
-    keyFingerprint: getSecretFingerprint(input.apiKey),
-    keySuffix: getSecretSuffix(input.apiKey),
+    encryptedApiKey,
+    keyVersion,
+    keyFingerprint,
+    keySuffix,
     lastValidatedAt: null,
     validationError: null,
     updatedAt: now,
   };
+
+  if (!encryptedApiKey && !hasSecret) {
+    throw new Error("AI provider key is required to save a new provider configuration.");
+  }
 
   if (existing) {
     const [updated] = await db

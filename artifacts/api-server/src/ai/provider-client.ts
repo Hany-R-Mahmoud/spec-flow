@@ -19,6 +19,32 @@ export class AiProviderError extends Error {
   }
 }
 
+const DEFAULT_AI_PROVIDER_BASE_URL = "https://api.openai.com/v1";
+
+function normalizeBaseUrl(baseUrl: string | null | undefined): string {
+  const trimmed = baseUrl?.trim();
+  if (!trimmed) {
+    return DEFAULT_AI_PROVIDER_BASE_URL;
+  }
+
+  let url: URL;
+  try {
+    url = new URL(trimmed);
+  } catch {
+    throw new AiProviderError("AI provider base URL must be a valid absolute URL.", "request");
+  }
+
+  if (url.protocol !== "https:" && url.protocol !== "http:") {
+    throw new AiProviderError("AI provider base URL must start with http:// or https://.", "request");
+  }
+
+  return url.toString().replace(/\/+$/, "");
+}
+
+function buildProviderUrl(baseUrl: string | null | undefined, path: string): string {
+  return new URL(path, `${normalizeBaseUrl(baseUrl)}/`).toString();
+}
+
 function classifyStatus(status: number): string {
   if (status === 401 || status === 403) {
     return "auth";
@@ -53,16 +79,14 @@ async function parseProviderError(response: Response): Promise<AiProviderError> 
 export async function validateOpenAiKey(args: {
   apiKey: string;
   model: string;
+  baseUrl?: string;
 }): Promise<void> {
-  const response = await fetch(
-    `https://api.openai.com/v1/models/${encodeURIComponent(args.model)}`,
-    {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${args.apiKey}`,
-      },
+  const response = await fetch(buildProviderUrl(args.baseUrl, `models/${encodeURIComponent(args.model)}`), {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${args.apiKey}`,
     },
-  );
+  });
 
   if (!response.ok) {
     throw await parseProviderError(response);
@@ -72,9 +96,10 @@ export async function validateOpenAiKey(args: {
 export async function runOpenAiJson(args: {
   apiKey: string;
   model: string;
+  baseUrl?: string;
   messages: LiveAiMessage[];
 }): Promise<LiveAiResult> {
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
+  const response = await fetch(buildProviderUrl(args.baseUrl, "chat/completions"), {
     method: "POST",
     headers: {
       Authorization: `Bearer ${args.apiKey}`,

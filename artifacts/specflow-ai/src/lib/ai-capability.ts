@@ -1,5 +1,7 @@
 import type { AiCapability } from '@/lib/types';
 
+export const DEFAULT_AI_PROVIDER_BASE_URL = 'https://api.openai.com/v1';
+
 export type AiProviderUiState = {
   isAiEnabled: boolean;
   hasSavedKey: boolean;
@@ -44,7 +46,7 @@ export function getAiProviderUiState(capability: AiCapability | null | undefined
       label: 'Validation failed',
       badgeVariant: 'destructive',
       statusText: provider.keySuffix ? `key ending ${provider.keySuffix}` : 'saved key failed validation',
-      helperText: provider.validationError ?? 'Validate the saved provider key before using AI generation.',
+      helperText: provider.validationError ?? 'Validate the saved provider endpoint and key before using AI generation.',
     };
   }
 
@@ -57,7 +59,7 @@ export function getAiProviderUiState(capability: AiCapability | null | undefined
       label: provider?.status === 'validating' ? 'Validating' : 'Key saved',
       badgeVariant: 'outline',
       statusText: provider?.keySuffix ? `not validated · key ending ${provider.keySuffix}` : 'saved key not validated',
-      helperText: 'Validate the saved provider key before AI generation and custom skills are enabled.',
+      helperText: 'Validate the saved provider endpoint and key before AI generation and custom skills are enabled.',
     };
   }
 
@@ -69,6 +71,6 @@ export function getAiProviderUiState(capability: AiCapability | null | undefined
     label: 'Manual mode',
     badgeVariant: 'outline',
     statusText: 'no saved provider key',
-    helperText: 'Add and validate a provider key to enable AI generation and custom step skills.',
+    helperText: 'Add and validate a provider key and endpoint to enable AI generation and custom step skills.',
   };
 }

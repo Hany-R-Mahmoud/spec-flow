@@ -521,6 +521,7 @@ async function runGeneration(
     const liveResult = await runOpenAiJson({
       apiKey: providerSecret.apiKey,
       model: providerSecret.model,
+      baseUrl: providerSecret.baseUrl,
       messages: [
         {
           role: "system",
@@ -794,6 +795,7 @@ router.post("/sessions/:sessionId/guidance", async (req, res) => {
     const liveResult = await runOpenAiJson({
       apiKey: providerSecret.apiKey,
       model: providerSecret.model,
+      baseUrl: providerSecret.baseUrl,
       messages: [
         {
           role: "system",

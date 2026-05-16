@@ -11,6 +11,7 @@ export interface AiProviderConfig {
   id: string | null;
   provider: string;
   model: string;
+  baseUrl: string;
   enabled: boolean;
   status: AiProviderStatus;
   configured: boolean;

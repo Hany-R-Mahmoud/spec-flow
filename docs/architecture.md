@@ -27,13 +27,17 @@ schema, and server types aligned.
 1. The browser enters through `artifacts/specflow-ai/src/App.tsx`.
 2. Auth gates the app and the workspace shell loads the current session.
 3. Workflow actions call the API through the generated client.
-4. AI generation first checks workspace BYOK capability.
-5. In manual mode, generation stays disabled and artifacts can still be edited.
-6. In AI-enabled mode, the API decrypts the workspace provider key server-side,
-   calls the provider, validates output, persists artifacts, and updates
-   generation state.
-7. Shared schema and client packages keep the API and UI contract aligned.
-8. Exports read persisted state instead of rebuilding from only live UI state.
+4. AI generation first checks workspace BYOK capability from the API capability
+   endpoint.
+5. In manual mode, the workflow still continues, but generation falls back to
+   manual behavior and artifacts remain editable.
+6. In AI-enabled mode, the API decrypts the workspace provider key and
+   endpoint server-side, calls the provider, validates output, persists
+   artifacts, and updates generation state.
+7. The UI reads one shared capability model for labels, button states, and
+   skill edit access instead of re-deriving provider truth ad hoc.
+8. Shared schema and client packages keep the API and UI contract aligned.
+9. Exports read persisted state instead of rebuilding from only live UI state.
 
 ## External Services
 
@@ -65,5 +69,9 @@ flowchart TB
   `lib/db/src/schema/index.ts` are the highest-risk coupling points
 - AI provider keys must stay server-only and must never be returned to browser
   payloads, logs, session artifacts, or workspace settings
+- Provider endpoint changes are stored alongside the key so validation and
+  generation always use the same workspace capability truth
+- Empty workspaces should not be seeded with demo projects or fixed IDs; the
+  UI should handle the empty-state path directly
 - Auth, workspace IDs, and persistence are tightly linked across UI and API
 - `graphify-out/` is useful for navigation but is generated, not source

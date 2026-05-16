@@ -5,6 +5,9 @@
 SpecFlow AI turns rough product input into structured breakdowns, stories,
 review output, and export-ready handoff.
 
+Fresh workspaces start empty. No demo project/session rows are created for a
+new account.
+
 ## Users / Use Cases
 
 - Product managers shaping vague ideas into usable delivery artifacts
@@ -28,6 +31,10 @@ review output, and export-ready handoff.
 - Clerk handles authentication
 - Supabase Postgres backs persistence
 - Vercel hosts the deployed app and runtime routing
+- BYOK AI is optional. When no validated provider exists, the app stays in
+  manual mode and still supports editing and handoff
+- BYOK provider state includes both the saved API key and the provider base URL
+  so validation and generation use one shared workspace configuration
 - Jira and GitHub exports are present in the product flow, but the exact
   production configuration is `Unknown / verify`
 

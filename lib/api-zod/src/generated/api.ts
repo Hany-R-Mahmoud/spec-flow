@@ -3160,6 +3160,7 @@ export const GetAiProviderResponse = zod.object({
   id: zod.union([zod.string(), zod.null()]),
   provider: zod.string(),
   model: zod.string(),
+  baseUrl: zod.string(),
   enabled: zod.boolean(),
   status: zod.enum([
     "not_configured",
@@ -3185,7 +3186,8 @@ export const updateAiProviderBodyApiKeyMin = 8;
 export const UpdateAiProviderBody = zod.object({
   provider: zod.enum(["openai"]),
   model: zod.string().min(1),
-  apiKey: zod.string().min(updateAiProviderBodyApiKeyMin),
+  baseUrl: zod.string().min(1),
+  apiKey: zod.string().min(updateAiProviderBodyApiKeyMin).optional(),
   enabled: zod.boolean(),
 });
 
@@ -3193,6 +3195,7 @@ export const UpdateAiProviderResponse = zod.object({
   id: zod.union([zod.string(), zod.null()]),
   provider: zod.string(),
   model: zod.string(),
+  baseUrl: zod.string(),
   enabled: zod.boolean(),
   status: zod.enum([
     "not_configured",
@@ -3216,6 +3219,7 @@ export const DeleteAiProviderResponse = zod.object({
   id: zod.union([zod.string(), zod.null()]),
   provider: zod.string(),
   model: zod.string(),
+  baseUrl: zod.string(),
   enabled: zod.boolean(),
   status: zod.enum([
     "not_configured",
@@ -3239,6 +3243,7 @@ export const ValidateAiProviderResponse = zod.object({
   id: zod.union([zod.string(), zod.null()]),
   provider: zod.string(),
   model: zod.string(),
+  baseUrl: zod.string(),
   enabled: zod.boolean(),
   status: zod.enum([
     "not_configured",
@@ -3258,9 +3263,11 @@ export const ValidateAiProviderResponse = zod.object({
 /**
  * @summary Rotate AI provider credentials
  */
+
 export const rotateAiProviderBodyApiKeyMin = 8;
 
 export const RotateAiProviderBody = zod.object({
+  baseUrl: zod.string().min(1),
   apiKey: zod.string().min(rotateAiProviderBodyApiKeyMin),
 });
 
@@ -3268,6 +3275,7 @@ export const RotateAiProviderResponse = zod.object({
   id: zod.union([zod.string(), zod.null()]),
   provider: zod.string(),
   model: zod.string(),
+  baseUrl: zod.string(),
   enabled: zod.boolean(),
   status: zod.enum([
     "not_configured",
@@ -3295,6 +3303,7 @@ export const GetAiCapabilityResponse = zod.object({
     id: zod.union([zod.string(), zod.null()]),
     provider: zod.string(),
     model: zod.string(),
+    baseUrl: zod.string(),
     enabled: zod.boolean(),
     status: zod.enum([
       "not_configured",

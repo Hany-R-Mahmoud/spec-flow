@@ -13,12 +13,13 @@
 
 1. User opens a workspace from the app shell
 2. UI checks `/api/ai/capability`
-3. If no provider key is configured, generation controls explain manual mode
-   and route admins to Settings
+3. If no validated provider exists, the flow stays in manual mode and the UI
+   keeps the workflow moving
 4. If AI is enabled, React client sends the selected step-skill snapshot with
    the generation request
-5. API decrypts the workspace provider key server-side, calls the provider,
-   validates JSON output, updates generation state, and persists artifacts
+5. API refreshes provider capability server-side, decrypts the workspace key,
+   calls the provider, validates JSON output, updates generation state, and
+   persists artifacts
 6. Invalid provider output preserves the previous trusted artifacts and marks
    the generation step failed
 7. Shared schema types keep response shape stable
@@ -46,12 +47,14 @@
 ## Flow: BYOK AI Provider
 
 1. Workspace admin opens Settings
-2. Admin enters provider, model, and API key
-3. API encrypts the key, stores only metadata and ciphertext, validates the key,
-   and records audit events
-4. Browser receives only status, provider, model, key suffix/fingerprint, and
-   timestamps
-5. Rotate, validate, and remove actions never return plaintext key material
+2. Admin enters provider, model, API base URL, and API key
+3. API encrypts the key, stores the endpoint plus metadata and ciphertext,
+   validates the saved provider against that endpoint, and records audit events
+4. Browser receives only status, provider, model, endpoint, key suffix/fingerprint,
+   and timestamps
+5. Settings, workflow badges, and step-skill access all reflect the same
+   capability truth from the API
+6. Rotate, validate, and remove actions never return plaintext key material
 
 ## Flow: Export History
 
@@ -65,6 +68,7 @@
 
 - `ensureWorkspaceSchema()` in `artifacts/api-server/src/server.ts` adds missing
   `workspace_id` columns on startup
+- Empty workspaces are initialized without demo projects or fixed demo IDs
 - OpenAPI code generation keeps the shared client and Zod packages aligned
 - AI provider keys require `AI_SECRET_ENCRYPTION_KEY` or
   `INTEGRATION_SECRET_ENCRYPTION_KEY` on the API server

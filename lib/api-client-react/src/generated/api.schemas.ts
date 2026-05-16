@@ -461,6 +461,7 @@ export interface AiProviderConfig {
   id: string | null;
   provider: string;
   model: string;
+  baseUrl: string;
   enabled: boolean;
   status: AiProviderStatus;
   configured: boolean;
@@ -498,12 +499,16 @@ export interface UpdateAiProviderRequest {
   provider: UpdateAiProviderRequestProvider;
   /** @minLength 1 */
   model: string;
+  /** @minLength 1 */
+  baseUrl: string;
   /** @minLength 8 */
-  apiKey: string;
+  apiKey?: string;
   enabled: boolean;
 }
 
 export interface RotateAiProviderRequest {
+  /** @minLength 1 */
+  baseUrl: string;
   /** @minLength 8 */
   apiKey: string;
 }

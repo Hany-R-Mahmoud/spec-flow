@@ -16,6 +16,7 @@ import {
   getAiProviderSecret,
   isAiProviderStorageMissingError,
   markAiProviderValidation,
+  normalizeAiProviderBaseUrl,
   recordAuditEvent,
   saveAiProviderConfig,
   toPublicAiProviderConfig,
@@ -65,7 +66,7 @@ async function validateSavedProvider(args: {
   }
 
   try {
-    await validateOpenAiKey({ apiKey: secret.apiKey, model: secret.model });
+    await validateOpenAiKey({ apiKey: secret.apiKey, model: secret.model, baseUrl: secret.baseUrl });
     const row = await markAiProviderValidation(db, args.workspaceId, "configured", null);
     await recordAuditEvent({
       db,
@@ -74,7 +75,7 @@ async function validateSavedProvider(args: {
       eventType: "ai_provider.validate.success",
       targetType: "ai_provider_config",
       targetId: secret.row.id,
-      metadata: { provider: secret.provider, model: secret.model },
+      metadata: { provider: secret.provider, model: secret.model, baseUrl: secret.baseUrl },
     });
     return toPublicAiProviderConfig(row);
   } catch (error) {
@@ -131,9 +132,28 @@ router.put("/ai/provider", async (req, res) => {
     }
 
     const input = UpdateAiProviderBody.parse(req.body);
+    const existing = await getAiProviderConfigRow(db, auth.workspaceId);
+    if (!input.apiKey?.trim() && !existing?.encryptedApiKey) {
+      sendError(res, 400, "AI provider key is required to save a new provider configuration.");
+      return;
+    }
+
+    let baseUrl: string;
+    try {
+      baseUrl = normalizeAiProviderBaseUrl(input.baseUrl ?? existing?.baseUrl);
+    } catch (error) {
+      sendError(
+        res,
+        400,
+        error instanceof Error ? error.message : "AI provider base URL is invalid.",
+      );
+      return;
+    }
+
     const row = await saveAiProviderConfig(db, auth.workspaceId, {
       provider: input.provider,
       model: input.model,
+      baseUrl,
       apiKey: input.apiKey,
       enabled: input.enabled,
     });
@@ -145,7 +165,7 @@ router.put("/ai/provider", async (req, res) => {
       eventType: "ai_provider.save",
       targetType: "ai_provider_config",
       targetId: row.id,
-      metadata: { provider: row.provider, model: row.model, enabled: row.enabled },
+      metadata: { provider: row.provider, model: row.model, baseUrl: row.baseUrl, enabled: row.enabled },
     });
 
     const validated = await validateSavedProvider({
@@ -221,9 +241,22 @@ router.post("/ai/provider/rotate", async (req, res) => {
 
     const input = RotateAiProviderBody.parse(req.body);
     const existing = await getAiProviderConfigRow(db, auth.workspaceId);
+    let baseUrl: string;
+    try {
+      baseUrl = normalizeAiProviderBaseUrl(input.baseUrl ?? existing?.baseUrl);
+    } catch (error) {
+      sendError(
+        res,
+        400,
+        error instanceof Error ? error.message : "AI provider base URL is invalid.",
+      );
+      return;
+    }
+
     const row = await saveAiProviderConfig(db, auth.workspaceId, {
       provider: "openai",
       model: existing?.model ?? "gpt-4o-mini",
+      baseUrl,
       apiKey: input.apiKey,
       enabled: existing?.enabled ?? true,
     });
@@ -234,7 +267,7 @@ router.post("/ai/provider/rotate", async (req, res) => {
       eventType: "ai_provider.rotate",
       targetType: "ai_provider_config",
       targetId: row.id,
-      metadata: { provider: row.provider, model: row.model },
+      metadata: { provider: row.provider, model: row.model, baseUrl: row.baseUrl },
     });
 
     const validated = await validateSavedProvider({

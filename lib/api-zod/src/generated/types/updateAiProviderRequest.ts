@@ -11,7 +11,9 @@ export interface UpdateAiProviderRequest {
   provider: UpdateAiProviderRequestProvider;
   /** @minLength 1 */
   model: string;
+  /** @minLength 1 */
+  baseUrl: string;
   /** @minLength 8 */
-  apiKey: string;
+  apiKey?: string;
   enabled: boolean;
 }
