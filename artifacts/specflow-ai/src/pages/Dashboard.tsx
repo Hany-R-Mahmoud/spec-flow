@@ -1,10 +1,12 @@
+import { useState } from 'react';
 import { useLocation } from 'wouter';
 import { useSessionStore } from '@/store/session-store';
 import { PhaseStatusBadge, ReviewStatusBadge } from '@/components/shared/StatusBadge';
 import { cn } from '@/lib/utils';
-import { Plus, TrendingUp, Clock, FileDown, ArrowRight } from 'lucide-react';
+import { Plus, TrendingUp, Clock, FileDown, ArrowRight, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Phase } from '@/lib/types';
+import { useToast } from '@/hooks/use-toast';
 
 const PHASE_ORDER: Phase[] = ['intake', 'clarification', 'prd', 'epics', 'stories', 'quality', 'devReview', 'export'];
 
@@ -14,8 +16,23 @@ function phaseProgress(currentPhase: Phase): number {
 }
 
 export function Dashboard() {
-  const { state } = useSessionStore();
+  const { state, removeSession } = useSessionStore();
   const [, setLocation] = useLocation();
+  const { toast } = useToast();
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDelete = async (sessionId: string) => {
+    setDeleting(true);
+    const ok = await removeSession(sessionId);
+    setDeleting(false);
+    setConfirmDeleteId(null);
+    if (ok) {
+      toast({ title: 'Deleted', description: 'Breakdown removed successfully.' });
+    } else {
+      toast({ title: 'Delete failed', description: 'Could not delete the session.' });
+    }
+  };
 
   const { sessions, stories, exportPackages, isLoading, error } = state;
 
@@ -97,15 +114,15 @@ export function Dashboard() {
           <caption className="sr-only">Active breakdown sessions with phase, progress, readiness, status, and last updated time.</caption>
           <thead>
             <tr className="bg-muted border-b border-border">
-              {['Session Name', 'Phase', 'Progress', 'Readiness', 'Status', 'Updated'].map(h => (
-                <th key={h} scope="col" className="text-left px-4 py-2 text-xs font-semibold text-muted-foreground">{h}</th>
+              {['Session Name', 'Phase', 'Progress', 'Readiness', 'Status', 'Updated', ''].map(h => (
+                <th key={h || 'actions'} scope="col" className="text-left px-4 py-2 text-xs font-semibold text-muted-foreground">{h}</th>
               ))}
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
             {sessions.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-10 text-center text-xs text-muted-foreground">
+                <td colSpan={7} className="px-4 py-10 text-center text-xs text-muted-foreground">
                   No active breakdowns yet. Start a new breakdown to create your first workflow session.
                 </td>
               </tr>
@@ -157,6 +174,16 @@ export function Dashboard() {
                     <PhaseStatusBadge status={session.phases[session.currentPhase]} />
                   </td>
                   <td className="px-4 py-3 text-xs text-muted-foreground">{updatedAgo}</td>
+                  <td className="px-4 py-3">
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(session.id); }}
+                      className="text-muted-foreground hover:text-[var(--color-danger)] transition-colors p-1 rounded"
+                      aria-label={`Delete ${session.name}`}
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </td>
                 </tr>
               );
             })}
@@ -220,6 +247,26 @@ export function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* Delete confirmation dialog */}
+      {confirmDeleteId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setConfirmDeleteId(null)}>
+          <div className="bg-card border border-border rounded-md p-6 max-w-sm w-full mx-4 shadow-lg" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-sm font-semibold text-foreground">Delete Session</h3>
+            <p className="mt-2 text-xs text-muted-foreground">
+              This will permanently delete this breakdown and all its artifacts (PRD, epics, stories). This cannot be undone.
+            </p>
+            <div className="mt-4 flex items-center justify-end gap-2">
+              <Button size="sm" variant="outline" onClick={() => setConfirmDeleteId(null)} disabled={deleting}>
+                Cancel
+              </Button>
+              <Button size="sm" variant="destructive" loading={deleting} onClick={() => void handleDelete(confirmDeleteId)}>
+                {deleting ? 'Deleting…' : 'Delete'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

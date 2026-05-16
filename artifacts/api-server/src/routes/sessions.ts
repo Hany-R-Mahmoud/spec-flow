@@ -221,4 +221,31 @@ router.patch("/sessions/:sessionId/artifacts", async (req, res) => {
   }
 });
 
+router.delete("/sessions/:sessionId", async (req, res) => {
+  try {
+    const db = requireDatabase();
+    const auth = requireAuthContext(req, res);
+    if (!auth) {
+      return;
+    }
+
+    const [deleted] = await db
+      .delete(sessionsTable)
+      .where(and(
+        eq(sessionsTable.id, req.params.sessionId),
+        eq(sessionsTable.workspaceId, auth.workspaceId),
+      ))
+      .returning({ id: sessionsTable.id });
+
+    if (!deleted) {
+      sendError(res, 404, "Session not found.");
+      return;
+    }
+
+    res.json({ id: deleted.id, deleted: true });
+  } catch (error) {
+    sendUnexpectedError(res, error);
+  }
+});
+
 export default router;

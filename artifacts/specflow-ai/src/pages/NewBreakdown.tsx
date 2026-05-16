@@ -452,11 +452,14 @@ export function NewBreakdown() {
                 type="submit"
                 className="w-full"
                 size="sm"
+                loading={form.formState.isSubmitting}
                 data-testid="button-start-breakdown"
               >
-                {reuseDetectedContent && adaptiveAnalysis.hasDetectedContent
-                  ? `Start at ${adaptiveAnalysis.recommendedPhase}`
-                  : 'Start Guided Breakdown'}
+                {form.formState.isSubmitting
+                  ? 'Creating…'
+                  : reuseDetectedContent && adaptiveAnalysis.hasDetectedContent
+                    ? `Start at ${adaptiveAnalysis.recommendedPhase}`
+                    : 'Start Guided Breakdown'}
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
 

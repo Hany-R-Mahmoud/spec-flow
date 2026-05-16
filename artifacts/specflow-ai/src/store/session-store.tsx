@@ -10,6 +10,7 @@ import {
 } from 'react';
 import {
   createSession as createSessionRequest,
+  deleteSession as deleteSessionRequest,
   generateClarification as generateClarificationRequest,
   generateEpics as generateEpicsRequest,
   generatePrd as generatePrdRequest,
@@ -249,6 +250,7 @@ const SessionContext = createContext<{
     step: GenerationStepKey,
   ) => Promise<ProjectSession | null>;
   cancelGeneration: () => void;
+  removeSession: (sessionId: string) => Promise<boolean>;
   reload: () => Promise<void>;
 } | undefined>(undefined);
 
@@ -874,6 +876,27 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     [state.sessions, state.aiCapability, cancelGeneration],
   );
 
+  const removeSession = useCallback(async (sessionId: string) => {
+    try {
+      await deleteSessionRequest(sessionId);
+      setState((current) =>
+        deriveState(
+          current.sessions.filter((s) => s.id !== sessionId),
+          current.activeSessionId === sessionId ? null : current.activeSessionId,
+          current.settings,
+          current.aiCapability,
+          current.exportPackages,
+          false,
+          null,
+          'api',
+        ),
+      );
+      return true;
+    } catch {
+      return false;
+    }
+  }, []);
+
   const value = useMemo(
     () => ({
       state,
@@ -887,6 +910,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       refreshAiCapability,
       runGeneration,
       cancelGeneration,
+      removeSession,
       reload: load,
     }),
     [
@@ -901,6 +925,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       refreshAiCapability,
       runGeneration,
       cancelGeneration,
+      removeSession,
       load,
     ],
   );
