@@ -20,8 +20,8 @@ export class AiProviderError extends Error {
 }
 
 const DEFAULT_AI_PROVIDER_BASE_URL = "https://api.openai.com/v1";
-const DEFAULT_AI_PROVIDER_TIMEOUT_MS = 45_000;
-const DEFAULT_AI_PROVIDER_VALIDATION_TIMEOUT_MS = 10_000;
+const DEFAULT_AI_PROVIDER_TIMEOUT_MS = 180_000;
+const DEFAULT_AI_PROVIDER_VALIDATION_TIMEOUT_MS = 60_000;
 
 function readTimeoutMs(envName: string, fallback: number): number {
   const raw = process.env[envName];
