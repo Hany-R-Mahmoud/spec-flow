@@ -1,12 +1,12 @@
 # Graph Report - spec-flow  (2026-05-16)
 
 ## Corpus Check
-- 268 files · ~227,127 words
+- 268 files · ~227,398 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 694 nodes · 843 edges · 35 communities detected
-- Extraction: 87% EXTRACTED · 13% INFERRED · 0% AMBIGUOUS · INFERRED: 108 edges (avg confidence: 0.8)
+- 701 nodes · 855 edges · 35 communities detected
+- Extraction: 87% EXTRACTED · 13% INFERRED · 0% AMBIGUOUS · INFERRED: 110 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Community Hubs (Navigation)
@@ -48,7 +48,7 @@
 
 ## God Nodes (most connected - your core abstractions)
 1. `customFetch()` - 40 edges
-2. `runGeneration()` - 23 edges
+2. `runGeneration()` - 24 edges
 3. `toast()` - 18 edges
 4. `assertWorkspaceId()` - 13 edges
 5. `dispatch()` - 9 edges
@@ -74,27 +74,27 @@
 
 ### Community 0 - "Community 0"
 Cohesion: 0.03
-Nodes (132): createExportPackage(), createProject(), createSession(), exportToGitHub(), exportToJira(), generateClarification(), generateEpics(), generatePrd() (+124 more)
+Nodes (126): createExportPackage(), createProject(), createSession(), exportToGitHub(), exportToJira(), generateClarification(), generateEpics(), generatePrd() (+118 more)
 
 ### Community 1 - "Community 1"
-Cohesion: 0.07
-Nodes (42): getGenerationRuntime(), buildInputSnapshotHash(), getOutputContract(), markGenerationState(), parseGuidanceResponse(), parseProviderJson(), resetDownstream(), resetStep() (+34 more)
+Cohesion: 0.06
+Nodes (46): getGenerationRuntime(), buildInputSnapshotHash(), GenerationRouteError, getGenerationErrorStatus(), getOutputContract(), hasZodIssues(), markGenerationState(), normalizeProviderJsonContent() (+38 more)
 
 ### Community 2 - "Community 2"
-Cohesion: 0.07
-Nodes (22): deleteAiProvider(), getDeleteAiProviderUrl(), getValidateAiProviderUrl(), validateAiProvider(), addToRemoveQueue(), dispatch(), genId(), reducer() (+14 more)
+Cohesion: 0.06
+Nodes (28): deleteAiProvider(), getDeleteAiProviderUrl(), getRotateAiProviderUrl(), getUpdateAiProviderUrl(), getValidateAiProviderUrl(), rotateAiProvider(), updateAiProvider(), validateAiProvider() (+20 more)
 
 ### Community 3 - "Community 3"
 Cohesion: 0.15
 Nodes (19): ApiError, applyBaseUrl(), buildErrorMessage(), getMediaType(), getStringField(), hasNoBody(), inferResponseType(), isJsonMediaType() (+11 more)
 
 ### Community 4 - "Community 4"
-Cohesion: 0.11
+Cohesion: 0.1
 Nodes (12): getAiProviderUiState(), emptyState(), getStepSkillSnapshotForPhase(), parseStoredState(), useStepSkills(), buildGuidanceItems(), handleSendStoryToReview(), handleSplitStory() (+4 more)
 
 ### Community 5 - "Community 5"
-Cohesion: 0.19
-Nodes (7): sendAiProviderRouteError(), getWorkspaceAuthContext(), requireAuthContext(), requireMutableWorkspaceContext(), hasZodIssues(), sendError(), sendUnexpectedError()
+Cohesion: 0.21
+Nodes (8): sendAiProviderRouteError(), getWorkspaceAuthContext(), requireAuthContext(), requireMutableWorkspaceContext(), hasZodIssues(), sendError(), sendUnexpectedError(), sendGenerationError()
 
 ### Community 6 - "Community 6"
 Cohesion: 0.24
@@ -254,11 +254,11 @@ Nodes (2): appPath(), joinAppPath()
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `runGeneration()` connect `Community 1` to `Community 0`, `Community 9`, `Community 10`, `Community 7`?**
-  _High betweenness centrality (0.144) - this node is a cross-community bridge._
+  _High betweenness centrality (0.148) - this node is a cross-community bridge._
 - **Why does `customFetch()` connect `Community 0` to `Community 2`, `Community 3`, `Community 4`?**
-  _High betweenness centrality (0.087) - this node is a cross-community bridge._
+  _High betweenness centrality (0.088) - this node is a cross-community bridge._
 - **Why does `generateEpics()` connect `Community 0` to `Community 1`?**
-  _High betweenness centrality (0.067) - this node is a cross-community bridge._
+  _High betweenness centrality (0.069) - this node is a cross-community bridge._
 - **Are the 31 inferred relationships involving `customFetch()` (e.g. with `getWorkflowGuidance()` and `healthCheck()`) actually correct?**
   _`customFetch()` has 31 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 16 inferred relationships involving `runGeneration()` (e.g. with `requireDatabase()` and `getSessionArtifactsRecord()`) actually correct?**

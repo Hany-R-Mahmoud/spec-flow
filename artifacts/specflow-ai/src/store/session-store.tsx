@@ -779,7 +779,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
           ),
         );
 
-        return null;
+        throw new Error(message);
       }
     },
     [state.sessions],

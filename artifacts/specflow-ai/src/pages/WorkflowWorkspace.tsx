@@ -40,6 +40,23 @@ const generationLoadingLabels: Record<GenerationPhase, string> = {
   quality: 'Refreshing quality scores...',
 };
 
+const generationFailureLabels: Record<GenerationPhase, string> = {
+  clarification: 'clarification questions',
+  prd: 'PRD sections',
+  epics: 'epics',
+  stories: 'user stories',
+  quality: 'quality scores',
+};
+
+function formatGenerationFailure(error: unknown): string {
+  const fallback = 'Generation failed before valid output could be saved.';
+  if (!(error instanceof Error)) {
+    return fallback;
+  }
+
+  return error.message.replace(/^HTTP \d+ [^:]+:\s*/, '').trim() || fallback;
+}
+
 function getSkillProvenance(promptVersion: string): string | null {
   const match = promptVersion.match(/\+skill:(.+)$/);
   return match?.[1] ?? null;
@@ -534,6 +551,11 @@ export function WorkflowWorkspace() {
       toast({
         title: step === 'quality' ? 'Quality refreshed' : 'Generation complete',
         description: 'Workflow output generated and saved.',
+      });
+    } catch (error) {
+      toast({
+        title: `Could not generate ${generationFailureLabels[step]}`,
+        description: formatGenerationFailure(error),
       });
     } finally {
       setPendingGenerationStep((current) => (current === step ? null : current));

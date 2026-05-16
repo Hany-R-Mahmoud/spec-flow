@@ -75,6 +75,16 @@ type GuidanceItem = {
   actionKey?: GuidanceActionKey | null;
 };
 
+class GenerationRouteError extends Error {
+  constructor(
+    message: string,
+    public readonly status: number,
+  ) {
+    super(message);
+    this.name = "GenerationRouteError";
+  }
+}
+
 type GuidanceRequestBody = {
   phase: GuidancePhase;
   session?: {
@@ -264,12 +274,33 @@ function buildFlowSummary(row: NonNullable<Awaited<ReturnType<typeof getSessionA
 }
 
 function parseProviderJson(content: string): Record<string, unknown> {
-  const parsed = JSON.parse(content) as unknown;
+  const normalized = normalizeProviderJsonContent(content);
+  const parsed = JSON.parse(normalized) as unknown;
   if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
     throw new Error("AI provider returned JSON with an invalid shape.");
   }
 
   return parsed as Record<string, unknown>;
+}
+
+function normalizeProviderJsonContent(content: string): string {
+  const trimmed = content.trim();
+  const fencedMatch = trimmed.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/i);
+  if (fencedMatch?.[1]) {
+    return fencedMatch[1].trim();
+  }
+
+  if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
+    return trimmed;
+  }
+
+  const objectStart = trimmed.indexOf("{");
+  const objectEnd = trimmed.lastIndexOf("}");
+  if (objectStart >= 0 && objectEnd > objectStart) {
+    return trimmed.slice(objectStart, objectEnd + 1);
+  }
+
+  return trimmed;
 }
 
 function buildInputSnapshotHash(input: unknown): string {
@@ -650,6 +681,7 @@ async function runGeneration(
       error instanceof Error
         ? error.message
         : "Generation failed before valid output could be saved.";
+    const status = getGenerationErrorStatus(error);
 
     await markGenerationState({
       sessionId,
@@ -686,8 +718,36 @@ async function runGeneration(
       },
     });
 
-    throw error;
+    throw new GenerationRouteError(message, status);
   }
+}
+
+function getGenerationErrorStatus(error: unknown): number {
+  if (error instanceof AiProviderError) {
+    if (error.errorClass === "auth") {
+      return 401;
+    }
+
+    if (error.errorClass === "rate_limit") {
+      return 429;
+    }
+
+    if (error.errorClass === "request") {
+      return 400;
+    }
+
+    return 502;
+  }
+
+  if (hasZodIssues(error) || error instanceof SyntaxError) {
+    return 502;
+  }
+
+  if (error instanceof Error && error.message.startsWith("Step skill")) {
+    return 400;
+  }
+
+  return 500;
 }
 
 function handleStep(step: GenerationRouteStep) {
@@ -727,9 +787,32 @@ function handleStep(step: GenerationRouteStep) {
       );
       res.json(session);
     } catch (error) {
-      sendUnexpectedError(res, error);
+      sendGenerationError(res, error);
     }
   });
+}
+
+function sendGenerationError(
+  res: Parameters<typeof sendError>[0],
+  error: unknown,
+) {
+  if (error instanceof GenerationRouteError) {
+    sendError(res, error.status, error.message);
+    return;
+  }
+
+  sendUnexpectedError(res, error);
+}
+
+function hasZodIssues(
+  error: unknown,
+): error is { issues: Array<{ message?: string }> } {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "issues" in error &&
+    Array.isArray((error as { issues?: unknown }).issues)
+  );
 }
 
 handleStep("clarification");
