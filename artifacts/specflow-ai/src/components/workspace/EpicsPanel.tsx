@@ -13,6 +13,8 @@ interface EpicsPanelProps {
   generationStep: GenerationStepState;
   onGenerateEpics: () => void;
   onGenerateStories: () => void;
+  isAiBusy?: boolean;
+  aiBusyLabel?: string;
 }
 
 export function EpicsPanel({
@@ -20,10 +22,12 @@ export function EpicsPanel({
   generationStep,
   onGenerateEpics,
   onGenerateStories,
+  isAiBusy = false,
+  aiBusyLabel,
 }: EpicsPanelProps) {
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set(['epic-1']));
   const { toast } = useToast();
-  const isGenerating = generationStep.status === 'running';
+  const isGenerating = generationStep.status === 'running' || isAiBusy;
 
   const toggle = (id: string) => {
     setExpandedIds(prev => {
@@ -152,7 +156,7 @@ export function EpicsPanel({
         })}
       </div>
 
-      <StepActionBar isLoading={isGenerating} loadingLabel="Generating epics…">
+      <StepActionBar isLoading={isGenerating} loadingLabel={aiBusyLabel ?? "Generating epics..."}>
         <Button size="sm" variant="outline" onClick={onGenerateEpics} disabled={isGenerating}>
           {isGenerating ? <Spinner className="h-3.5 w-3.5" /> : null}
           Regenerate Epics

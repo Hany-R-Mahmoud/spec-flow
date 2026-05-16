@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
-import { Spinner } from '@/components/ui/spinner';
 import { cn } from '@/lib/utils';
+import { AiLoadingState } from './AiLoadingState';
 
 type StepActionBarProps = {
   children: ReactNode;
@@ -18,12 +18,19 @@ export function StepActionBar({ children, isLoading = false, loadingLabel, class
       )}
     >
       {isLoading ? (
-        <div className="mb-2 flex items-center justify-end gap-2 px-0 text-xs text-muted-foreground">
-          <Spinner className="h-3.5 w-3.5" />
-          <span>{loadingLabel ?? 'AI is working…'}</span>
-        </div>
+        <AiLoadingState
+          compact
+          className="mb-2 ml-auto max-w-md"
+          label={loadingLabel ?? 'AI is working...'}
+        />
       ) : null}
-      <div className="flex items-center justify-end gap-2 px-0" aria-busy={isLoading}>
+      <div
+        className={cn(
+          "flex items-center justify-end gap-2 px-0 transition-opacity",
+          isLoading && "opacity-85",
+        )}
+        aria-busy={isLoading}
+      >
         {children}
       </div>
     </div>

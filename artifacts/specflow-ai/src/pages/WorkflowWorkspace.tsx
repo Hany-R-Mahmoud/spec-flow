@@ -32,6 +32,14 @@ type GuidanceActions = {
 
 type GenerationPhase = 'clarification' | 'prd' | 'epics' | 'stories' | 'quality';
 
+const generationLoadingLabels: Record<GenerationPhase, string> = {
+  clarification: 'Generating clarification questions...',
+  prd: 'Generating PRD sections...',
+  epics: 'Generating epics...',
+  stories: 'Generating user stories...',
+  quality: 'Refreshing quality scores...',
+};
+
 function getSkillProvenance(promptVersion: string): string | null {
   const match = promptVersion.match(/\+skill:(.+)$/);
   return match?.[1] ?? null;
@@ -230,6 +238,7 @@ export function WorkflowWorkspace() {
   const [livePrdSections, setLivePrdSections] = useState<PRDSection[]>(session?.prdSections ?? []);
   const [guidanceItems, setGuidanceItems] = useState<GuidanceItem[]>([]);
   const [guidanceLoading, setGuidanceLoading] = useState(false);
+  const [pendingGenerationStep, setPendingGenerationStep] = useState<GenerationPhase | null>(null);
 
   useEffect(() => {
     if (!sessionId) {
@@ -471,55 +480,65 @@ export function WorkflowWorkspace() {
     advancePhase('export');
   }, [advancePhase, canCompleteReview, completionBlocker, toast]);
 
-  const handleGeneration = useCallback(async (step: 'clarification' | 'prd' | 'epics' | 'stories' | 'quality') => {
-    const updatedSession = await runGeneration(session.id, step);
+  const handleGeneration = useCallback(async (step: GenerationPhase) => {
+    if (pendingGenerationStep) {
+      return;
+    }
 
-    if (!updatedSession) {
-      const latestCapability = await refreshAiCapability();
-      const latestProviderUi = getAiProviderUiState(latestCapability);
+    setPendingGenerationStep(step);
 
-      if (latestProviderUi.isAiEnabled) {
+    try {
+      const updatedSession = await runGeneration(session.id, step);
+
+      if (!updatedSession) {
+        const latestCapability = await refreshAiCapability();
+        const latestProviderUi = getAiProviderUiState(latestCapability);
+
+        if (latestProviderUi.isAiEnabled) {
+          toast({
+            title: 'Generation failed',
+            description: 'The previous saved output was preserved. Review the status message and retry when ready.',
+          });
+          return;
+        }
+
+        if (step !== 'clarification') {
+          const nextPhase =
+            step === 'prd'
+              ? 'prd'
+              : step === 'epics'
+                ? 'epics'
+                : step === 'stories'
+                  ? 'stories'
+                  : 'quality';
+
+          advancePhase(nextPhase);
+        }
+
         toast({
-          title: 'Generation failed',
-          description: 'The previous saved output was preserved. Review the status message and retry when ready.',
+          title: latestProviderUi.label,
+          description: `${latestCapability?.reason ?? latestProviderUi.helperText} Continued without AI generation.`,
         });
         return;
       }
 
-      if (step !== 'clarification') {
-        const nextPhase =
-          step === 'prd'
-            ? 'prd'
-            : step === 'epics'
-              ? 'epics'
-              : step === 'stories'
-                ? 'stories'
-                : 'quality';
+      const phaseMap = {
+        clarification: 'clarification',
+        prd: 'prd',
+        epics: 'epics',
+        stories: 'stories',
+        quality: 'quality',
+      } as const;
 
-        advancePhase(nextPhase);
-      }
-
+      setActivePhase(phaseMap[step]);
       toast({
-        title: latestProviderUi.label,
-        description: `${latestCapability?.reason ?? latestProviderUi.helperText} Continued without AI generation.`,
+        title: step === 'quality' ? 'Quality refreshed' : 'Generation complete',
+        description: 'Workflow output generated and saved.',
       });
-      return;
+    } finally {
+      setPendingGenerationStep((current) => (current === step ? null : current));
     }
-
-    const phaseMap = {
-      clarification: 'clarification',
-      prd: 'prd',
-      epics: 'epics',
-      stories: 'stories',
-      quality: 'quality',
-    } as const;
-
-    setActivePhase(phaseMap[step]);
-    toast({
-      title: step === 'quality' ? 'Quality refreshed' : 'Generation complete',
-      description: 'Workflow output generated and saved.',
-    });
-  }, [advancePhase, refreshAiCapability, runGeneration, session.id, toast]);
+  }, [advancePhase, pendingGenerationStep, refreshAiCapability, runGeneration, session.id, toast]);
 
   const handleEditSkill = useCallback((phase: StepSkillPhase) => {
     setLocation(`/settings?step-skill=${phase}`);
@@ -702,6 +721,12 @@ export function WorkflowWorkspace() {
               onGenerateClarification={() => void handleGeneration('clarification')}
               onGeneratePRD={() => void handleGeneration('prd')}
               onDraftChange={setLiveQuestions}
+              isAiBusy={pendingGenerationStep === 'clarification' || pendingGenerationStep === 'prd'}
+              aiBusyLabel={
+                pendingGenerationStep === 'prd'
+                  ? generationLoadingLabels.prd
+                  : generationLoadingLabels.clarification
+              }
             />
             )}
 
@@ -712,6 +737,12 @@ export function WorkflowWorkspace() {
               onGeneratePRD={() => void handleGeneration('prd')}
               onGenerateEpics={() => void handleGeneration('epics')}
               onDraftChange={setLivePrdSections}
+              isAiBusy={pendingGenerationStep === 'prd' || pendingGenerationStep === 'epics'}
+              aiBusyLabel={
+                pendingGenerationStep === 'epics'
+                  ? generationLoadingLabels.epics
+                  : generationLoadingLabels.prd
+              }
             />
             )}
 
@@ -721,6 +752,12 @@ export function WorkflowWorkspace() {
               generationStep={session.generation.epics}
               onGenerateEpics={() => void handleGeneration('epics')}
               onGenerateStories={() => void handleGeneration('stories')}
+              isAiBusy={pendingGenerationStep === 'epics' || pendingGenerationStep === 'stories'}
+              aiBusyLabel={
+                pendingGenerationStep === 'stories'
+                  ? generationLoadingLabels.stories
+                  : generationLoadingLabels.epics
+              }
             />
             )}
 
@@ -732,6 +769,12 @@ export function WorkflowWorkspace() {
               generationStep={session.generation.stories}
               onGenerateStories={() => void handleGeneration('stories')}
               onGenerateQuality={() => void handleGeneration('quality')}
+              isAiBusy={pendingGenerationStep === 'stories' || pendingGenerationStep === 'quality'}
+              aiBusyLabel={
+                pendingGenerationStep === 'quality'
+                  ? generationLoadingLabels.quality
+                  : generationLoadingLabels.stories
+              }
             />
             )}
 
@@ -741,6 +784,8 @@ export function WorkflowWorkspace() {
               epics={epics}
               generationStep={session.generation.quality}
               onGenerateQuality={() => void handleGeneration('quality')}
+              isAiBusy={pendingGenerationStep === 'quality'}
+              aiBusyLabel={generationLoadingLabels.quality}
               onSendToDevReview={async () => {
                 const queuedStories = stories.map((story) => ({
                   ...story,
@@ -787,8 +832,8 @@ export function WorkflowWorkspace() {
             phase={activePhase}
             phaseStatus={session.phases[activePhase]}
             items={guidanceItems}
-            isLoading={guidanceLoading || Boolean(activeGenerationStep?.status === 'running')}
-            loadingLabel={canGenerate ? 'AI is analyzing this step…' : 'Manual guidance is loading…'}
+            isLoading={guidanceLoading || Boolean(activeGenerationStep?.status === 'running') || Boolean(pendingGenerationStep)}
+            loadingLabel={pendingGenerationStep ? generationLoadingLabels[pendingGenerationStep] : canGenerate ? 'AI is analyzing this step...' : 'Manual guidance is loading...'}
             completionCount={completionCount}
           />
         </div>

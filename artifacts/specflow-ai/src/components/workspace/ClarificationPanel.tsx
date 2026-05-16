@@ -15,6 +15,8 @@ interface ClarificationPanelProps {
   onGenerateClarification: () => void;
   onGeneratePRD: () => void;
   onDraftChange?: (questions: ClarificationQuestion[]) => void;
+  isAiBusy?: boolean;
+  aiBusyLabel?: string;
 }
 
 type ClarificationFormValues = {
@@ -31,6 +33,8 @@ export function ClarificationPanel({
   onGenerateClarification,
   onGeneratePRD,
   onDraftChange,
+  isAiBusy = false,
+  aiBusyLabel,
 }: ClarificationPanelProps) {
   const { saveClarificationQuestions } = useSessionStore();
   const { toast } = useToast();
@@ -99,7 +103,7 @@ export function ClarificationPanel({
     return question.required && !(draft?.answer?.trim()) && !draft?.skipped;
   });
   const allRequiredAnswered = requiredUnanswered.length === 0;
-  const isGenerating = generationStep.status === 'running';
+  const isGenerating = generationStep.status === 'running' || isAiBusy;
 
   const saveDraft = form.handleSubmit(async (values) => {
     const nextQuestions = questions.map((question, index) => ({
@@ -258,7 +262,7 @@ export function ClarificationPanel({
         })}
       </div>
 
-      <StepActionBar isLoading={isGenerating} loadingLabel="Generating clarification questions…">
+      <StepActionBar isLoading={isGenerating} loadingLabel={aiBusyLabel ?? "Generating clarification questions..."}>
         {!allRequiredAnswered && (
           <span className="mr-auto text-xs text-[var(--color-danger)] flex items-center gap-1">
             <AlertCircle className="w-3.5 h-3.5" />

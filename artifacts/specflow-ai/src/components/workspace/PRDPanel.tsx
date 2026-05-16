@@ -16,6 +16,8 @@ interface PRDPanelProps {
   onGeneratePRD: () => void;
   onGenerateEpics: () => void;
   onDraftChange?: (sections: PRDSection[]) => void;
+  isAiBusy?: boolean;
+  aiBusyLabel?: string;
 }
 
 type PRDFormValues = {
@@ -28,11 +30,13 @@ export function PRDPanel({
   onGeneratePRD,
   onGenerateEpics,
   onDraftChange,
+  isAiBusy = false,
+  aiBusyLabel,
 }: PRDPanelProps) {
   const { savePrdSections } = useSessionStore();
   const { toast } = useToast();
   const [editingId, setEditingId] = useState<string | null>(null);
-  const isGenerating = generationStep.status === 'running';
+  const isGenerating = generationStep.status === 'running' || isAiBusy;
 
   const form = useForm<PRDFormValues>({
     defaultValues: {
@@ -221,7 +225,7 @@ export function PRDPanel({
           })}
       </div>
 
-      <StepActionBar isLoading={isGenerating} loadingLabel="Generating PRD sections…">
+      <StepActionBar isLoading={isGenerating} loadingLabel={aiBusyLabel ?? "Generating PRD sections..."}>
         <Button size="sm" variant="outline" onClick={onGeneratePRD} disabled={isGenerating}>
           {isGenerating ? <Spinner className="h-3.5 w-3.5" /> : null}
           Regenerate PRD

@@ -1,8 +1,8 @@
 import { AlertCircle, AlertTriangle, ArrowRight, CheckCircle, Lightbulb } from 'lucide-react';
 import { Phase, PhaseStatus } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { Spinner } from '@/components/ui/spinner';
 import { Skeleton } from '@/components/ui/skeleton';
+import { AiLoadingState } from './AiLoadingState';
 
 export interface GuidanceItem {
   type: 'error' | 'warning' | 'success' | 'action';
@@ -81,15 +81,10 @@ export function GuidancePanel({ phase, phaseStatus, items, isLoading = false, lo
       <div className="flex-1 overflow-y-auto">
         {isLoading ? (
           <div className="px-4 py-4 border-b border-border">
-            <div className="flex items-center gap-2">
-              <Spinner className="h-4 w-4 text-primary" />
-              <div className="text-xs font-semibold text-foreground">
-                {loadingLabel ?? 'AI is analyzing this step…'}
-              </div>
-            </div>
-            <div className="mt-2 text-xs text-muted-foreground">
-              Reading the current phase, workflow state, and step skills.
-            </div>
+            <AiLoadingState
+              label={loadingLabel ?? 'AI is analyzing this step...'}
+              description="Reading the current phase, workflow state, and step skills."
+            />
             <div className="mt-4 space-y-2">
               <Skeleton className="h-10 w-full" />
               <Skeleton className="h-10 w-11/12" />

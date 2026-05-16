@@ -1,11 +1,11 @@
 # Graph Report - spec-flow  (2026-05-16)
 
 ## Corpus Check
-- 267 files · ~226,476 words
+- 268 files · ~227,127 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 689 nodes · 836 edges · 35 communities detected
+- 694 nodes · 843 edges · 35 communities detected
 - Extraction: 87% EXTRACTED · 13% INFERRED · 0% AMBIGUOUS · INFERRED: 108 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
@@ -81,8 +81,8 @@ Cohesion: 0.07
 Nodes (42): getGenerationRuntime(), buildInputSnapshotHash(), getOutputContract(), markGenerationState(), parseGuidanceResponse(), parseProviderJson(), resetDownstream(), resetStep() (+34 more)
 
 ### Community 2 - "Community 2"
-Cohesion: 0.06
-Nodes (23): deleteAiProvider(), getDeleteAiProviderUrl(), getValidateAiProviderUrl(), validateAiProvider(), addToRemoveQueue(), dispatch(), genId(), reducer() (+15 more)
+Cohesion: 0.07
+Nodes (22): deleteAiProvider(), getDeleteAiProviderUrl(), getValidateAiProviderUrl(), validateAiProvider(), addToRemoveQueue(), dispatch(), genId(), reducer() (+14 more)
 
 ### Community 3 - "Community 3"
 Cohesion: 0.15
@@ -105,20 +105,20 @@ Cohesion: 0.29
 Nodes (15): answeredQuestionSummary(), applyQualityReview(), buildReadinessScore(), compactSentences(), detectWarnings(), generateClarificationQuestions(), generateEpics(), generatePrdSections() (+7 more)
 
 ### Community 8 - "Community 8"
+Cohesion: 0.25
+Nodes (11): analyzeAdaptiveIntake(), buildAdaptiveArtifacts(), buildAdaptivePhasePatch(), extractAcceptanceCriteria(), extractSectionContent(), extractStoryLines(), getRecommendedPhase(), hasPrdSignals() (+3 more)
+
+### Community 9 - "Community 9"
 Cohesion: 0.31
 Nodes (10): defaultAiProviderConfig(), getAiProviderConfigRow(), getAiProviderSecret(), isAiProviderStorageMissingError(), markAiProviderValidation(), normalizeAiProviderBaseUrl(), recordAuditEvent(), saveAiProviderConfig() (+2 more)
 
-### Community 9 - "Community 9"
-Cohesion: 0.38
-Nodes (10): analyzeAdaptiveIntake(), buildAdaptiveArtifacts(), buildAdaptivePhasePatch(), extractAcceptanceCriteria(), extractSectionContent(), extractStoryLines(), getRecommendedPhase(), hasPrdSignals() (+2 more)
-
 ### Community 10 - "Community 10"
-Cohesion: 0.27
-Nodes (7): createMetaSelector(), ensureLinkTag(), ensureMetaTag(), getRouteMetadata(), syncDocumentMetadata(), getCanonicalUrl(), isPreviewDeployment()
+Cohesion: 0.3
+Nodes (10): AiProviderError, buildProviderUrl(), classifyStatus(), extractProviderErrorMessage(), normalizeBaseUrl(), parseProviderError(), postChatCompletion(), runOpenAiJson() (+2 more)
 
 ### Community 11 - "Community 11"
-Cohesion: 0.39
-Nodes (7): AiProviderError, buildProviderUrl(), classifyStatus(), normalizeBaseUrl(), parseProviderError(), runOpenAiJson(), validateOpenAiKey()
+Cohesion: 0.27
+Nodes (7): createMetaSelector(), ensureLinkTag(), ensureMetaTag(), getRouteMetadata(), syncDocumentMetadata(), getCanonicalUrl(), isPreviewDeployment()
 
 ### Community 12 - "Community 12"
 Cohesion: 0.36
@@ -253,8 +253,8 @@ Nodes (2): appPath(), joinAppPath()
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `runGeneration()` connect `Community 1` to `Community 8`, `Community 0`, `Community 11`, `Community 7`?**
-  _High betweenness centrality (0.143) - this node is a cross-community bridge._
+- **Why does `runGeneration()` connect `Community 1` to `Community 0`, `Community 9`, `Community 10`, `Community 7`?**
+  _High betweenness centrality (0.144) - this node is a cross-community bridge._
 - **Why does `customFetch()` connect `Community 0` to `Community 2`, `Community 3`, `Community 4`?**
   _High betweenness centrality (0.087) - this node is a cross-community bridge._
 - **Why does `generateEpics()` connect `Community 0` to `Community 1`?**

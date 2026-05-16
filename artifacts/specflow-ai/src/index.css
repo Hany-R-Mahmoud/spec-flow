@@ -5,6 +5,20 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@keyframes ai-loading-slide {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  50% {
+    transform: translateX(60%);
+  }
+
+  100% {
+    transform: translateX(220%);
+  }
+}
+
 @theme inline {
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));

@@ -18,6 +18,8 @@ interface QualityReviewPanelProps {
   onGenerateQuality: () => void;
   onSendToDevReview: () => void;
   onSplitStory: (storyId: string) => void | Promise<void>;
+  isAiBusy?: boolean;
+  aiBusyLabel?: string;
 }
 
 function scoreColor(value: number) {
@@ -34,12 +36,14 @@ export function QualityReviewPanel({
   onGenerateQuality,
   onSendToDevReview,
   onSplitStory,
+  isAiBusy = false,
+  aiBusyLabel,
 }: QualityReviewPanelProps) {
   const { toast } = useToast();
   const { dispatch } = useSessionStore();
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [splittingStoryId, setSplittingStoryId] = useState<string | null>(null);
-  const isGenerating = generationStep.status === 'running';
+  const isGenerating = generationStep.status === 'running' || isAiBusy;
 
   const avgScore = stories.length > 0
     ? Math.round(stories.reduce((sum, s) => sum + s.readinessScore.total, 0) / stories.length)
@@ -256,7 +260,7 @@ export function QualityReviewPanel({
         </div>
       </div>
 
-      <StepActionBar isLoading={isGenerating} loadingLabel="Refreshing quality scores…">
+      <StepActionBar isLoading={isGenerating} loadingLabel={aiBusyLabel ?? "Refreshing quality scores..."}>
         <Button size="sm" variant="outline" onClick={onGenerateQuality} disabled={isGenerating || stories.length === 0}>
           {isGenerating ? <Spinner className="h-3.5 w-3.5" /> : null}
           Refresh Scores
