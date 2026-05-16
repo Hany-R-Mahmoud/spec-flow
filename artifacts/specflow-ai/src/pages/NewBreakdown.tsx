@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label';
 import { useSessionStore } from '@/store/session-store';
 import { useToast } from '@/hooks/use-toast';
 import { analyzeAdaptiveIntake, buildAdaptiveArtifacts, buildAdaptivePhasePatch } from '@/lib/adaptive-intake';
+import { getAiProviderUiState } from '@/lib/ai-capability';
 import { AlertCircle, ArrowRight, FileSearch, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -79,9 +80,9 @@ function ChipsInput({ value, onChange, placeholder }: { value: string[]; onChang
 
 export function NewBreakdown() {
   const { createSession, state } = useSessionStore();
-  const provider = state.aiCapability?.provider;
-  const showManualModeBanner = !provider?.id;
-  const headerCopy = provider?.id
+  const providerUi = getAiProviderUiState(state.aiCapability);
+  const showManualModeBanner = !providerUi.isAiEnabled;
+  const headerCopy = providerUi.isAiEnabled
     ? 'Fill in the intake form to start an AI-assisted breakdown'
     : 'Fill in the intake form to organize a manual breakdown.';
   const { toast } = useToast();
@@ -189,10 +190,10 @@ export function NewBreakdown() {
         <div className="rounded-md border border-[var(--color-warning)]/30 bg-[var(--color-warning-soft)] px-4 py-3 text-xs text-foreground">
           <div className="flex items-center gap-2 font-medium text-[var(--color-warning)]">
             <AlertCircle className="h-4 w-4" />
-            Manual mode
+            {providerUi.label}
           </div>
           <p className="mt-1 text-muted-foreground">
-            No AI provider key is saved yet. You can continue in manual mode, or add a provider key in Settings to enable generation.
+            {providerUi.helperText} You can continue in manual mode.
           </p>
         </div>
       ) : null}

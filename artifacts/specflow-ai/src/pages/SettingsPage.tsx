@@ -12,6 +12,7 @@ import { useSessionStore } from '@/store/session-store';
 import { ThemeModeToggle } from '@/components/shared/ThemeModeToggle';
 import { StepSkillsSection } from '@/components/settings/StepSkillsSection';
 import { STEP_SKILL_PHASES, type StepSkillPhase } from '@/lib/step-skills';
+import { getAiProviderUiState } from '@/lib/ai-capability';
 import { Badge } from '@/components/ui/badge';
 import {
   deleteAiProvider,
@@ -103,6 +104,7 @@ function AiProviderSection() {
   const { toast } = useToast();
   const { state, refreshAiCapability } = useSessionStore();
   const provider = state.aiCapability?.provider;
+  const providerUi = getAiProviderUiState(state.aiCapability);
   const [apiKey, setApiKey] = useState('');
   const [model, setModel] = useState(provider?.model ?? 'gpt-4o-mini');
   const [showKeyInput, setShowKeyInput] = useState(false);
@@ -115,18 +117,22 @@ function AiProviderSection() {
   }, [provider?.configured, provider?.id, provider?.keySuffix, provider?.model]);
 
   const status = provider?.status ?? 'not_configured';
-  const configured = Boolean(provider?.configured);
-  const hasSavedKey = Boolean(provider?.id && (provider.keySuffix || provider.keyFingerprint));
+  const configured = providerUi.isValidated;
+  const hasSavedKey = providerUi.hasSavedKey;
   const showValidationError = Boolean(provider?.validationError);
   const apiKeyPlaceholder = hasSavedKey ? 'Paste replacement provider API key' : 'Paste provider API key';
   const apiKeyHelper = hasSavedKey
-    ? 'Saved key is already active. Reveal the input only when you want to replace it.'
+    ? providerUi.helperText
     : 'Use your own key for generation. The key is stored securely on the API server.';
   const lastValidatedLabel = provider?.lastValidatedAt
     ? new Date(provider.lastValidatedAt).toLocaleString()
     : null;
-  const providerStateLabel = configured ? 'AI enabled' : hasSavedKey ? 'Key saved' : 'Manual mode';
-  const providerStateTone = configured ? 'default' : 'outline';
+  const providerStateLabel = providerUi.label;
+  const providerStateTone = providerUi.badgeVariant;
+
+  useEffect(() => {
+    void refreshAiCapability();
+  }, [refreshAiCapability]);
 
   const saveProvider = async () => {
     try {
@@ -221,10 +227,7 @@ function AiProviderSection() {
     <SettingsSection title="AI Provider">
       <div className="flex flex-wrap items-center gap-2">
         <Badge variant={providerStateTone}>{providerStateLabel}</Badge>
-        <span className="text-xs text-muted-foreground">
-          {configured ? 'configured' : hasSavedKey ? 'saved key active' : status.replaceAll('_', ' ')}
-          {provider?.keySuffix ? ` · key ending ${provider.keySuffix}` : ''}
-        </span>
+        <span className="text-xs text-muted-foreground">{providerUi.statusText || status.replaceAll('_', ' ')}</span>
       </div>
 
       <div className="rounded border border-border bg-muted/30 p-3 text-xs text-muted-foreground">
@@ -242,11 +245,14 @@ function AiProviderSection() {
         <div className="rounded-md border border-border bg-background p-3">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="space-y-1">
-              <div className="text-sm font-medium text-foreground">Saved provider key active</div>
+              <div className="text-sm font-medium text-foreground">
+                {configured ? 'Validated provider key' : 'Saved provider key needs validation'}
+              </div>
               <div className="text-xs text-muted-foreground">
                 {provider?.keySuffix ? `Key ending ${provider.keySuffix}` : 'Key stored securely'}
                 {lastValidatedLabel ? ` · validated ${lastValidatedLabel}` : ''}
               </div>
+              <p className="text-xs text-muted-foreground">{providerUi.helperText}</p>
             </div>
             <div className="flex flex-wrap gap-2">
               <Button

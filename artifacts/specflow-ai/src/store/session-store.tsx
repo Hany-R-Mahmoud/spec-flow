@@ -682,9 +682,16 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         return null;
       }
 
-      if (!state.aiCapability?.canGenerate) {
+      const capability = await getAiCapability();
+      setState((current) => ({
+        ...current,
+        aiCapability: capability,
+        error: null,
+      }));
+
+      if (!capability.canGenerate) {
         const message =
-          state.aiCapability?.reason ??
+          capability.reason ??
           'Connect and validate an AI provider key before running generation.';
         setState((current) => ({
           ...current,
@@ -710,7 +717,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
           })),
           current.activeSessionId,
           current.settings,
-          current.aiCapability,
+          capability,
           current.exportPackages,
           false,
           null,
@@ -737,7 +744,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
             replaceSession(current.sessions, updatedSession),
             current.activeSessionId,
             current.settings,
-            current.aiCapability,
+            capability,
             current.exportPackages,
             false,
             null,
@@ -775,7 +782,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         return null;
       }
     },
-    [state.aiCapability, state.sessions],
+    [state.sessions],
   );
 
   const value = useMemo(

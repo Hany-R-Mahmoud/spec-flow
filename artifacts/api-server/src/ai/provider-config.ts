@@ -140,7 +140,7 @@ export async function getAiProviderSecret(
   const row = await getAiProviderConfigRow(db, workspaceId);
   const publicConfig = toPublicAiProviderConfig(row);
   const usable = options.allowUnvalidated
-    ? Boolean(row?.encryptedApiKey && row.enabled && row.provider === "openai")
+    ? Boolean(row?.encryptedApiKey && row.provider === "openai")
     : Boolean(publicConfig.configured);
 
   if (!row?.encryptedApiKey || !usable || row.provider !== "openai") {
@@ -207,7 +207,6 @@ export async function markAiProviderValidation(
     .update(aiProviderConfigTable)
     .set({
       status,
-      enabled: status === "configured",
       validationError,
       lastValidatedAt: status === "configured" ? new Date() : null,
       updatedAt: new Date(),

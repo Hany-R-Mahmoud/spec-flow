@@ -63,7 +63,7 @@
       "source_file": "artifacts/api-server/src/app.ts",
       "source_location": "L1",
       "id": "artifacts_api_server_src_app_ts",
-      "community": 5,
+      "community": 6,
       "norm_label": "app.ts"
     },
     {
@@ -72,7 +72,7 @@
       "source_file": "artifacts/api-server/src/app.ts",
       "source_location": "L9",
       "id": "src_app_createapp",
-      "community": 5,
+      "community": 6,
       "norm_label": "createapp()"
     },
     {
@@ -81,7 +81,7 @@
       "source_file": "artifacts/api-server/src/index.ts",
       "source_location": "L1",
       "id": "artifacts_api_server_src_index_ts",
-      "community": 5,
+      "community": 6,
       "norm_label": "index.ts"
     },
     {
@@ -90,7 +90,7 @@
       "source_file": "artifacts/api-server/src/config.ts",
       "source_location": "L1",
       "id": "artifacts_api_server_src_config_ts",
-      "community": 5,
+      "community": 6,
       "norm_label": "config.ts"
     },
     {
@@ -99,7 +99,7 @@
       "source_file": "artifacts/api-server/src/config.ts",
       "source_location": "L24",
       "id": "src_config_readrequiredenv",
-      "community": 5,
+      "community": 6,
       "norm_label": "readrequiredenv()"
     },
     {
@@ -108,7 +108,7 @@
       "source_file": "artifacts/api-server/src/config.ts",
       "source_location": "L33",
       "id": "src_config_loadlocalenv",
-      "community": 5,
+      "community": 6,
       "norm_label": "loadlocalenv()"
     },
     {
@@ -117,7 +117,7 @@
       "source_file": "artifacts/api-server/src/config.ts",
       "source_location": "L39",
       "id": "src_config_readapporigin",
-      "community": 5,
+      "community": 6,
       "norm_label": "readapporigin()"
     },
     {
@@ -126,7 +126,7 @@
       "source_file": "artifacts/api-server/src/config.ts",
       "source_location": "L53",
       "id": "src_config_normalizeorigin",
-      "community": 5,
+      "community": 6,
       "norm_label": "normalizeorigin()"
     },
     {
@@ -135,7 +135,7 @@
       "source_file": "artifacts/api-server/src/config.ts",
       "source_location": "L61",
       "id": "src_config_readvercelorigins",
-      "community": 5,
+      "community": 6,
       "norm_label": "readvercelorigins()"
     },
     {
@@ -144,7 +144,7 @@
       "source_file": "artifacts/api-server/src/config.ts",
       "source_location": "L72",
       "id": "src_config_parseallowedorigins",
-      "community": 5,
+      "community": 6,
       "norm_label": "parseallowedorigins()"
     },
     {
@@ -153,7 +153,7 @@
       "source_file": "artifacts/api-server/src/config.ts",
       "source_location": "L89",
       "id": "src_config_loadapiserverconfig",
-      "community": 5,
+      "community": 6,
       "norm_label": "loadapiserverconfig()"
     },
     {
@@ -162,7 +162,7 @@
       "source_file": "artifacts/api-server/src/server.ts",
       "source_location": "L1",
       "id": "artifacts_api_server_src_server_ts",
-      "community": 5,
+      "community": 6,
       "norm_label": "server.ts"
     },
     {
@@ -171,7 +171,7 @@
       "source_file": "artifacts/api-server/src/server.ts",
       "source_location": "L16",
       "id": "src_server_ensureworkspaceschema",
-      "community": 5,
+      "community": 6,
       "norm_label": "ensureworkspaceschema()"
     },
     {
@@ -180,7 +180,7 @@
       "source_file": "artifacts/api-server/src/server.ts",
       "source_location": "L26",
       "id": "src_server_createapiserver",
-      "community": 5,
+      "community": 6,
       "norm_label": "createapiserver()"
     },
     {
@@ -189,7 +189,7 @@
       "source_file": "artifacts/api-server/src/server.ts",
       "source_location": "L31",
       "id": "src_server_startapiserver",
-      "community": 5,
+      "community": 6,
       "norm_label": "startapiserver()"
     },
     {
@@ -340,7 +340,7 @@
       "label": "deleteAiProviderConfig()",
       "file_type": "code",
       "source_file": "artifacts/api-server/src/ai/provider-config.ts",
-      "source_location": "L221",
+      "source_location": "L220",
       "id": "ai_provider_config_deleteaiproviderconfig",
       "community": 3,
       "norm_label": "deleteaiproviderconfig()"
@@ -349,7 +349,7 @@
       "label": "recordAuditEvent()",
       "file_type": "code",
       "source_file": "artifacts/api-server/src/ai/provider-config.ts",
-      "source_location": "L230",
+      "source_location": "L229",
       "id": "ai_provider_config_recordauditevent",
       "community": 3,
       "norm_label": "recordauditevent()"
@@ -540,7 +540,7 @@
       "source_file": "artifacts/api-server/src/lib/logger.ts",
       "source_location": "L1",
       "id": "artifacts_api_server_src_lib_logger_ts",
-      "community": 5,
+      "community": 6,
       "norm_label": "logger.ts"
     },
     {
@@ -889,7 +889,7 @@
       "label": "toResponseGeneration()",
       "file_type": "code",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L580",
+      "source_location": "L517",
       "id": "routes_persistence_toresponsegeneration",
       "community": 2,
       "norm_label": "toresponsegeneration()"
@@ -898,7 +898,7 @@
       "label": "toProject()",
       "file_type": "code",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L615",
+      "source_location": "L552",
       "id": "routes_persistence_toproject",
       "community": 2,
       "norm_label": "toproject()"
@@ -907,7 +907,7 @@
       "label": "toWorkflowSession()",
       "file_type": "code",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L625",
+      "source_location": "L562",
       "id": "routes_persistence_toworkflowsession",
       "community": 2,
       "norm_label": "toworkflowsession()"
@@ -916,7 +916,7 @@
       "label": "toSettings()",
       "file_type": "code",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L666",
+      "source_location": "L603",
       "id": "routes_persistence_tosettings",
       "community": 2,
       "norm_label": "tosettings()"
@@ -925,7 +925,7 @@
       "label": "toExportPackage()",
       "file_type": "code",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L685",
+      "source_location": "L622",
       "id": "routes_persistence_toexportpackage",
       "community": 2,
       "norm_label": "toexportpackage()"
@@ -934,7 +934,7 @@
       "label": "createSessionDefaults()",
       "file_type": "code",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L701",
+      "source_location": "L638",
       "id": "routes_persistence_createsessiondefaults",
       "community": 2,
       "norm_label": "createsessiondefaults()"
@@ -943,7 +943,7 @@
       "label": "getSessionArtifactsRecord()",
       "file_type": "code",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L716",
+      "source_location": "L653",
       "id": "routes_persistence_getsessionartifactsrecord",
       "community": 2,
       "norm_label": "getsessionartifactsrecord()"
@@ -952,7 +952,7 @@
       "label": "buildPhaseUpdate()",
       "file_type": "code",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L737",
+      "source_location": "L674",
       "id": "routes_persistence_buildphaseupdate",
       "community": 2,
       "norm_label": "buildphaseupdate()"
@@ -961,7 +961,7 @@
       "label": "listSessionsWithArtifacts()",
       "file_type": "code",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L748",
+      "source_location": "L685",
       "id": "routes_persistence_listsessionswithartifacts",
       "community": 2,
       "norm_label": "listsessionswithartifacts()"
@@ -970,7 +970,7 @@
       "label": "getSessionWithArtifacts()",
       "file_type": "code",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L769",
+      "source_location": "L706",
       "id": "routes_persistence_getsessionwithartifacts",
       "community": 2,
       "norm_label": "getsessionwithartifacts()"
@@ -979,7 +979,7 @@
       "label": "createProjectRecord()",
       "file_type": "code",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L778",
+      "source_location": "L715",
       "id": "routes_persistence_createprojectrecord",
       "community": 2,
       "norm_label": "createprojectrecord()"
@@ -988,7 +988,7 @@
       "label": "toExportItem()",
       "file_type": "code",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L825",
+      "source_location": "L762",
       "id": "routes_persistence_toexportitem",
       "community": 2,
       "norm_label": "toexportitem()"
@@ -997,7 +997,7 @@
       "label": "toIntegrationConfig()",
       "file_type": "code",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L845",
+      "source_location": "L782",
       "id": "routes_persistence_tointegrationconfig",
       "community": 2,
       "norm_label": "tointegrationconfig()"
@@ -1006,7 +1006,7 @@
       "label": "getIntegrationConfigs()",
       "file_type": "code",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L863",
+      "source_location": "L800",
       "id": "routes_persistence_getintegrationconfigs",
       "community": 2,
       "norm_label": "getintegrationconfigs()"
@@ -1015,7 +1015,7 @@
       "label": "getIntegrationConfig()",
       "file_type": "code",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L875",
+      "source_location": "L812",
       "id": "routes_persistence_getintegrationconfig",
       "community": 2,
       "norm_label": "getintegrationconfig()"
@@ -1024,7 +1024,7 @@
       "label": "updateIntegrationConfigRecord()",
       "file_type": "code",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L893",
+      "source_location": "L830",
       "id": "routes_persistence_updateintegrationconfigrecord",
       "community": 2,
       "norm_label": "updateintegrationconfigrecord()"
@@ -1033,7 +1033,7 @@
       "label": "getExportItemsByPackageId()",
       "file_type": "code",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L937",
+      "source_location": "L874",
       "id": "routes_persistence_getexportitemsbypackageid",
       "community": 2,
       "norm_label": "getexportitemsbypackageid()"
@@ -1042,7 +1042,7 @@
       "label": "createExportItemRecord()",
       "file_type": "code",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L955",
+      "source_location": "L892",
       "id": "routes_persistence_createexportitemrecord",
       "community": 2,
       "norm_label": "createexportitemrecord()"
@@ -1051,7 +1051,7 @@
       "label": "updateExportItemExternalResult()",
       "file_type": "code",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L986",
+      "source_location": "L923",
       "id": "routes_persistence_updateexportitemexternalresult",
       "community": 2,
       "norm_label": "updateexportitemexternalresult()"
@@ -2646,16 +2646,16 @@
       "source_file": "artifacts/specflow-ai/src/components/settings/StepSkillsSection.tsx",
       "source_location": "L1",
       "id": "artifacts_specflow_ai_src_components_settings_stepskillssection_tsx",
-      "community": 6,
+      "community": 5,
       "norm_label": "stepskillssection.tsx"
     },
     {
       "label": "StepSkillsSection()",
       "file_type": "code",
       "source_file": "artifacts/specflow-ai/src/components/settings/StepSkillsSection.tsx",
-      "source_location": "L22",
+      "source_location": "L23",
       "id": "settings_stepskillssection_stepskillssection",
-      "community": 6,
+      "community": 5,
       "norm_label": "stepskillssection()"
     },
     {
@@ -3258,7 +3258,7 @@
       "source_file": "artifacts/specflow-ai/src/lib/step-skills.ts",
       "source_location": "L1",
       "id": "artifacts_specflow_ai_src_lib_step_skills_ts",
-      "community": 6,
+      "community": 5,
       "norm_label": "step-skills.ts"
     },
     {
@@ -3267,7 +3267,7 @@
       "source_file": "artifacts/specflow-ai/src/lib/step-skills.ts",
       "source_location": "L222",
       "id": "lib_step_skills_emptystate",
-      "community": 6,
+      "community": 5,
       "norm_label": "emptystate()"
     },
     {
@@ -3276,7 +3276,7 @@
       "source_file": "artifacts/specflow-ai/src/lib/step-skills.ts",
       "source_location": "L229",
       "id": "lib_step_skills_parsestoredstate",
-      "community": 6,
+      "community": 5,
       "norm_label": "parsestoredstate()"
     },
     {
@@ -3285,7 +3285,7 @@
       "source_file": "artifacts/specflow-ai/src/lib/step-skills.ts",
       "source_location": "L245",
       "id": "lib_step_skills_getstepskillsnapshotforphase",
-      "community": 6,
+      "community": 5,
       "norm_label": "getstepskillsnapshotforphase()"
     },
     {
@@ -3294,7 +3294,7 @@
       "source_file": "artifacts/specflow-ai/src/lib/step-skills.ts",
       "source_location": "L278",
       "id": "lib_step_skills_validatestepskill",
-      "community": 6,
+      "community": 5,
       "norm_label": "validatestepskill()"
     },
     {
@@ -3303,7 +3303,7 @@
       "source_file": "artifacts/specflow-ai/src/lib/step-skills.ts",
       "source_location": "L300",
       "id": "lib_step_skills_usestepskills",
-      "community": 6,
+      "community": 5,
       "norm_label": "usestepskills()"
     },
     {
@@ -3321,7 +3321,7 @@
       "source_file": "artifacts/specflow-ai/src/lib/runtime.ts",
       "source_location": "L1",
       "id": "artifacts_specflow_ai_src_lib_runtime_ts",
-      "community": 8,
+      "community": 9,
       "norm_label": "runtime.ts"
     },
     {
@@ -3330,7 +3330,7 @@
       "source_file": "artifacts/specflow-ai/src/lib/runtime.ts",
       "source_location": "L9",
       "id": "lib_runtime_normalizebaseurl",
-      "community": 8,
+      "community": 9,
       "norm_label": "normalizebaseurl()"
     },
     {
@@ -3339,7 +3339,7 @@
       "source_file": "artifacts/specflow-ai/src/lib/runtime.ts",
       "source_location": "L18",
       "id": "lib_runtime_resolveapiurl",
-      "community": 8,
+      "community": 9,
       "norm_label": "resolveapiurl()"
     },
     {
@@ -3348,7 +3348,7 @@
       "source_file": "artifacts/specflow-ai/src/lib/runtime.ts",
       "source_location": "L27",
       "id": "lib_runtime_ispreviewdeployment",
-      "community": 8,
+      "community": 9,
       "norm_label": "ispreviewdeployment()"
     },
     {
@@ -3357,7 +3357,7 @@
       "source_file": "artifacts/specflow-ai/src/lib/runtime.ts",
       "source_location": "L39",
       "id": "lib_runtime_getcanonicalurl",
-      "community": 8,
+      "community": 9,
       "norm_label": "getcanonicalurl()"
     },
     {
@@ -3370,12 +3370,30 @@
       "norm_label": "types.ts"
     },
     {
+      "label": "ai-capability.ts",
+      "file_type": "code",
+      "source_file": "artifacts/specflow-ai/src/lib/ai-capability.ts",
+      "source_location": "L1",
+      "id": "artifacts_specflow_ai_src_lib_ai_capability_ts",
+      "community": 5,
+      "norm_label": "ai-capability.ts"
+    },
+    {
+      "label": "getAiProviderUiState()",
+      "file_type": "code",
+      "source_file": "artifacts/specflow-ai/src/lib/ai-capability.ts",
+      "source_location": "L14",
+      "id": "lib_ai_capability_getaiprovideruistate",
+      "community": 5,
+      "norm_label": "getaiprovideruistate()"
+    },
+    {
       "label": "adaptive-intake.ts",
       "file_type": "code",
       "source_file": "artifacts/specflow-ai/src/lib/adaptive-intake.ts",
       "source_location": "L1",
       "id": "artifacts_specflow_ai_src_lib_adaptive_intake_ts",
-      "community": 9,
+      "community": 8,
       "norm_label": "adaptive-intake.ts"
     },
     {
@@ -3384,7 +3402,7 @@
       "source_file": "artifacts/specflow-ai/src/lib/adaptive-intake.ts",
       "source_location": "L100",
       "id": "lib_adaptive_intake_splitlines",
-      "community": 9,
+      "community": 8,
       "norm_label": "splitlines()"
     },
     {
@@ -3393,7 +3411,7 @@
       "source_file": "artifacts/specflow-ai/src/lib/adaptive-intake.ts",
       "source_location": "L107",
       "id": "lib_adaptive_intake_hasprdsignals",
-      "community": 9,
+      "community": 8,
       "norm_label": "hasprdsignals()"
     },
     {
@@ -3402,7 +3420,7 @@
       "source_file": "artifacts/specflow-ai/src/lib/adaptive-intake.ts",
       "source_location": "L118",
       "id": "lib_adaptive_intake_extractsectioncontent",
-      "community": 9,
+      "community": 8,
       "norm_label": "extractsectioncontent()"
     },
     {
@@ -3411,7 +3429,7 @@
       "source_file": "artifacts/specflow-ai/src/lib/adaptive-intake.ts",
       "source_location": "L127",
       "id": "lib_adaptive_intake_extractstorylines",
-      "community": 9,
+      "community": 8,
       "norm_label": "extractstorylines()"
     },
     {
@@ -3420,7 +3438,7 @@
       "source_file": "artifacts/specflow-ai/src/lib/adaptive-intake.ts",
       "source_location": "L133",
       "id": "lib_adaptive_intake_extractacceptancecriteria",
-      "community": 9,
+      "community": 8,
       "norm_label": "extractacceptancecriteria()"
     },
     {
@@ -3429,7 +3447,7 @@
       "source_file": "artifacts/specflow-ai/src/lib/adaptive-intake.ts",
       "source_location": "L145",
       "id": "lib_adaptive_intake_makephaseplan",
-      "community": 9,
+      "community": 8,
       "norm_label": "makephaseplan()"
     },
     {
@@ -3438,7 +3456,7 @@
       "source_file": "artifacts/specflow-ai/src/lib/adaptive-intake.ts",
       "source_location": "L258",
       "id": "lib_adaptive_intake_getrecommendedphase",
-      "community": 9,
+      "community": 8,
       "norm_label": "getrecommendedphase()"
     },
     {
@@ -3447,7 +3465,7 @@
       "source_file": "artifacts/specflow-ai/src/lib/adaptive-intake.ts",
       "source_location": "L273",
       "id": "lib_adaptive_intake_analyzeadaptiveintake",
-      "community": 9,
+      "community": 8,
       "norm_label": "analyzeadaptiveintake()"
     },
     {
@@ -3456,7 +3474,7 @@
       "source_file": "artifacts/specflow-ai/src/lib/adaptive-intake.ts",
       "source_location": "L315",
       "id": "lib_adaptive_intake_buildadaptiveartifacts",
-      "community": 9,
+      "community": 8,
       "norm_label": "buildadaptiveartifacts()"
     },
     {
@@ -3465,7 +3483,7 @@
       "source_file": "artifacts/specflow-ai/src/lib/adaptive-intake.ts",
       "source_location": "L432",
       "id": "lib_adaptive_intake_buildadaptivephasepatch",
-      "community": 9,
+      "community": 8,
       "norm_label": "buildadaptivephasepatch()"
     },
     {
@@ -3474,7 +3492,7 @@
       "source_file": "artifacts/specflow-ai/src/lib/metadata.ts",
       "source_location": "L1",
       "id": "artifacts_specflow_ai_src_lib_metadata_ts",
-      "community": 8,
+      "community": 9,
       "norm_label": "metadata.ts"
     },
     {
@@ -3483,7 +3501,7 @@
       "source_file": "artifacts/specflow-ai/src/lib/metadata.ts",
       "source_location": "L16",
       "id": "lib_metadata_createmetaselector",
-      "community": 8,
+      "community": 9,
       "norm_label": "createmetaselector()"
     },
     {
@@ -3492,7 +3510,7 @@
       "source_file": "artifacts/specflow-ai/src/lib/metadata.ts",
       "source_location": "L23",
       "id": "lib_metadata_ensuremetatag",
-      "community": 8,
+      "community": 9,
       "norm_label": "ensuremetatag()"
     },
     {
@@ -3501,7 +3519,7 @@
       "source_file": "artifacts/specflow-ai/src/lib/metadata.ts",
       "source_location": "L39",
       "id": "lib_metadata_ensurelinktag",
-      "community": 8,
+      "community": 9,
       "norm_label": "ensurelinktag()"
     },
     {
@@ -3510,7 +3528,7 @@
       "source_file": "artifacts/specflow-ai/src/lib/metadata.ts",
       "source_location": "L52",
       "id": "lib_metadata_getroutemetadata",
-      "community": 8,
+      "community": 9,
       "norm_label": "getroutemetadata()"
     },
     {
@@ -3519,7 +3537,7 @@
       "source_file": "artifacts/specflow-ai/src/lib/metadata.ts",
       "source_location": "L87",
       "id": "lib_metadata_syncdocumentmetadata",
-      "community": 8,
+      "community": 9,
       "norm_label": "syncdocumentmetadata()"
     },
     {
@@ -3589,7 +3607,7 @@
       "label": "add()",
       "file_type": "code",
       "source_file": "artifacts/specflow-ai/src/pages/NewBreakdown.tsx",
-      "source_location": "L52",
+      "source_location": "L53",
       "id": "pages_newbreakdown_add",
       "community": 1,
       "norm_label": "add()"
@@ -3598,7 +3616,7 @@
       "label": "remove()",
       "file_type": "code",
       "source_file": "artifacts/specflow-ai/src/pages/NewBreakdown.tsx",
-      "source_location": "L57",
+      "source_location": "L58",
       "id": "pages_newbreakdown_remove",
       "community": 1,
       "norm_label": "remove()"
@@ -3607,7 +3625,7 @@
       "label": "onSubmit()",
       "file_type": "code",
       "source_file": "artifacts/specflow-ai/src/pages/NewBreakdown.tsx",
-      "source_location": "L146",
+      "source_location": "L147",
       "id": "pages_newbreakdown_onsubmit",
       "community": 1,
       "norm_label": "onsubmit()"
@@ -3670,7 +3688,7 @@
       "label": "add()",
       "file_type": "code",
       "source_file": "artifacts/specflow-ai/src/pages/SettingsPage.tsx",
-      "source_location": "L37",
+      "source_location": "L38",
       "id": "pages_settingspage_add",
       "community": 1,
       "norm_label": "add()"
@@ -3679,7 +3697,7 @@
       "label": "if()",
       "file_type": "code",
       "source_file": "artifacts/specflow-ai/src/pages/SettingsPage.tsx",
-      "source_location": "L88",
+      "source_location": "L89",
       "id": "pages_settingspage_if",
       "community": 1,
       "norm_label": "if()"
@@ -3688,7 +3706,7 @@
       "label": "saveProvider()",
       "file_type": "code",
       "source_file": "artifacts/specflow-ai/src/pages/SettingsPage.tsx",
-      "source_location": "L131",
+      "source_location": "L137",
       "id": "pages_settingspage_saveprovider",
       "community": 1,
       "norm_label": "saveprovider()"
@@ -3697,7 +3715,7 @@
       "label": "validateProvider()",
       "file_type": "code",
       "source_file": "artifacts/specflow-ai/src/pages/SettingsPage.tsx",
-      "source_location": "L153",
+      "source_location": "L159",
       "id": "pages_settingspage_validateprovider",
       "community": 1,
       "norm_label": "validateprovider()"
@@ -3706,7 +3724,7 @@
       "label": "rotateProvider()",
       "file_type": "code",
       "source_file": "artifacts/specflow-ai/src/pages/SettingsPage.tsx",
-      "source_location": "L176",
+      "source_location": "L182",
       "id": "pages_settingspage_rotateprovider",
       "community": 1,
       "norm_label": "rotateprovider()"
@@ -3715,7 +3733,7 @@
       "label": "beginKeyRotation()",
       "file_type": "code",
       "source_file": "artifacts/specflow-ai/src/pages/SettingsPage.tsx",
-      "source_location": "L193",
+      "source_location": "L199",
       "id": "pages_settingspage_beginkeyrotation",
       "community": 1,
       "norm_label": "beginkeyrotation()"
@@ -3724,7 +3742,7 @@
       "label": "cancelKeyRotation()",
       "file_type": "code",
       "source_file": "artifacts/specflow-ai/src/pages/SettingsPage.tsx",
-      "source_location": "L198",
+      "source_location": "L204",
       "id": "pages_settingspage_cancelkeyrotation",
       "community": 1,
       "norm_label": "cancelkeyrotation()"
@@ -3733,7 +3751,7 @@
       "label": "removeProvider()",
       "file_type": "code",
       "source_file": "artifacts/specflow-ai/src/pages/SettingsPage.tsx",
-      "source_location": "L203",
+      "source_location": "L209",
       "id": "pages_settingspage_removeprovider",
       "community": 1,
       "norm_label": "removeprovider()"
@@ -3742,7 +3760,7 @@
       "label": "save()",
       "file_type": "code",
       "source_file": "artifacts/specflow-ai/src/pages/SettingsPage.tsx",
-      "source_location": "L420",
+      "source_location": "L426",
       "id": "pages_settingspage_save",
       "community": 1,
       "norm_label": "save()"
@@ -3852,88 +3870,88 @@
       "source_file": "artifacts/specflow-ai/src/pages/WorkflowWorkspace.tsx",
       "source_location": "L1",
       "id": "artifacts_specflow_ai_src_pages_workflowworkspace_tsx",
-      "community": 6,
+      "community": 5,
       "norm_label": "workflowworkspace.tsx"
     },
     {
       "label": "getSkillProvenance()",
       "file_type": "code",
       "source_file": "artifacts/specflow-ai/src/pages/WorkflowWorkspace.tsx",
-      "source_location": "L34",
+      "source_location": "L35",
       "id": "pages_workflowworkspace_getskillprovenance",
-      "community": 6,
+      "community": 5,
       "norm_label": "getskillprovenance()"
     },
     {
       "label": "resolveStepSkillPhase()",
       "file_type": "code",
       "source_file": "artifacts/specflow-ai/src/pages/WorkflowWorkspace.tsx",
-      "source_location": "L39",
+      "source_location": "L40",
       "id": "pages_workflowworkspace_resolvestepskillphase",
-      "community": 6,
+      "community": 5,
       "norm_label": "resolvestepskillphase()"
     },
     {
       "label": "toSkillSnapshot()",
       "file_type": "code",
       "source_file": "artifacts/specflow-ai/src/pages/WorkflowWorkspace.tsx",
-      "source_location": "L54",
+      "source_location": "L55",
       "id": "pages_workflowworkspace_toskillsnapshot",
-      "community": 6,
+      "community": 5,
       "norm_label": "toskillsnapshot()"
     },
     {
       "label": "mapGuidanceItem()",
       "file_type": "code",
       "source_file": "artifacts/specflow-ai/src/pages/WorkflowWorkspace.tsx",
-      "source_location": "L72",
+      "source_location": "L73",
       "id": "pages_workflowworkspace_mapguidanceitem",
-      "community": 6,
+      "community": 5,
       "norm_label": "mapguidanceitem()"
     },
     {
       "label": "buildGuidanceItems()",
       "file_type": "code",
       "source_file": "artifacts/specflow-ai/src/pages/WorkflowWorkspace.tsx",
-      "source_location": "L101",
+      "source_location": "L102",
       "id": "pages_workflowworkspace_buildguidanceitems",
-      "community": 6,
+      "community": 5,
       "norm_label": "buildguidanceitems()"
     },
     {
       "label": "WorkflowWorkspace()",
       "file_type": "code",
       "source_file": "artifacts/specflow-ai/src/pages/WorkflowWorkspace.tsx",
-      "source_location": "L214",
+      "source_location": "L215",
       "id": "pages_workflowworkspace_workflowworkspace",
-      "community": 6,
+      "community": 5,
       "norm_label": "workflowworkspace()"
     },
     {
       "label": "handleSendStoryToReview()",
       "file_type": "code",
       "source_file": "artifacts/specflow-ai/src/pages/WorkflowWorkspace.tsx",
-      "source_location": "L313",
+      "source_location": "L315",
       "id": "pages_workflowworkspace_handlesendstorytoreview",
-      "community": 6,
+      "community": 5,
       "norm_label": "handlesendstorytoreview()"
     },
     {
       "label": "handleSplitStory()",
       "file_type": "code",
       "source_file": "artifacts/specflow-ai/src/pages/WorkflowWorkspace.tsx",
-      "source_location": "L344",
+      "source_location": "L346",
       "id": "pages_workflowworkspace_handlesplitstory",
-      "community": 6,
+      "community": 5,
       "norm_label": "handlesplitstory()"
     },
     {
       "label": "loadGuidance()",
       "file_type": "code",
       "source_file": "artifacts/specflow-ai/src/pages/WorkflowWorkspace.tsx",
-      "source_location": "L548",
+      "source_location": "L553",
       "id": "pages_workflowworkspace_loadguidance",
-      "community": 6,
+      "community": 5,
       "norm_label": "loadguidance()"
     },
     {
@@ -4617,7 +4635,7 @@
       "source_file": "lib/db/src/index.ts",
       "source_location": "L1",
       "id": "lib_db_src_index_ts",
-      "community": 5,
+      "community": 6,
       "norm_label": "index.ts"
     },
     {
@@ -4626,7 +4644,7 @@
       "source_file": "lib/db/src/index.ts",
       "source_location": "L10",
       "id": "src_index_isdatabaseconfigured",
-      "community": 5,
+      "community": 6,
       "norm_label": "isdatabaseconfigured()"
     },
     {
@@ -4635,7 +4653,7 @@
       "source_file": "lib/db/src/index.ts",
       "source_location": "L14",
       "id": "src_index_getpool",
-      "community": 5,
+      "community": 6,
       "norm_label": "getpool()"
     },
     {
@@ -4644,7 +4662,7 @@
       "source_file": "lib/db/src/index.ts",
       "source_location": "L25",
       "id": "src_index_getdb",
-      "community": 5,
+      "community": 6,
       "norm_label": "getdb()"
     },
     {
@@ -4653,7 +4671,7 @@
       "source_file": "lib/db/src/index.ts",
       "source_location": "L30",
       "id": "src_index_ensureworkspaceschema",
-      "community": 5,
+      "community": 6,
       "norm_label": "ensureworkspaceschema()"
     },
     {
@@ -4671,7 +4689,7 @@
       "source_file": "lib/api-client-react/src/guidance.ts",
       "source_location": "L1",
       "id": "lib_api_client_react_src_guidance_ts",
-      "community": 6,
+      "community": 5,
       "norm_label": "guidance.ts"
     },
     {
@@ -4680,7 +4698,7 @@
       "source_file": "lib/api-client-react/src/guidance.ts",
       "source_location": "L24",
       "id": "src_guidance_getworkflowguidance",
-      "community": 6,
+      "community": 5,
       "norm_label": "getworkflowguidance()"
     },
     {
@@ -4716,7 +4734,7 @@
       "source_file": "lib/api-client-react/src/custom-fetch.ts",
       "source_location": "L48",
       "id": "src_custom_fetch_isrequest",
-      "community": 4,
+      "community": 0,
       "norm_label": "isrequest()"
     },
     {
@@ -4725,7 +4743,7 @@
       "source_file": "lib/api-client-react/src/custom-fetch.ts",
       "source_location": "L52",
       "id": "src_custom_fetch_resolvemethod",
-      "community": 4,
+      "community": 0,
       "norm_label": "resolvemethod()"
     },
     {
@@ -4923,7 +4941,7 @@
       "source_file": "lib/api-client-react/src/custom-fetch.ts",
       "source_location": "L326",
       "id": "src_custom_fetch_customfetch",
-      "community": 4,
+      "community": 0,
       "norm_label": "customfetch()"
     },
     {
@@ -5202,7 +5220,7 @@
       "source_file": "lib/api-client-react/src/generated/api.ts",
       "source_location": "L578",
       "id": "generated_api_getcreatesessionurl",
-      "community": 1,
+      "community": 0,
       "norm_label": "getcreatesessionurl()"
     },
     {
@@ -5211,7 +5229,7 @@
       "source_file": "lib/api-client-react/src/generated/api.ts",
       "source_location": "L582",
       "id": "generated_api_createsession",
-      "community": 1,
+      "community": 0,
       "norm_label": "createsession()"
     },
     {
@@ -5931,7 +5949,7 @@
       "source_file": "lib/api-client-react/src/generated/api.ts",
       "source_location": "L2283",
       "id": "generated_api_getgetexportpackageurl",
-      "community": 10,
+      "community": 0,
       "norm_label": "getgetexportpackageurl()"
     },
     {
@@ -5940,7 +5958,7 @@
       "source_file": "lib/api-client-react/src/generated/api.ts",
       "source_location": "L2287",
       "id": "generated_api_getexportpackage",
-      "community": 10,
+      "community": 0,
       "norm_label": "getexportpackage()"
     },
     {
@@ -6897,7 +6915,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/ai/provider-config.ts",
-      "source_location": "L221",
+      "source_location": "L220",
       "weight": 1.0,
       "_src": "artifacts_api_server_src_ai_provider_config_ts",
       "_tgt": "ai_provider_config_deleteaiproviderconfig",
@@ -6909,7 +6927,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/ai/provider-config.ts",
-      "source_location": "L230",
+      "source_location": "L229",
       "weight": 1.0,
       "_src": "artifacts_api_server_src_ai_provider_config_ts",
       "_tgt": "ai_provider_config_recordauditevent",
@@ -6957,7 +6975,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/ai/provider-config.ts",
-      "source_location": "L251",
+      "source_location": "L250",
       "weight": 1.0,
       "_src": "ai_provider_config_recordauditevent",
       "_tgt": "ai_provider_config_isaiproviderstoragemissingerror",
@@ -8601,7 +8619,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L580",
+      "source_location": "L517",
       "weight": 1.0,
       "_src": "artifacts_api_server_src_routes_persistence_ts",
       "_tgt": "routes_persistence_toresponsegeneration",
@@ -8613,7 +8631,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L615",
+      "source_location": "L552",
       "weight": 1.0,
       "_src": "artifacts_api_server_src_routes_persistence_ts",
       "_tgt": "routes_persistence_toproject",
@@ -8625,7 +8643,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L625",
+      "source_location": "L562",
       "weight": 1.0,
       "_src": "artifacts_api_server_src_routes_persistence_ts",
       "_tgt": "routes_persistence_toworkflowsession",
@@ -8637,7 +8655,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L666",
+      "source_location": "L603",
       "weight": 1.0,
       "_src": "artifacts_api_server_src_routes_persistence_ts",
       "_tgt": "routes_persistence_tosettings",
@@ -8649,7 +8667,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L685",
+      "source_location": "L622",
       "weight": 1.0,
       "_src": "artifacts_api_server_src_routes_persistence_ts",
       "_tgt": "routes_persistence_toexportpackage",
@@ -8661,7 +8679,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L701",
+      "source_location": "L638",
       "weight": 1.0,
       "_src": "artifacts_api_server_src_routes_persistence_ts",
       "_tgt": "routes_persistence_createsessiondefaults",
@@ -8673,7 +8691,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L716",
+      "source_location": "L653",
       "weight": 1.0,
       "_src": "artifacts_api_server_src_routes_persistence_ts",
       "_tgt": "routes_persistence_getsessionartifactsrecord",
@@ -8685,7 +8703,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L737",
+      "source_location": "L674",
       "weight": 1.0,
       "_src": "artifacts_api_server_src_routes_persistence_ts",
       "_tgt": "routes_persistence_buildphaseupdate",
@@ -8697,7 +8715,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L748",
+      "source_location": "L685",
       "weight": 1.0,
       "_src": "artifacts_api_server_src_routes_persistence_ts",
       "_tgt": "routes_persistence_listsessionswithartifacts",
@@ -8709,7 +8727,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L769",
+      "source_location": "L706",
       "weight": 1.0,
       "_src": "artifacts_api_server_src_routes_persistence_ts",
       "_tgt": "routes_persistence_getsessionwithartifacts",
@@ -8721,7 +8739,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L778",
+      "source_location": "L715",
       "weight": 1.0,
       "_src": "artifacts_api_server_src_routes_persistence_ts",
       "_tgt": "routes_persistence_createprojectrecord",
@@ -8733,7 +8751,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L825",
+      "source_location": "L762",
       "weight": 1.0,
       "_src": "artifacts_api_server_src_routes_persistence_ts",
       "_tgt": "routes_persistence_toexportitem",
@@ -8745,7 +8763,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L845",
+      "source_location": "L782",
       "weight": 1.0,
       "_src": "artifacts_api_server_src_routes_persistence_ts",
       "_tgt": "routes_persistence_tointegrationconfig",
@@ -8757,7 +8775,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L863",
+      "source_location": "L800",
       "weight": 1.0,
       "_src": "artifacts_api_server_src_routes_persistence_ts",
       "_tgt": "routes_persistence_getintegrationconfigs",
@@ -8769,7 +8787,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L875",
+      "source_location": "L812",
       "weight": 1.0,
       "_src": "artifacts_api_server_src_routes_persistence_ts",
       "_tgt": "routes_persistence_getintegrationconfig",
@@ -8781,7 +8799,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L893",
+      "source_location": "L830",
       "weight": 1.0,
       "_src": "artifacts_api_server_src_routes_persistence_ts",
       "_tgt": "routes_persistence_updateintegrationconfigrecord",
@@ -8793,7 +8811,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L937",
+      "source_location": "L874",
       "weight": 1.0,
       "_src": "artifacts_api_server_src_routes_persistence_ts",
       "_tgt": "routes_persistence_getexportitemsbypackageid",
@@ -8805,7 +8823,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L955",
+      "source_location": "L892",
       "weight": 1.0,
       "_src": "artifacts_api_server_src_routes_persistence_ts",
       "_tgt": "routes_persistence_createexportitemrecord",
@@ -8817,7 +8835,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L986",
+      "source_location": "L923",
       "weight": 1.0,
       "_src": "artifacts_api_server_src_routes_persistence_ts",
       "_tgt": "routes_persistence_updateexportitemexternalresult",
@@ -8877,7 +8895,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L630",
+      "source_location": "L567",
       "weight": 1.0,
       "_src": "routes_persistence_toworkflowsession",
       "_tgt": "routes_persistence_createworkflowgeneration",
@@ -8889,7 +8907,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L711",
+      "source_location": "L648",
       "weight": 1.0,
       "_src": "routes_persistence_createsessiondefaults",
       "_tgt": "routes_persistence_createworkflowgeneration",
@@ -8913,7 +8931,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L743",
+      "source_location": "L680",
       "weight": 1.0,
       "_src": "routes_persistence_buildphaseupdate",
       "_tgt": "routes_persistence_derivephaseprogress",
@@ -8985,7 +9003,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L721",
+      "source_location": "L658",
       "weight": 1.0,
       "_src": "routes_persistence_getsessionartifactsrecord",
       "_tgt": "routes_persistence_assertworkspaceid",
@@ -8997,7 +9015,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L752",
+      "source_location": "L689",
       "weight": 1.0,
       "_src": "routes_persistence_listsessionswithartifacts",
       "_tgt": "routes_persistence_assertworkspaceid",
@@ -9009,7 +9027,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L783",
+      "source_location": "L720",
       "weight": 1.0,
       "_src": "routes_persistence_createprojectrecord",
       "_tgt": "routes_persistence_assertworkspaceid",
@@ -9021,7 +9039,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L867",
+      "source_location": "L804",
       "weight": 1.0,
       "_src": "routes_persistence_getintegrationconfigs",
       "_tgt": "routes_persistence_assertworkspaceid",
@@ -9033,7 +9051,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L880",
+      "source_location": "L817",
       "weight": 1.0,
       "_src": "routes_persistence_getintegrationconfig",
       "_tgt": "routes_persistence_assertworkspaceid",
@@ -9045,7 +9063,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L899",
+      "source_location": "L836",
       "weight": 1.0,
       "_src": "routes_persistence_updateintegrationconfigrecord",
       "_tgt": "routes_persistence_assertworkspaceid",
@@ -9057,7 +9075,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L942",
+      "source_location": "L879",
       "weight": 1.0,
       "_src": "routes_persistence_getexportitemsbypackageid",
       "_tgt": "routes_persistence_assertworkspaceid",
@@ -9069,7 +9087,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L968",
+      "source_location": "L905",
       "weight": 1.0,
       "_src": "routes_persistence_createexportitemrecord",
       "_tgt": "routes_persistence_assertworkspaceid",
@@ -9081,7 +9099,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L997",
+      "source_location": "L934",
       "weight": 1.0,
       "_src": "routes_persistence_updateexportitemexternalresult",
       "_tgt": "routes_persistence_assertworkspaceid",
@@ -9117,7 +9135,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L629",
+      "source_location": "L566",
       "weight": 1.0,
       "_src": "routes_persistence_toworkflowsession",
       "_tgt": "routes_persistence_toresponsegeneration",
@@ -9129,7 +9147,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L797",
+      "source_location": "L734",
       "weight": 1.0,
       "_src": "routes_persistence_createprojectrecord",
       "_tgt": "routes_persistence_toproject",
@@ -9141,7 +9159,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L775",
+      "source_location": "L712",
       "weight": 1.0,
       "_src": "routes_persistence_getsessionwithartifacts",
       "_tgt": "routes_persistence_toworkflowsession",
@@ -9153,7 +9171,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L774",
+      "source_location": "L711",
       "weight": 1.0,
       "_src": "routes_persistence_getsessionwithartifacts",
       "_tgt": "routes_persistence_getsessionartifactsrecord",
@@ -9165,7 +9183,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L983",
+      "source_location": "L920",
       "weight": 1.0,
       "_src": "routes_persistence_createexportitemrecord",
       "_tgt": "routes_persistence_toexportitem",
@@ -9177,7 +9195,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L1014",
+      "source_location": "L951",
       "weight": 1.0,
       "_src": "routes_persistence_updateexportitemexternalresult",
       "_tgt": "routes_persistence_toexportitem",
@@ -9189,7 +9207,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L919",
+      "source_location": "L856",
       "weight": 1.0,
       "_src": "routes_persistence_updateintegrationconfigrecord",
       "_tgt": "routes_persistence_tointegrationconfig",
@@ -9201,7 +9219,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/routes/persistence.ts",
-      "source_location": "L900",
+      "source_location": "L837",
       "weight": 1.0,
       "_src": "routes_persistence_updateintegrationconfigrecord",
       "_tgt": "routes_persistence_getintegrationconfig",
@@ -10701,7 +10719,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/specflow-ai/src/components/settings/StepSkillsSection.tsx",
-      "source_location": "L22",
+      "source_location": "L23",
       "weight": 1.0,
       "_src": "artifacts_specflow_ai_src_components_settings_stepskillssection_tsx",
       "_tgt": "settings_stepskillssection_stepskillssection",
@@ -10720,6 +10738,18 @@
       "_tgt": "lib_step_skills_usestepskills",
       "source": "settings_stepskillssection_stepskillssection",
       "target": "lib_step_skills_usestepskills"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "artifacts/specflow-ai/src/components/settings/StepSkillsSection.tsx",
+      "source_location": "L37",
+      "weight": 1.0,
+      "_src": "settings_stepskillssection_stepskillssection",
+      "_tgt": "lib_ai_capability_getaiprovideruistate",
+      "source": "settings_stepskillssection_stepskillssection",
+      "target": "lib_ai_capability_getaiprovideruistate"
     },
     {
       "relation": "contains",
@@ -11420,6 +11450,30 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "artifacts/specflow-ai/src/lib/ai-capability.ts",
+      "source_location": "L14",
+      "weight": 1.0,
+      "_src": "artifacts_specflow_ai_src_lib_ai_capability_ts",
+      "_tgt": "lib_ai_capability_getaiprovideruistate",
+      "source": "artifacts_specflow_ai_src_lib_ai_capability_ts",
+      "target": "lib_ai_capability_getaiprovideruistate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "artifacts/specflow-ai/src/pages/WorkflowWorkspace.tsx",
+      "source_location": "L225",
+      "weight": 1.0,
+      "_src": "lib_ai_capability_getaiprovideruistate",
+      "_tgt": "pages_workflowworkspace_workflowworkspace",
+      "source": "lib_ai_capability_getaiprovideruistate",
+      "target": "pages_workflowworkspace_workflowworkspace"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "artifacts/specflow-ai/src/lib/adaptive-intake.ts",
       "source_location": "L100",
       "weight": 1.0,
@@ -11853,7 +11907,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/specflow-ai/src/pages/NewBreakdown.tsx",
-      "source_location": "L52",
+      "source_location": "L53",
       "weight": 1.0,
       "_src": "artifacts_specflow_ai_src_pages_newbreakdown_tsx",
       "_tgt": "pages_newbreakdown_add",
@@ -11865,7 +11919,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/specflow-ai/src/pages/NewBreakdown.tsx",
-      "source_location": "L57",
+      "source_location": "L58",
       "weight": 1.0,
       "_src": "artifacts_specflow_ai_src_pages_newbreakdown_tsx",
       "_tgt": "pages_newbreakdown_remove",
@@ -11877,7 +11931,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/specflow-ai/src/pages/NewBreakdown.tsx",
-      "source_location": "L146",
+      "source_location": "L147",
       "weight": 1.0,
       "_src": "artifacts_specflow_ai_src_pages_newbreakdown_tsx",
       "_tgt": "pages_newbreakdown_onsubmit",
@@ -11937,7 +11991,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/specflow-ai/src/pages/SettingsPage.tsx",
-      "source_location": "L37",
+      "source_location": "L38",
       "weight": 1.0,
       "_src": "artifacts_specflow_ai_src_pages_settingspage_tsx",
       "_tgt": "pages_settingspage_add",
@@ -11949,7 +12003,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/specflow-ai/src/pages/SettingsPage.tsx",
-      "source_location": "L88",
+      "source_location": "L89",
       "weight": 1.0,
       "_src": "artifacts_specflow_ai_src_pages_settingspage_tsx",
       "_tgt": "pages_settingspage_if",
@@ -11961,7 +12015,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/specflow-ai/src/pages/SettingsPage.tsx",
-      "source_location": "L131",
+      "source_location": "L137",
       "weight": 1.0,
       "_src": "artifacts_specflow_ai_src_pages_settingspage_tsx",
       "_tgt": "pages_settingspage_saveprovider",
@@ -11973,7 +12027,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/specflow-ai/src/pages/SettingsPage.tsx",
-      "source_location": "L153",
+      "source_location": "L159",
       "weight": 1.0,
       "_src": "artifacts_specflow_ai_src_pages_settingspage_tsx",
       "_tgt": "pages_settingspage_validateprovider",
@@ -11985,7 +12039,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/specflow-ai/src/pages/SettingsPage.tsx",
-      "source_location": "L176",
+      "source_location": "L182",
       "weight": 1.0,
       "_src": "artifacts_specflow_ai_src_pages_settingspage_tsx",
       "_tgt": "pages_settingspage_rotateprovider",
@@ -11997,7 +12051,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/specflow-ai/src/pages/SettingsPage.tsx",
-      "source_location": "L193",
+      "source_location": "L199",
       "weight": 1.0,
       "_src": "artifacts_specflow_ai_src_pages_settingspage_tsx",
       "_tgt": "pages_settingspage_beginkeyrotation",
@@ -12009,7 +12063,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/specflow-ai/src/pages/SettingsPage.tsx",
-      "source_location": "L198",
+      "source_location": "L204",
       "weight": 1.0,
       "_src": "artifacts_specflow_ai_src_pages_settingspage_tsx",
       "_tgt": "pages_settingspage_cancelkeyrotation",
@@ -12021,7 +12075,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/specflow-ai/src/pages/SettingsPage.tsx",
-      "source_location": "L203",
+      "source_location": "L209",
       "weight": 1.0,
       "_src": "artifacts_specflow_ai_src_pages_settingspage_tsx",
       "_tgt": "pages_settingspage_removeprovider",
@@ -12033,7 +12087,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/specflow-ai/src/pages/SettingsPage.tsx",
-      "source_location": "L420",
+      "source_location": "L426",
       "weight": 1.0,
       "_src": "artifacts_specflow_ai_src_pages_settingspage_tsx",
       "_tgt": "pages_settingspage_save",
@@ -12273,7 +12327,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/specflow-ai/src/pages/WorkflowWorkspace.tsx",
-      "source_location": "L34",
+      "source_location": "L35",
       "weight": 1.0,
       "_src": "artifacts_specflow_ai_src_pages_workflowworkspace_tsx",
       "_tgt": "pages_workflowworkspace_getskillprovenance",
@@ -12285,7 +12339,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/specflow-ai/src/pages/WorkflowWorkspace.tsx",
-      "source_location": "L39",
+      "source_location": "L40",
       "weight": 1.0,
       "_src": "artifacts_specflow_ai_src_pages_workflowworkspace_tsx",
       "_tgt": "pages_workflowworkspace_resolvestepskillphase",
@@ -12297,7 +12351,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/specflow-ai/src/pages/WorkflowWorkspace.tsx",
-      "source_location": "L54",
+      "source_location": "L55",
       "weight": 1.0,
       "_src": "artifacts_specflow_ai_src_pages_workflowworkspace_tsx",
       "_tgt": "pages_workflowworkspace_toskillsnapshot",
@@ -12309,7 +12363,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/specflow-ai/src/pages/WorkflowWorkspace.tsx",
-      "source_location": "L72",
+      "source_location": "L73",
       "weight": 1.0,
       "_src": "artifacts_specflow_ai_src_pages_workflowworkspace_tsx",
       "_tgt": "pages_workflowworkspace_mapguidanceitem",
@@ -12321,7 +12375,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/specflow-ai/src/pages/WorkflowWorkspace.tsx",
-      "source_location": "L101",
+      "source_location": "L102",
       "weight": 1.0,
       "_src": "artifacts_specflow_ai_src_pages_workflowworkspace_tsx",
       "_tgt": "pages_workflowworkspace_buildguidanceitems",
@@ -12333,7 +12387,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/specflow-ai/src/pages/WorkflowWorkspace.tsx",
-      "source_location": "L214",
+      "source_location": "L215",
       "weight": 1.0,
       "_src": "artifacts_specflow_ai_src_pages_workflowworkspace_tsx",
       "_tgt": "pages_workflowworkspace_workflowworkspace",
@@ -12345,7 +12399,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/specflow-ai/src/pages/WorkflowWorkspace.tsx",
-      "source_location": "L313",
+      "source_location": "L315",
       "weight": 1.0,
       "_src": "artifacts_specflow_ai_src_pages_workflowworkspace_tsx",
       "_tgt": "pages_workflowworkspace_handlesendstorytoreview",
@@ -12357,7 +12411,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/specflow-ai/src/pages/WorkflowWorkspace.tsx",
-      "source_location": "L344",
+      "source_location": "L346",
       "weight": 1.0,
       "_src": "artifacts_specflow_ai_src_pages_workflowworkspace_tsx",
       "_tgt": "pages_workflowworkspace_handlesplitstory",
@@ -12369,7 +12423,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/specflow-ai/src/pages/WorkflowWorkspace.tsx",
-      "source_location": "L548",
+      "source_location": "L553",
       "weight": 1.0,
       "_src": "artifacts_specflow_ai_src_pages_workflowworkspace_tsx",
       "_tgt": "pages_workflowworkspace_loadguidance",
@@ -12381,7 +12435,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/specflow-ai/src/pages/WorkflowWorkspace.tsx",
-      "source_location": "L586",
+      "source_location": "L591",
       "weight": 1.0,
       "_src": "pages_workflowworkspace_loadguidance",
       "_tgt": "pages_workflowworkspace_buildguidanceitems",

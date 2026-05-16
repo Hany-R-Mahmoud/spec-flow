@@ -14,6 +14,7 @@ import {
   type StepSkillPhase,
 } from '@/lib/step-skills';
 import { useSessionStore } from '@/store/session-store';
+import { getAiProviderUiState } from '@/lib/ai-capability';
 
 type StepSkillsSectionProps = {
   initialPhase?: StepSkillPhase;
@@ -33,7 +34,8 @@ export function StepSkillsSection({ initialPhase = 'clarification' }: StepSkills
   const [phase, setPhase] = useState<StepSkillPhase>(initialPhase);
   const activeSkill = getSkill(phase);
   const customSkill = state.customSkills[phase];
-  const aiEnabled = Boolean(sessionState.aiCapability?.canEditSkills);
+  const providerUi = getAiProviderUiState(sessionState.aiCapability);
+  const aiEnabled = providerUi.canEditSkills;
   const [name, setName] = useState(activeSkill.name);
   const [content, setContent] = useState(activeSkill.content);
   const warnings = useMemo(() => validateStepSkill(content), [content]);
@@ -99,7 +101,7 @@ export function StepSkillsSection({ initialPhase = 'clarification' }: StepSkills
           <p className="mt-0.5 text-xs text-muted-foreground">
             {aiEnabled
               ? 'Edit the behavior guide used by each AI workflow phase.'
-              : 'Connect an AI provider key to customize generation skills.'}
+              : providerUi.helperText}
           </p>
         </div>
         <Badge variant={activeSkill.source === 'custom' ? 'default' : 'outline'}>
@@ -217,7 +219,7 @@ export function StepSkillsSection({ initialPhase = 'clarification' }: StepSkills
             <p className="text-xs text-muted-foreground">
               {aiEnabled
                 ? 'Saved skills are validated on the server before live generation runs.'
-                : 'Manual mode keeps skills read-only because they only affect AI generation.'}
+                : providerUi.helperText}
             </p>
             <Button
               type="button"

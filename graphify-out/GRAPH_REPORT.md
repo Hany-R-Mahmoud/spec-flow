@@ -1,12 +1,12 @@
 # Graph Report - spec-flow  (2026-05-16)
 
 ## Corpus Check
-- 266 files · ~225,455 words
+- 267 files · ~225,526 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 684 nodes · 822 edges · 33 communities detected
-- Extraction: 87% EXTRACTED · 13% INFERRED · 0% AMBIGUOUS · INFERRED: 105 edges (avg confidence: 0.8)
+- 686 nodes · 825 edges · 33 communities detected
+- Extraction: 87% EXTRACTED · 13% INFERRED · 0% AMBIGUOUS · INFERRED: 107 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Community Hubs (Navigation)
@@ -65,18 +65,18 @@
   artifacts/api-server/src/routes/generation.ts → lib/api-client-react/src/generated/api.ts
 - `requireDatabase()` --calls--> `getDb()`  [INFERRED]
   artifacts/api-server/src/routes/persistence.ts → lib/db/src/index.ts
-- `ensureWorkspaceSchema()` --calls--> `getPool()`  [INFERRED]
-  artifacts/api-server/src/server.ts → lib/db/src/index.ts
+- `onSubmit()` --calls--> `createSession()`  [INFERRED]
+  artifacts/specflow-ai/src/pages/NewBreakdown.tsx → lib/api-client-react/src/generated/api.ts
 
 ## Communities
 
 ### Community 0 - "Community 0"
 Cohesion: 0.03
-Nodes (119): createExportPackage(), createProject(), exportToGitHub(), exportToJira(), generateClarification(), generateEpics(), generatePrd(), generateQuality() (+111 more)
+Nodes (126): createExportPackage(), createProject(), createSession(), exportToGitHub(), exportToJira(), generateClarification(), generateEpics(), generatePrd() (+118 more)
 
 ### Community 1 - "Community 1"
 Cohesion: 0.05
-Nodes (31): createSession(), deleteAiProvider(), getCreateSessionUrl(), getDeleteAiProviderUrl(), getRotateAiProviderUrl(), getUpdateAiProviderUrl(), getValidateAiProviderUrl(), rotateAiProvider() (+23 more)
+Nodes (29): deleteAiProvider(), getDeleteAiProviderUrl(), getRotateAiProviderUrl(), getUpdateAiProviderUrl(), getValidateAiProviderUrl(), rotateAiProvider(), updateAiProvider(), validateAiProvider() (+21 more)
 
 ### Community 2 - "Community 2"
 Cohesion: 0.08
@@ -88,31 +88,31 @@ Nodes (21): AiProviderError, classifyStatus(), parseProviderError(), runOpenAiJs
 
 ### Community 4 - "Community 4"
 Cohesion: 0.15
-Nodes (22): ApiError, applyBaseUrl(), buildErrorMessage(), customFetch(), getMediaType(), getStringField(), hasNoBody(), inferResponseType() (+14 more)
+Nodes (19): ApiError, applyBaseUrl(), buildErrorMessage(), getMediaType(), getStringField(), hasNoBody(), inferResponseType(), isJsonMediaType() (+11 more)
 
 ### Community 5 - "Community 5"
-Cohesion: 0.17
-Nodes (15): createApp(), loadApiServerConfig(), loadLocalEnv(), normalizeOrigin(), parseAllowedOrigins(), readAppOrigin(), readRequiredEnv(), readVercelOrigins() (+7 more)
+Cohesion: 0.11
+Nodes (12): getAiProviderUiState(), emptyState(), getStepSkillSnapshotForPhase(), parseStoredState(), useStepSkills(), buildGuidanceItems(), handleSendStoryToReview(), handleSplitStory() (+4 more)
 
 ### Community 6 - "Community 6"
-Cohesion: 0.12
-Nodes (11): emptyState(), getStepSkillSnapshotForPhase(), parseStoredState(), useStepSkills(), buildGuidanceItems(), handleSendStoryToReview(), handleSplitStory(), loadGuidance() (+3 more)
+Cohesion: 0.17
+Nodes (15): createApp(), loadApiServerConfig(), loadLocalEnv(), normalizeOrigin(), parseAllowedOrigins(), readAppOrigin(), readRequiredEnv(), readVercelOrigins() (+7 more)
 
 ### Community 7 - "Community 7"
 Cohesion: 0.29
 Nodes (15): answeredQuestionSummary(), applyQualityReview(), buildReadinessScore(), compactSentences(), detectWarnings(), generateClarificationQuestions(), generateEpics(), generatePrdSections() (+7 more)
 
 ### Community 8 - "Community 8"
-Cohesion: 0.27
-Nodes (7): createMetaSelector(), ensureLinkTag(), ensureMetaTag(), getRouteMetadata(), syncDocumentMetadata(), getCanonicalUrl(), isPreviewDeployment()
-
-### Community 9 - "Community 9"
 Cohesion: 0.38
 Nodes (10): analyzeAdaptiveIntake(), buildAdaptiveArtifacts(), buildAdaptivePhasePatch(), extractAcceptanceCriteria(), extractSectionContent(), extractStoryLines(), getRecommendedPhase(), hasPrdSignals() (+2 more)
 
-### Community 10 - "Community 10"
+### Community 9 - "Community 9"
 Cohesion: 0.27
-Nodes (8): getExportPackage(), getGetExportPackageUrl(), buildCsv(), buildJson(), buildMarkdown(), download(), slugifyFilename(), triggerFileDownload()
+Nodes (7): createMetaSelector(), ensureLinkTag(), ensureMetaTag(), getRouteMetadata(), syncDocumentMetadata(), getCanonicalUrl(), isPreviewDeployment()
+
+### Community 10 - "Community 10"
+Cohesion: 0.36
+Nodes (6): buildCsv(), buildJson(), buildMarkdown(), download(), slugifyFilename(), triggerFileDownload()
 
 ### Community 11 - "Community 11"
 Cohesion: 0.46
@@ -245,9 +245,9 @@ _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `runGeneration()` connect `Community 2` to `Community 0`, `Community 3`, `Community 7`?**
   _High betweenness centrality (0.140) - this node is a cross-community bridge._
-- **Why does `customFetch()` connect `Community 4` to `Community 0`, `Community 1`, `Community 10`, `Community 6`?**
-  _High betweenness centrality (0.085) - this node is a cross-community bridge._
-- **Why does `generateEpics()` connect `Community 0` to `Community 2`, `Community 4`?**
+- **Why does `customFetch()` connect `Community 0` to `Community 1`, `Community 4`, `Community 5`?**
+  _High betweenness centrality (0.087) - this node is a cross-community bridge._
+- **Why does `generateEpics()` connect `Community 0` to `Community 2`?**
   _High betweenness centrality (0.066) - this node is a cross-community bridge._
 - **Are the 31 inferred relationships involving `customFetch()` (e.g. with `getWorkflowGuidance()` and `healthCheck()`) actually correct?**
   _`customFetch()` has 31 INFERRED edges - model-reasoned connections that need verification._

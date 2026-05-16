@@ -17,6 +17,7 @@ import type { GuidanceItem } from '@/components/workspace/GuidancePanel';
 import type { ClarificationQuestion, GenerationStepState, PRDSection, Story } from '@/lib/types';
 import { type StepSkillPhase } from '@/lib/step-skills';
 import { useStepSkills, type StepSkill } from '@/lib/step-skills';
+import { getAiProviderUiState } from '@/lib/ai-capability';
 import { getWorkflowGuidance, type AiGuidanceItem, type GuidanceActionKey } from '@workspace/api-client-react';
 
 type GuidanceActions = {
@@ -221,8 +222,9 @@ export function WorkflowWorkspace() {
 
   const session = state.sessions.find(s => s.id === sessionId);
   const aiCapability = state.aiCapability;
-  const canGenerate = Boolean(aiCapability?.canGenerate);
-  const canEditSkills = Boolean(aiCapability?.canEditSkills);
+  const providerUi = getAiProviderUiState(aiCapability);
+  const canGenerate = providerUi.isAiEnabled;
+  const canEditSkills = providerUi.canEditSkills;
   const [activePhase, setActivePhase] = useState<Phase>(session?.currentPhase || 'clarification');
   const [liveQuestions, setLiveQuestions] = useState<ClarificationQuestion[]>(session?.clarificationQuestions ?? []);
   const [livePrdSections, setLivePrdSections] = useState<PRDSection[]>(session?.prdSections ?? []);
@@ -470,7 +472,20 @@ export function WorkflowWorkspace() {
   }, [advancePhase, canCompleteReview, completionBlocker, toast]);
 
   const handleGeneration = useCallback(async (step: 'clarification' | 'prd' | 'epics' | 'stories' | 'quality') => {
-    if (!canGenerate) {
+    const updatedSession = await runGeneration(session.id, step);
+
+    if (!updatedSession) {
+      const latestCapability = await refreshAiCapability();
+      const latestProviderUi = getAiProviderUiState(latestCapability);
+
+      if (latestProviderUi.isAiEnabled) {
+        toast({
+          title: 'Generation failed',
+          description: 'The previous saved output was preserved. Review the status message and retry when ready.',
+        });
+        return;
+      }
+
       if (step !== 'clarification') {
         const nextPhase =
           step === 'prd'
@@ -485,18 +500,8 @@ export function WorkflowWorkspace() {
       }
 
       toast({
-        title: 'Manual mode',
-        description: 'No validated AI provider found. Continued without AI generation.',
-      });
-      return;
-    }
-
-    const updatedSession = await runGeneration(session.id, step);
-
-    if (!updatedSession) {
-      toast({
-        title: 'Generation failed',
-        description: 'The previous saved output was preserved. Review the status message and retry when ready.',
+        title: latestProviderUi.label,
+        description: `${latestCapability?.reason ?? latestProviderUi.helperText} Continued without AI generation.`,
       });
       return;
     }
@@ -514,7 +519,7 @@ export function WorkflowWorkspace() {
       title: step === 'quality' ? 'Quality refreshed' : 'Generation complete',
       description: 'Workflow output generated and saved.',
     });
-  }, [advancePhase, canGenerate, runGeneration, session.id, toast]);
+  }, [advancePhase, refreshAiCapability, runGeneration, session.id, toast]);
 
   const handleEditSkill = useCallback((phase: StepSkillPhase) => {
     setLocation(`/settings?step-skill=${phase}`);
@@ -662,20 +667,20 @@ export function WorkflowWorkspace() {
             {activeGenerationStep ? (
               <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-md border border-border bg-muted/30 px-3 py-2">
                 <div className="text-xs text-muted-foreground">
-                  {canGenerate ? 'AI generation behavior' : 'Manual mode'}
+                  {providerUi.isAiEnabled ? 'AI generation behavior' : providerUi.label}
                   <span className="ml-2 font-mono text-foreground">
-                    {canGenerate
+                    {providerUi.isAiEnabled
                       ? activeGenerationStep.promptVersion
-                      : 'connect provider to enable generation'}
+                      : providerUi.statusText}
                   </span>
                 </div>
-                {canGenerate && skillProvenance ? (
+                {providerUi.isAiEnabled && skillProvenance ? (
                   <Badge variant="outline" className="text-[10px]">
                     skill {skillProvenance}
                   </Badge>
                 ) : null}
-                <Badge variant={canGenerate ? 'default' : 'outline'} className="text-[10px]">
-                  {canGenerate ? 'AI enabled' : 'Manual'}
+                <Badge variant={providerUi.badgeVariant} className="text-[10px]">
+                  {providerUi.label}
                 </Badge>
               </div>
             ) : null}

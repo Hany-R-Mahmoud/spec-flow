@@ -490,77 +490,14 @@ export async function ensureSeedData(db: Database, workspaceId: string): Promise
   }
 
   const seedPromise = (async () => {
-    const [settingsCount] = await db
+    const [settings] = await db
       .select()
       .from(settingsTable)
       .where(eq(settingsTable.workspaceId, scopedWorkspaceId));
-    if (!settingsCount) {
+
+    if (!settings) {
       await db.insert(settingsTable).values(buildDefaultSettings(scopedWorkspaceId));
     }
-
-    const [projectCount] = await db
-      .select()
-      .from(projectsTable)
-      .where(eq(projectsTable.workspaceId, scopedWorkspaceId));
-    if (projectCount) {
-      return;
-    }
-
-    const now = new Date();
-    const demoProjectId = "project-demo-1";
-    const demoSessionId = "session-demo-1";
-    const demoArtifacts = createDemoArtifacts(demoSessionId);
-
-    await db.insert(projectsTable).values({
-      id: demoProjectId,
-      workspaceId: scopedWorkspaceId,
-      name: "SpecFlow Persistence Demo",
-      jiraKey: "SPEC",
-      createdAt: now,
-      updatedAt: now,
-    });
-
-    await db.insert(sessionsTable).values({
-      id: demoSessionId,
-      workspaceId: scopedWorkspaceId,
-      projectId: demoProjectId,
-      name: "SpecFlow Persistence Demo",
-      inputType: "PRD draft",
-      outputDepth: "Standard",
-      jiraKey: "SPEC",
-      targetUsers: ["Product Manager", "Engineer"],
-      businessGoal: "Keep workflow progress durable between browser sessions.",
-      knownConstraints: "No AI generation in this phase.",
-      labels: ["Persistence", "MVP"],
-      rawInput:
-        "Persist session progress, settings, and workflow artifacts so refresh no longer loses active work.",
-      currentPhase: "stories",
-      phases: {
-        ...DEFAULT_PHASES,
-        clarification: "complete",
-        prd: "complete",
-        epics: "complete",
-        stories: "in-progress",
-      },
-      createdAt: now,
-      updatedAt: now,
-    });
-
-    await db.insert(workflowArtifactsTable).values({
-      sessionId: demoSessionId,
-      workspaceId: scopedWorkspaceId,
-      ...demoArtifacts,
-      createdAt: now,
-      updatedAt: now,
-    });
-
-    await db.insert(exportPackagesTable).values(
-      DEMO_EXPORTS.map((pkg) => ({
-        ...pkg,
-        workspaceId: scopedWorkspaceId,
-        date: new Date(pkg.date),
-      })),
-    );
   })();
 
   workspaceSeedPromises.set(scopedWorkspaceId, seedPromise);
