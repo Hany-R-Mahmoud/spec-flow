@@ -12,7 +12,7 @@ export interface UpdateAiProviderRequest {
   /** @minLength 1 */
   model: string;
   /** @minLength 1 */
-  baseUrl: string;
+  baseUrl?: string;
   /** @minLength 8 */
   apiKey?: string;
   enabled: boolean;

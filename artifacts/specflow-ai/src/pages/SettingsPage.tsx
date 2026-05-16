@@ -110,72 +110,92 @@ function AiProviderSection() {
   const [baseUrl, setBaseUrl] = useState(provider?.baseUrl ?? DEFAULT_AI_PROVIDER_BASE_URL);
   const [showKeyInput, setShowKeyInput] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<{ model?: string; baseUrl?: string; apiKey?: string }>({});
 
   useEffect(() => {
     setModel(provider?.model ?? 'gpt-4o-mini');
     setBaseUrl(provider?.baseUrl ?? DEFAULT_AI_PROVIDER_BASE_URL);
     setApiKey('');
     setShowKeyInput(false);
+    setFieldErrors({});
   }, [provider?.baseUrl, provider?.configured, provider?.id, provider?.keySuffix, provider?.model]);
 
-  const status = provider?.status ?? 'not_configured';
-  const configured = providerUi.isValidated;
   const hasSavedKey = providerUi.hasSavedKey;
+  const configured = providerUi.isValidated;
   const canEditKeyInline = !configured || showKeyInput || !hasSavedKey;
-  const showValidationError = Boolean(provider?.validationError);
-  const apiKeyHelper = hasSavedKey
-    ? providerUi.helperText
-    : 'Use your own key and endpoint for generation. The key is stored securely on the API server.';
   const lastValidatedLabel = provider?.lastValidatedAt
     ? new Date(provider.lastValidatedAt).toLocaleString()
     : null;
-  const providerStateLabel = providerUi.label;
-  const providerStateTone = providerUi.badgeVariant;
-  const normalizedBaseUrl = baseUrl.trim() || DEFAULT_AI_PROVIDER_BASE_URL;
 
   useEffect(() => {
-    void refreshAiCapability();
+    void refreshAiCapability().catch(() => {});
   }, [refreshAiCapability]);
 
+  // Client-side validation
+  const validate = (requireKey: boolean): boolean => {
+    const errors: typeof fieldErrors = {};
+    if (!model.trim()) errors.model = 'Model is required.';
+    const urlValue = baseUrl.trim();
+    if (urlValue) {
+      try {
+        const parsed = new URL(urlValue);
+        if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
+          errors.baseUrl = 'URL must start with http:// or https://.';
+        }
+      } catch {
+        errors.baseUrl = 'Must be a valid URL.';
+      }
+    }
+    const keyValue = apiKey.trim();
+    if (requireKey && keyValue.length < 8) {
+      errors.apiKey = 'API key must be at least 8 characters.';
+    }
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const saveProvider = async () => {
+    const keyValue = apiKey.trim();
+    const isNewKey = keyValue.length > 0;
+    if (!validate(isNewKey && !hasSavedKey)) return;
+    if (isNewKey && keyValue.length < 8) {
+      setFieldErrors((prev) => ({ ...prev, apiKey: 'API key must be at least 8 characters.' }));
+      return;
+    }
+
     try {
       setIsSaving(true);
-      const keyValue = apiKey.trim();
-      if (hasSavedKey && !showKeyInput) {
-        if (keyValue.length > 0) {
-          await rotateAiProvider({
-            apiKey: keyValue,
-            baseUrl: normalizedBaseUrl,
-          });
-        } else {
-          await updateAiProvider({
-            provider: 'openai',
-            model,
-            baseUrl: normalizedBaseUrl,
-            enabled: true,
-          });
-        }
-      } else if (hasSavedKey) {
-        await updateAiProvider({
-          provider: 'openai',
-          model,
-          baseUrl: normalizedBaseUrl,
+      let result;
+      if (isNewKey && hasSavedKey) {
+        // Rotating key — send model so it's not lost
+        result = await rotateAiProvider({
           apiKey: keyValue,
-          enabled: true,
+          model,
+          baseUrl: baseUrl.trim() || undefined,
         });
-        setShowKeyInput(false);
       } else {
-        await updateAiProvider({
+        result = await updateAiProvider({
           provider: 'openai',
           model,
-          baseUrl: normalizedBaseUrl,
-          apiKey: keyValue,
+          baseUrl: baseUrl.trim() || undefined,
+          apiKey: isNewKey ? keyValue : undefined,
           enabled: true,
         });
       }
       setApiKey('');
-      await refreshAiCapability();
-      toast({ title: 'AI provider saved', description: 'Provider key validated and stored securely.' });
+      setShowKeyInput(false);
+      await refreshAiCapability().catch(() => {});
+
+      if (result.status === 'configured') {
+        toast({ title: 'AI provider saved', description: 'Provider key validated and stored securely.' });
+      } else if (result.status === 'validation_failed') {
+        toast({
+          title: 'Saved but validation failed',
+          description: result.validationError ?? 'The API key could not be validated against the provider.',
+        });
+      } else {
+        toast({ title: 'AI provider saved', description: 'Settings updated.' });
+      }
     } catch (error) {
       toast({
         title: 'Provider save failed',
@@ -190,13 +210,13 @@ function AiProviderSection() {
     try {
       setIsSaving(true);
       const validated = await validateAiProvider();
-      await refreshAiCapability();
+      await refreshAiCapability().catch(() => {});
       if (validated.status === 'configured') {
         toast({ title: 'Validation complete', description: 'AI provider validated successfully.' });
       } else {
         toast({
           title: 'Validation failed',
-          description: validated.validationError ?? 'AI provider is not validated yet.',
+          description: validated.validationError ?? 'AI provider could not be validated.',
         });
       }
     } catch (error) {
@@ -209,39 +229,12 @@ function AiProviderSection() {
     }
   };
 
-  const rotateProvider = async () => {
-    try {
-      setIsSaving(true);
-      await rotateAiProvider({ apiKey, baseUrl: normalizedBaseUrl });
-      setApiKey('');
-      await refreshAiCapability();
-      toast({ title: 'Provider key rotated', description: 'New key validated and stored securely.' });
-    } catch (error) {
-      toast({
-        title: 'Rotation failed',
-        description: error instanceof Error ? error.message : 'Could not rotate AI provider key.',
-      });
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const beginKeyRotation = () => {
-    setShowKeyInput(true);
-    setApiKey('');
-  };
-
-  const cancelKeyRotation = () => {
-    setShowKeyInput(false);
-    setApiKey('');
-  };
-
   const removeProvider = async () => {
     try {
       setIsSaving(true);
       await deleteAiProvider();
       setApiKey('');
-      await refreshAiCapability();
+      await refreshAiCapability().catch(() => {});
       toast({ title: 'AI provider removed', description: 'Workspace returned to manual mode.' });
     } catch (error) {
       toast({
@@ -253,11 +246,19 @@ function AiProviderSection() {
     }
   };
 
+  const needsKey = !hasSavedKey || showKeyInput;
+  const canSubmit =
+    !isSaving &&
+    model.trim().length > 0 &&
+    (needsKey ? apiKey.trim().length >= 8 : true);
+
   return (
     <SettingsSection title="AI Provider">
       <div className="flex flex-wrap items-center gap-2">
-        <Badge variant={providerStateTone}>{providerStateLabel}</Badge>
-        <span className="text-xs text-muted-foreground">{providerUi.statusText || status.replaceAll('_', ' ')}</span>
+        <Badge variant={providerUi.badgeVariant}>{providerUi.label}</Badge>
+        <span className="text-xs text-muted-foreground">
+          {providerUi.statusText || (provider?.status ?? 'not_configured').replaceAll('_', ' ')}
+        </span>
       </div>
 
       <div className="rounded border border-border bg-muted/30 p-3 text-xs text-muted-foreground">
@@ -271,7 +272,7 @@ function AiProviderSection() {
         </p>
       </div>
 
-      {hasSavedKey ? (
+      {hasSavedKey && !showKeyInput ? (
         <div className="rounded-md border border-border bg-background p-3">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="space-y-1">
@@ -291,7 +292,7 @@ function AiProviderSection() {
                 size="sm"
                 variant="outline"
                 className="h-8 text-xs"
-                onClick={beginKeyRotation}
+                onClick={() => { setShowKeyInput(true); setApiKey(''); }}
                 disabled={isSaving}
               >
                 Replace key
@@ -308,7 +309,7 @@ function AiProviderSection() {
               </Button>
             </div>
           </div>
-          {showValidationError && provider?.validationError ? (
+          {provider?.validationError ? (
             <p className="mt-2 text-xs text-[var(--color-danger)]">{provider.validationError}</p>
           ) : null}
         </div>
@@ -323,26 +324,33 @@ function AiProviderSection() {
           <Label className="text-xs font-medium mb-1.5 block">Model</Label>
           <Input
             value={model}
-            onChange={(event) => setModel(event.target.value)}
-            className="h-8 text-xs font-mono"
+            onChange={(event) => { setModel(event.target.value); setFieldErrors((p) => ({ ...p, model: undefined })); }}
+            className={`h-8 text-xs font-mono ${fieldErrors.model ? 'border-[var(--color-danger)]' : ''}`}
             placeholder="gpt-4o-mini"
             data-testid="input-ai-provider-model"
+            aria-invalid={Boolean(fieldErrors.model)}
           />
+          {fieldErrors.model ? <p className="mt-1 text-xs text-[var(--color-danger)]">{fieldErrors.model}</p> : null}
         </div>
         <div className="md:col-span-2">
           <Label className="text-xs font-medium mb-1.5 block">API Base URL</Label>
           <Input
             value={baseUrl}
-            onChange={(event) => setBaseUrl(event.target.value)}
-            className="h-8 text-xs font-mono"
+            onChange={(event) => { setBaseUrl(event.target.value); setFieldErrors((p) => ({ ...p, baseUrl: undefined })); }}
+            className={`h-8 text-xs font-mono ${fieldErrors.baseUrl ? 'border-[var(--color-danger)]' : ''}`}
             type="url"
             placeholder={DEFAULT_AI_PROVIDER_BASE_URL}
             autoComplete="off"
             data-testid="input-ai-provider-base-url"
+            aria-invalid={Boolean(fieldErrors.baseUrl)}
           />
-          <p className="mt-1 text-xs text-muted-foreground">
-            Used for validation and generation. Leave the default for OpenAI, or point to another OpenAI-compatible endpoint.
-          </p>
+          {fieldErrors.baseUrl ? (
+            <p className="mt-1 text-xs text-[var(--color-danger)]">{fieldErrors.baseUrl}</p>
+          ) : (
+            <p className="mt-1 text-xs text-muted-foreground">
+              Leave empty for the default OpenAI endpoint, or point to another OpenAI-compatible endpoint.
+            </p>
+          )}
         </div>
       </div>
 
@@ -351,85 +359,76 @@ function AiProviderSection() {
           <Label className="text-xs font-medium mb-1.5 block">API Key</Label>
           <Input
             value={apiKey}
-            onChange={(event) => setApiKey(event.target.value)}
-            className="h-8 text-xs font-mono"
+            onChange={(event) => { setApiKey(event.target.value); setFieldErrors((p) => ({ ...p, apiKey: undefined })); }}
+            className={`h-8 text-xs font-mono ${fieldErrors.apiKey ? 'border-[var(--color-danger)]' : ''}`}
             type="password"
             placeholder={hasSavedKey ? 'Paste replacement provider API key' : 'Paste provider API key'}
             autoComplete="off"
             aria-describedby="ai-provider-key-help"
+            aria-invalid={Boolean(fieldErrors.apiKey)}
             data-testid="input-ai-provider-key"
           />
-          <p id="ai-provider-key-help" className="mt-1 text-xs text-muted-foreground">
-            {hasSavedKey
-              ? 'Enter a replacement key to fix validation, or leave it empty to update the endpoint/model only.'
-              : apiKeyHelper}
-          </p>
+          {fieldErrors.apiKey ? (
+            <p id="ai-provider-key-help" className="mt-1 text-xs text-[var(--color-danger)]">{fieldErrors.apiKey}</p>
+          ) : (
+            <p id="ai-provider-key-help" className="mt-1 text-xs text-muted-foreground">
+              {hasSavedKey
+                ? 'Enter a replacement key to fix validation, or leave it empty to update the endpoint/model only.'
+                : 'Use your own key and endpoint for generation. The key is stored securely on the API server.'}
+            </p>
+          )}
         </div>
       ) : null}
 
       <div className="flex flex-wrap gap-2">
-        {hasSavedKey && !showKeyInput ? (
-          <Button
-            type="button"
-            size="sm"
-            className="h-8 text-xs"
-            onClick={saveProvider}
-            disabled={isSaving || model.trim().length === 0 || normalizedBaseUrl.trim().length === 0}
-          >
-            <KeyRound className="mr-2 h-3.5 w-3.5" />
-            Save Changes
-          </Button>
-        ) : null}
-        {!hasSavedKey || showKeyInput ? (
-          <Button
-            type="button"
-            size="sm"
-            className="h-8 text-xs"
-            onClick={hasSavedKey ? rotateProvider : saveProvider}
-            disabled={isSaving || apiKey.trim().length < 8 || model.trim().length === 0 || normalizedBaseUrl.trim().length === 0}
-          >
-            <KeyRound className="mr-2 h-3.5 w-3.5" />
-            {hasSavedKey ? 'Save Replacement' : 'Save Provider'}
-          </Button>
-        ) : null}
+        <Button
+          type="button"
+          size="sm"
+          className="h-8 text-xs"
+          onClick={saveProvider}
+          disabled={!canSubmit}
+        >
+          <KeyRound className="mr-2 h-3.5 w-3.5" />
+          {needsKey ? (hasSavedKey ? 'Save Replacement' : 'Save Provider') : 'Save Changes'}
+        </Button>
         {hasSavedKey && showKeyInput ? (
           <Button
             type="button"
             size="sm"
             variant="outline"
             className="h-8 text-xs"
-            onClick={cancelKeyRotation}
+            onClick={() => { setShowKeyInput(false); setApiKey(''); setFieldErrors({}); }}
             disabled={isSaving}
           >
             Cancel
           </Button>
         ) : null}
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          className="h-8 text-xs"
-          onClick={validateProvider}
-          disabled={isSaving || !provider?.id}
-        >
-          Validate
-        </Button>
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          className="h-8 text-xs text-[var(--color-danger)]"
-          onClick={removeProvider}
-          disabled={isSaving || !provider?.id}
-        >
-          <Trash2 className="mr-2 h-3.5 w-3.5" />
-          Remove
-        </Button>
+        {hasSavedKey ? (
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            className="h-8 text-xs"
+            onClick={validateProvider}
+            disabled={isSaving || !provider?.id}
+          >
+            Validate
+          </Button>
+        ) : null}
+        {hasSavedKey ? (
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            className="h-8 text-xs text-[var(--color-danger)]"
+            onClick={removeProvider}
+            disabled={isSaving || !provider?.id}
+          >
+            <Trash2 className="mr-2 h-3.5 w-3.5" />
+            Remove
+          </Button>
+        ) : null}
       </div>
-
-      {!hasSavedKey && showValidationError && provider?.validationError ? (
-        <p className="text-xs text-[var(--color-danger)]">{provider.validationError}</p>
-      ) : null}
     </SettingsSection>
   );
 }

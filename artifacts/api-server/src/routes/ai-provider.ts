@@ -255,7 +255,7 @@ router.post("/ai/provider/rotate", async (req, res) => {
 
     const row = await saveAiProviderConfig(db, auth.workspaceId, {
       provider: "openai",
-      model: existing?.model ?? "gpt-4o-mini",
+      model: input.model ?? existing?.model ?? "gpt-4o-mini",
       baseUrl,
       apiKey: input.apiKey,
       enabled: existing?.enabled ?? true,

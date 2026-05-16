@@ -3186,7 +3186,7 @@ export const updateAiProviderBodyApiKeyMin = 8;
 export const UpdateAiProviderBody = zod.object({
   provider: zod.enum(["openai"]),
   model: zod.string().min(1),
-  baseUrl: zod.string().min(1),
+  baseUrl: zod.string().min(1).optional(),
   apiKey: zod.string().min(updateAiProviderBodyApiKeyMin).optional(),
   enabled: zod.boolean(),
 });
@@ -3267,7 +3267,8 @@ export const ValidateAiProviderResponse = zod.object({
 export const rotateAiProviderBodyApiKeyMin = 8;
 
 export const RotateAiProviderBody = zod.object({
-  baseUrl: zod.string().min(1),
+  model: zod.string().min(1).optional(),
+  baseUrl: zod.string().min(1).optional(),
   apiKey: zod.string().min(rotateAiProviderBodyApiKeyMin),
 });
 

@@ -1650,18 +1650,21 @@ components:
           minLength: 8
         enabled:
           type: boolean
-      required: [provider, model, baseUrl, enabled]
+      required: [provider, model, enabled]
       additionalProperties: false
     RotateAiProviderRequest:
       type: object
       properties:
+        model:
+          type: string
+          minLength: 1
         baseUrl:
           type: string
           minLength: 1
         apiKey:
           type: string
           minLength: 8
-      required: [baseUrl, apiKey]
+      required: [apiKey]
       additionalProperties: false
     UpdateIntegrationConfigRequest:
       type: object
