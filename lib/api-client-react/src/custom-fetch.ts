@@ -1,6 +1,7 @@
 export type CustomFetchOptions = RequestInit & {
   responseType?: "json" | "text" | "blob" | "auto";
   skipAuth?: boolean;
+  // signal is inherited from RequestInit — pass AbortController.signal to cancel
 };
 
 export type ErrorType<T = unknown> = ApiError<T>;

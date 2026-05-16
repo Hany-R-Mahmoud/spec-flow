@@ -1,7 +1,6 @@
 import { cn } from '@/lib/utils';
-import { Check, AlertTriangle } from 'lucide-react';
+import { Check, AlertTriangle, Loader2 } from 'lucide-react';
 import { Phase, PhaseStatus, ProjectSession } from '@/lib/types';
-import { STEP_SKILL_PHASES, type StepSkillPhase } from '@/lib/step-skills';
 
 const PHASES: { key: Phase; label: string; short: string }[] = [
   { key: 'intake', label: 'Intake', short: 'Intake' },
@@ -15,9 +14,6 @@ const PHASES: { key: Phase; label: string; short: string }[] = [
 ];
 
 const PHASE_ORDER: Phase[] = ['intake', 'clarification', 'prd', 'epics', 'stories', 'quality', 'devReview', 'export'];
-const STEP_SKILL_PHASE_SET = new Set<StepSkillPhase>(
-  STEP_SKILL_PHASES.map((item) => item.phase),
-);
 
 function isAccessible(phase: Phase, session: ProjectSession): boolean {
   const phaseIdx = PHASE_ORDER.indexOf(phase);
@@ -29,11 +25,10 @@ interface PhaseTrackerProps {
   session: ProjectSession;
   activePhase: Phase;
   onPhaseClick: (phase: Phase) => void;
-  onEditSkill?: (phase: StepSkillPhase) => void;
-  canEditSkills?: boolean;
+  generatingPhase?: Phase | null;
 }
 
-export function PhaseTracker({ session, activePhase, onPhaseClick, onEditSkill, canEditSkills = false }: PhaseTrackerProps) {
+export function PhaseTracker({ session, activePhase, onPhaseClick, generatingPhase }: PhaseTrackerProps) {
   return (
     <div className="border-b border-border bg-card">
       <div className="overflow-x-auto">
@@ -42,7 +37,8 @@ export function PhaseTracker({ session, activePhase, onPhaseClick, onEditSkill, 
             const status: PhaseStatus = session.phases[phase.key];
             const isActive = activePhase === phase.key;
             const accessible = isAccessible(phase.key, session);
-            const skillEditable = canEditSkills && STEP_SKILL_PHASE_SET.has(phase.key as StepSkillPhase);
+
+            const isGenerating = generatingPhase === phase.key;
 
             return (
               <div key={phase.key} className="flex items-center">
@@ -69,7 +65,11 @@ export function PhaseTracker({ session, activePhase, onPhaseClick, onEditSkill, 
                       accessible && !isActive && 'hover:bg-muted cursor-pointer'
                     )}
                   >
-                    {status === 'complete' ? (
+                    {isGenerating ? (
+                      <span className="flex items-center justify-center w-4 h-4 rounded-full bg-primary flex-shrink-0">
+                        <Loader2 className="w-2.5 h-2.5 text-white animate-spin" />
+                      </span>
+                    ) : status === 'complete' ? (
                       <span className="flex items-center justify-center w-4 h-4 rounded-full bg-[var(--color-success)] text-white flex-shrink-0">
                         <Check className="w-2.5 h-2.5" />
                       </span>
@@ -91,15 +91,6 @@ export function PhaseTracker({ session, activePhase, onPhaseClick, onEditSkill, 
                     <span className="hidden sm:inline">{phase.label}</span>
                     <span className="sm:hidden">{phase.short}</span>
                   </button>
-                  {skillEditable && onEditSkill ? (
-                    <button
-                      type="button"
-                      onClick={() => onEditSkill(phase.key as StepSkillPhase)}
-                      className="mt-1 px-3 text-[10px] font-medium text-muted-foreground transition-colors hover:text-primary"
-                    >
-                      Edit skill
-                    </button>
-                  ) : null}
                 </div>
               </div>
             );

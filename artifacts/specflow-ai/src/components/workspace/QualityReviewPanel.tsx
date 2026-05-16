@@ -6,7 +6,6 @@ import { PriorityBadge } from '@/components/shared/PriorityBadge';
 import { WarningList } from '@/components/shared/WarningBadge';
 import { ScoreBar } from '@/components/shared/ScoreBar';
 import { Button } from '@/components/ui/button';
-import { Spinner } from '@/components/ui/spinner';
 import { useToast } from '@/hooks/use-toast';
 import { useSessionStore } from '@/store/session-store';
 import { StepActionBar } from '@/components/workspace/StepActionBar';
@@ -20,6 +19,7 @@ interface QualityReviewPanelProps {
   onSendToDevReview: () => void;
   onSplitStory: (storyId: string) => void | Promise<void>;
   isAiBusy?: boolean;
+  onCancel?: () => void;
 }
 
 function scoreColor(value: number) {
@@ -37,6 +37,7 @@ export function QualityReviewPanel({
   onSendToDevReview,
   onSplitStory,
   isAiBusy = false,
+  onCancel,
 }: QualityReviewPanelProps) {
   const { toast } = useToast();
   const { dispatch } = useSessionStore();
@@ -103,11 +104,13 @@ export function QualityReviewPanel({
 
       <GenerationStatusNotice
         generationStep={generationStep}
+        stepLabel="quality scores"
         successMessage="Readiness scores refreshed from the API workflow."
         failedMessage="Quality review failed. Retry when ready."
         unavailableMessage="Quality review is unavailable right now."
         onRetry={onGenerateQuality}
         retryLabel="Quality"
+        onCancel={onCancel}
       />
 
       {/* Summary cards */}
@@ -254,14 +257,12 @@ export function QualityReviewPanel({
       </div>
 
       <StepActionBar isLoading={isGenerating}>
-        <Button size="sm" variant="outline" onClick={onGenerateQuality} disabled={isGenerating || stories.length === 0}>
-          {isGenerating ? <Spinner className="h-3.5 w-3.5" /> : null}
-          Refresh Scores
+        <Button size="sm" variant="outline" onClick={onGenerateQuality} disabled={isGenerating || stories.length === 0} loading={isGenerating}>
+          {isGenerating ? 'Refreshing…' : 'Refresh Scores'}
         </Button>
-        <Button size="sm" onClick={onSendToDevReview} disabled={isGenerating || stories.length === 0} data-testid="button-send-all-review">
-          {isGenerating ? <Spinner className="h-3.5 w-3.5" /> : null}
+        <Button size="sm" onClick={onSendToDevReview} disabled={isGenerating || stories.length === 0} loading={isGenerating} data-testid="button-send-all-review">
           <Send className="w-3 h-3 mr-1.5" />
-          Send All to Dev Review
+          {isGenerating ? 'Processing…' : 'Send All to Dev Review'}
         </Button>
       </StepActionBar>
     </div>

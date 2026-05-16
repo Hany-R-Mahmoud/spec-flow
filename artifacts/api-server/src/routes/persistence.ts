@@ -514,34 +514,50 @@ type SessionWithArtifactsRow = {
   artifacts: typeof workflowArtifactsTable.$inferSelect | null;
 };
 
+function sanitizeGenerationStatus(
+  step: WorkflowGeneration[keyof WorkflowGeneration],
+): WorkflowGeneration[keyof WorkflowGeneration] {
+  // A 'running' status persisted in the DB means the server process was
+  // interrupted mid-generation. Reset it to 'failed' so the client doesn't
+  // treat it as an active in-flight request.
+  if (step.status === "running") {
+    return {
+      ...step,
+      status: "failed",
+      errorMessage: "Generation was interrupted. Retry when ready.",
+    };
+  }
+  return step;
+}
+
 function toResponseGeneration(
   generation: WorkflowGeneration,
 ): WorkflowSession["generation"] {
   return {
     clarification: {
-      ...generation.clarification,
+      ...sanitizeGenerationStatus(generation.clarification),
       updatedAt: generation.clarification.updatedAt
         ? new Date(generation.clarification.updatedAt)
         : null,
     },
     prd: {
-      ...generation.prd,
+      ...sanitizeGenerationStatus(generation.prd),
       updatedAt: generation.prd.updatedAt ? new Date(generation.prd.updatedAt) : null,
     },
     epics: {
-      ...generation.epics,
+      ...sanitizeGenerationStatus(generation.epics),
       updatedAt: generation.epics.updatedAt
         ? new Date(generation.epics.updatedAt)
         : null,
     },
     stories: {
-      ...generation.stories,
+      ...sanitizeGenerationStatus(generation.stories),
       updatedAt: generation.stories.updatedAt
         ? new Date(generation.stories.updatedAt)
         : null,
     },
     quality: {
-      ...generation.quality,
+      ...sanitizeGenerationStatus(generation.quality),
       updatedAt: generation.quality.updatedAt
         ? new Date(generation.quality.updatedAt)
         : null,

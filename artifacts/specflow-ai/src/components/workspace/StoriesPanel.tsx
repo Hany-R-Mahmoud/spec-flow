@@ -8,7 +8,6 @@ import { ReadinessScoreRing } from '@/components/shared/ReadinessScore';
 import { WarningList } from '@/components/shared/WarningBadge';
 import { ScoreBar } from '@/components/shared/ScoreBar';
 import { Button } from '@/components/ui/button';
-import { Spinner } from '@/components/ui/spinner';
 import { StepActionBar } from '@/components/workspace/StepActionBar';
 import { GenerationStatusNotice } from '@/components/workspace/GenerationStatusNotice';
 
@@ -20,6 +19,7 @@ interface StoriesPanelProps {
   onGenerateStories: () => void;
   onGenerateQuality: () => void;
   isAiBusy?: boolean;
+  onCancel?: () => void;
 }
 
 function StoryCard({ story, onSendToReview }: { story: Story; onSendToReview: (storyId: string) => void }) {
@@ -258,6 +258,7 @@ export function StoriesPanel({
   onGenerateStories,
   onGenerateQuality,
   isAiBusy = false,
+  onCancel,
 }: StoriesPanelProps) {
   const [collapsedEpics, setCollapsedEpics] = useState<Set<string>>(new Set());
   const isGenerating = generationStep.status === 'running' || isAiBusy;
@@ -288,11 +289,13 @@ export function StoriesPanel({
 
       <GenerationStatusNotice
         generationStep={generationStep}
+        stepLabel="user stories"
         successMessage="Stories generated and saved."
         failedMessage="Story generation failed. Retry when ready."
         unavailableMessage="Story generation is unavailable right now."
         onRetry={onGenerateStories}
         retryLabel="Stories"
+        onCancel={onCancel}
       />
 
       <div className="space-y-6">
@@ -331,13 +334,11 @@ export function StoriesPanel({
       </div>
 
       <StepActionBar isLoading={isGenerating}>
-        <Button size="sm" variant="outline" onClick={onGenerateStories} disabled={isGenerating || epics.length === 0}>
-          {isGenerating ? <Spinner className="h-3.5 w-3.5" /> : null}
-          Regenerate Stories
+        <Button size="sm" variant="outline" onClick={onGenerateStories} disabled={isGenerating || epics.length === 0} loading={isGenerating}>
+          {isGenerating ? 'Regenerating…' : 'Regenerate Stories'}
         </Button>
-        <Button size="sm" onClick={onGenerateQuality} disabled={isGenerating || stories.length === 0} data-testid="button-review-quality">
-          {isGenerating ? <Spinner className="h-3.5 w-3.5" /> : null}
-          Review Quality
+        <Button size="sm" onClick={onGenerateQuality} disabled={isGenerating || stories.length === 0} loading={isGenerating} data-testid="button-review-quality">
+          {isGenerating ? 'Reviewing…' : 'Review Quality'}
         </Button>
       </StepActionBar>
     </div>

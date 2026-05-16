@@ -3,7 +3,8 @@ import { useLocation, useRoute } from 'wouter';
 import { useSessionStore } from '@/store/session-store';
 import { Phase } from '@/lib/types';
 import { PhaseTracker } from '@/components/workspace/PhaseTracker';
-import { GuidancePanel } from '@/components/workspace/GuidancePanel';
+import { WorkflowStatusBar } from '@/components/workspace/WorkflowStatusBar';
+import { type GuidanceItem } from '@/components/workspace/WorkflowStatusBar';
 import { ClarificationPanel } from '@/components/workspace/ClarificationPanel';
 import { PRDPanel } from '@/components/workspace/PRDPanel';
 import { EpicsPanel } from '@/components/workspace/EpicsPanel';
@@ -12,11 +13,11 @@ import { QualityReviewPanel } from '@/components/workspace/QualityReviewPanel';
 import { DeveloperReviewPanel } from '@/components/workspace/DeveloperReviewPanel';
 import { ExportPanel } from '@/components/workspace/ExportPanel';
 import { useToast } from '@/hooks/use-toast';
-import type { ClarificationQuestion, PRDSection, Story } from '@/lib/types';
+import type { ClarificationQuestion, PRDSection, Story, ProjectSession } from '@/lib/types';
 import { type StepSkillPhase } from '@/lib/step-skills';
 import { useStepSkills } from '@/lib/step-skills';
+import { StepSkillSidebar } from '@/components/workspace/StepSkillSidebar';
 import { getAiProviderUiState } from '@/lib/ai-capability';
-import { type GuidanceItem } from '@/components/workspace/GuidancePanel';
 
 type GuidanceActions = {
   onGeneratePRD: () => void;
@@ -25,7 +26,6 @@ type GuidanceActions = {
   onGenerateQuality: () => void;
   onSendToDevReview: () => void;
   onCompleteReview: () => void;
-  onEditStepSkill?: (phase: StepSkillPhase) => void;
 };
 
 type GenerationPhase = 'clarification' | 'prd' | 'epics' | 'stories' | 'quality';
@@ -47,20 +47,7 @@ function formatGenerationFailure(error: unknown): string {
   return error.message.replace(/^HTTP \d+ [^:]+:\s*/, '').trim() || fallback;
 }
 
-function resolveStepSkillPhase(phase: Phase): StepSkillPhase {
-  if (
-    phase === 'clarification' ||
-    phase === 'prd' ||
-    phase === 'epics' ||
-    phase === 'stories' ||
-    phase === 'quality' ||
-    phase === 'export'
-  ) {
-    return phase;
-  }
 
-  return phase === 'devReview' ? 'quality' : 'clarification';
-}
 
 function buildGuidanceItems(
   phase: Phase,
@@ -241,15 +228,10 @@ export function WorkflowWorkspace() {
 
 function WorkflowWorkspaceContent({ session }: { session: ProjectSession }) {
   const [, setLocation] = useLocation();
-  const { state, dispatch, runGeneration, saveWorkflowArtifacts, refreshAiCapability } = useSessionStore();
-  const { skillsByPhase } = useStepSkills();
+  const { state, dispatch, runGeneration, saveWorkflowArtifacts, refreshAiCapability, cancelGeneration } = useSessionStore();
   const { toast } = useToast();
-  const aiCapability = state.aiCapability;
-  const providerUi = getAiProviderUiState(aiCapability);
-  const canGenerate = providerUi.isAiEnabled;
-  const canEditSkills = providerUi.canEditSkills;
+  const { skillsByPhase } = useStepSkills();
   const [activePhase, setActivePhase] = useState<Phase>(session.currentPhase || 'clarification');
-  const [pendingGenerationPhase, setPendingGenerationPhase] = useState<GenerationPhase | null>(null);
 
   useEffect(() => {
     if (session.currentPhase) {
@@ -261,9 +243,23 @@ function WorkflowWorkspaceContent({ session }: { session: ProjectSession }) {
   const stories = state.stories.filter(s => s.sessionId === session.id);
   const questions = state.clarificationQuestions;
   const prdSections = state.prdSections;
-  const isWorkflowGenerating = Object.values(session.generation).some(
+  const isWorkflowGenerating = (Object.values(session.generation) as Array<{ status: string }>).some(
     (step) => step.status === 'running',
   );
+
+  // Derive which phase is currently generating (for PhaseTracker indicator)
+  const generatingPhase: Phase | null = (() => {
+    const steps = ['clarification', 'prd', 'epics', 'stories', 'quality'] as const;
+    for (const step of steps) {
+      if (session.generation[step].status === 'running') return step as Phase;
+    }
+    return null;
+  })();
+
+  const handleCancel = useCallback(() => {
+    cancelGeneration();
+    toast({ title: 'Generation cancelled', description: 'The AI request was stopped.' });
+  }, [cancelGeneration, toast]);
 
   const advancePhase = useCallback((nextPhase: Phase) => {
     setActivePhase(nextPhase);
@@ -435,8 +431,6 @@ function WorkflowWorkspaceContent({ session }: { session: ProjectSession }) {
       return;
     }
 
-    setPendingGenerationPhase(step);
-
     try {
       const updatedSession = await runGeneration(session.id, step);
 
@@ -490,40 +484,25 @@ function WorkflowWorkspaceContent({ session }: { session: ProjectSession }) {
         title: `Could not generate ${generationFailureLabels[step]}`,
         description: formatGenerationFailure(error),
       });
-    } finally {
-      setPendingGenerationPhase((current) => (current === step ? null : current));
     }
   }, [advancePhase, isWorkflowGenerating, refreshAiCapability, runGeneration, session.id, toast]);
 
-  const handleEditSkill = useCallback((phase: StepSkillPhase) => {
-    setLocation(`/settings?step-skill=${phase}`);
-  }, [setLocation]);
-
   const guidanceItems: GuidanceItem[] = useMemo(() => {
+    // Sidebar only handles navigation/phase transitions — never AI generation.
+    // Generation is triggered exclusively from the main panel action bars.
     const callbacks: Partial<GuidanceActions> = {
       onSendToDevReview: () => advancePhase('devReview'),
       onCompleteReview: handleCompleteReview,
-      onEditStepSkill: handleEditSkill,
     };
-
-    if (canGenerate) {
-      callbacks.onGeneratePRD = () => void handleGeneration('prd');
-      callbacks.onGenerateEpics = () => void handleGeneration('epics');
-      callbacks.onGenerateStories = () => void handleGeneration('stories');
-      callbacks.onGenerateQuality = () => void handleGeneration('quality');
-    }
 
     return buildGuidanceItems(activePhase, questions, prdSections, stories, callbacks);
   }, [
     activePhase,
     advancePhase,
-    handleGeneration,
     handleCompleteReview,
-    handleEditSkill,
     questions,
     prdSections,
     stories,
-    canGenerate,
   ]);
 
   const completionCount = (() => {
@@ -546,21 +525,11 @@ function WorkflowWorkspaceContent({ session }: { session: ProjectSession }) {
     return undefined;
   })();
 
-  const clarificationBusy =
-    pendingGenerationPhase === 'clarification' ||
-    session.generation.clarification.status === 'running';
-  const prdBusy =
-    pendingGenerationPhase === 'prd' ||
-    session.generation.prd.status === 'running';
-  const epicsBusy =
-    pendingGenerationPhase === 'epics' ||
-    session.generation.epics.status === 'running';
-  const storiesBusy =
-    pendingGenerationPhase === 'stories' ||
-    session.generation.stories.status === 'running';
-  const qualityBusy =
-    pendingGenerationPhase === 'quality' ||
-    session.generation.quality.status === 'running';
+  const clarificationBusy = session.generation.clarification.status === 'running';
+  const prdBusy = session.generation.prd.status === 'running';
+  const epicsBusy = session.generation.epics.status === 'running';
+  const storiesBusy = session.generation.stories.status === 'running';
+  const qualityBusy = session.generation.quality.status === 'running';
 
   return (
     <div className="flex flex-col h-full -m-4 sm:-m-6 md:-m-8">
@@ -569,15 +538,24 @@ function WorkflowWorkspaceContent({ session }: { session: ProjectSession }) {
         session={session}
         activePhase={activePhase}
         onPhaseClick={advancePhase}
-        onEditSkill={handleEditSkill}
-        canEditSkills={canEditSkills}
+        generatingPhase={generatingPhase}
       />
 
       {/* Content area */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Main content */}
+        {/* Main content — guidance integrated inline */}
         <div className="flex-1 overflow-y-auto p-6">
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-4xl mx-auto space-y-4">
+            {/* Inline status + guidance */}
+            <WorkflowStatusBar
+              phase={activePhase}
+              phaseStatus={session.phases[activePhase]}
+              items={guidanceItems}
+              completionCount={completionCount}
+              isGenerating={isWorkflowGenerating}
+              generatingLabel={generatingPhase ? `Generating ${generatingPhase}…` : undefined}
+            />
+
             {activePhase === 'intake' && (
               <div className="text-center py-16">
                 <div className="text-sm font-medium text-foreground mb-2">Intake Complete</div>
@@ -595,6 +573,7 @@ function WorkflowWorkspaceContent({ session }: { session: ProjectSession }) {
               onGenerateClarification={() => void handleGeneration('clarification')}
               onGeneratePRD={() => void handleGeneration('prd')}
               isAiBusy={clarificationBusy}
+              onCancel={handleCancel}
             />
             )}
 
@@ -605,6 +584,7 @@ function WorkflowWorkspaceContent({ session }: { session: ProjectSession }) {
               onGeneratePRD={() => void handleGeneration('prd')}
               onGenerateEpics={() => void handleGeneration('epics')}
               isAiBusy={prdBusy}
+              onCancel={handleCancel}
             />
             )}
 
@@ -615,6 +595,7 @@ function WorkflowWorkspaceContent({ session }: { session: ProjectSession }) {
               onGenerateEpics={() => void handleGeneration('epics')}
               onGenerateStories={() => void handleGeneration('stories')}
               isAiBusy={epicsBusy}
+              onCancel={handleCancel}
             />
             )}
 
@@ -627,6 +608,7 @@ function WorkflowWorkspaceContent({ session }: { session: ProjectSession }) {
               onGenerateStories={() => void handleGeneration('stories')}
               onGenerateQuality={() => void handleGeneration('quality')}
               isAiBusy={storiesBusy}
+              onCancel={handleCancel}
             />
             )}
 
@@ -637,6 +619,7 @@ function WorkflowWorkspaceContent({ session }: { session: ProjectSession }) {
               generationStep={session.generation.quality}
               onGenerateQuality={() => void handleGeneration('quality')}
               isAiBusy={qualityBusy}
+              onCancel={handleCancel}
               onSendToDevReview={async () => {
                 const queuedStories = stories.map((story) => ({
                   ...story,
@@ -677,15 +660,15 @@ function WorkflowWorkspaceContent({ session }: { session: ProjectSession }) {
           </div>
         </div>
 
-        {/* Guidance panel */}
-        <div className="w-72 flex-shrink-0 hidden lg:block overflow-y-auto">
-          <GuidancePanel
-            phase={activePhase}
-            phaseStatus={session.phases[activePhase]}
-            items={guidanceItems}
-            completionCount={completionCount}
-          />
-        </div>
+        {/* Step skill sidebar — shows the active skill for the current phase */}
+        {(activePhase === 'clarification' || activePhase === 'prd' || activePhase === 'epics' || activePhase === 'stories' || activePhase === 'quality' || activePhase === 'export') && (
+          <div className="w-64 flex-shrink-0 hidden lg:block overflow-y-auto">
+            <StepSkillSidebar
+              phase={activePhase}
+              skill={skillsByPhase[activePhase]}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

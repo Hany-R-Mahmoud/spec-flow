@@ -4,7 +4,6 @@ import { Epic, GenerationStepState } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { PriorityBadge } from '@/components/shared/PriorityBadge';
 import { Button } from '@/components/ui/button';
-import { Spinner } from '@/components/ui/spinner';
 import { useToast } from '@/hooks/use-toast';
 import { StepActionBar } from '@/components/workspace/StepActionBar';
 import { GenerationStatusNotice } from '@/components/workspace/GenerationStatusNotice';
@@ -15,6 +14,7 @@ interface EpicsPanelProps {
   onGenerateEpics: () => void;
   onGenerateStories: () => void;
   isAiBusy?: boolean;
+  onCancel?: () => void;
 }
 
 export function EpicsPanel({
@@ -23,6 +23,7 @@ export function EpicsPanel({
   onGenerateEpics,
   onGenerateStories,
   isAiBusy = false,
+  onCancel,
 }: EpicsPanelProps) {
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set(['epic-1']));
   const { toast } = useToast();
@@ -53,11 +54,13 @@ export function EpicsPanel({
 
       <GenerationStatusNotice
         generationStep={generationStep}
+        stepLabel="epics"
         successMessage="Epics generated and saved."
         failedMessage="Epic generation failed. Retry when ready."
         unavailableMessage="Epic generation is unavailable right now."
         onRetry={onGenerateEpics}
         retryLabel="Epics"
+        onCancel={onCancel}
       />
 
       <div className="space-y-3">
@@ -150,13 +153,11 @@ export function EpicsPanel({
       </div>
 
       <StepActionBar isLoading={isGenerating}>
-        <Button size="sm" variant="outline" onClick={onGenerateEpics} disabled={isGenerating}>
-          {isGenerating ? <Spinner className="h-3.5 w-3.5" /> : null}
-          Regenerate Epics
+        <Button size="sm" variant="outline" onClick={onGenerateEpics} disabled={isGenerating} loading={isGenerating}>
+          {isGenerating ? 'Regenerating…' : 'Regenerate Epics'}
         </Button>
-        <Button size="sm" onClick={onGenerateStories} disabled={isGenerating || epics.length === 0} data-testid="button-generate-stories">
-          {isGenerating ? <Spinner className="h-3.5 w-3.5" /> : null}
-          Generate Stories
+        <Button size="sm" onClick={onGenerateStories} disabled={isGenerating || epics.length === 0} loading={isGenerating} data-testid="button-generate-stories">
+          {isGenerating ? 'Generating Stories…' : 'Generate Stories'}
         </Button>
       </StepActionBar>
     </div>

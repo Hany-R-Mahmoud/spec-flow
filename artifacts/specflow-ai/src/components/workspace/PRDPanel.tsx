@@ -5,7 +5,6 @@ import { GenerationStepState, PRDSection } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Spinner } from '@/components/ui/spinner';
 import { useToast } from '@/hooks/use-toast';
 import { useSessionStore } from '@/store/session-store';
 import { StepActionBar } from '@/components/workspace/StepActionBar';
@@ -17,6 +16,7 @@ interface PRDPanelProps {
   onGeneratePRD: () => void;
   onGenerateEpics: () => void;
   isAiBusy?: boolean;
+  onCancel?: () => void;
 }
 
 type PRDFormValues = {
@@ -29,6 +29,7 @@ export function PRDPanel({
   onGeneratePRD,
   onGenerateEpics,
   isAiBusy = false,
+  onCancel,
 }: PRDPanelProps) {
   const { savePrdSections } = useSessionStore();
   const { toast } = useToast();
@@ -107,11 +108,13 @@ export function PRDPanel({
 
       <GenerationStatusNotice
         generationStep={generationStep}
+        stepLabel="PRD sections"
         successMessage="PRD sections generated and saved."
         failedMessage="PRD generation failed. Retry when ready."
         unavailableMessage="PRD generation is unavailable right now."
         onRetry={onGeneratePRD}
         retryLabel="PRD"
+        onCancel={onCancel}
       />
 
       <div className="space-y-3">
@@ -199,18 +202,17 @@ export function PRDPanel({
       </div>
 
       <StepActionBar isLoading={isGenerating}>
-        <Button size="sm" variant="outline" onClick={onGeneratePRD} disabled={isGenerating}>
-          {isGenerating ? <Spinner className="h-3.5 w-3.5" /> : null}
-          Regenerate PRD
+        <Button size="sm" variant="outline" onClick={onGeneratePRD} disabled={isGenerating} loading={isGenerating}>
+          {isGenerating ? 'Regenerating…' : 'Regenerate PRD'}
         </Button>
         <Button
           size="sm"
           onClick={onGenerateEpics}
           disabled={isGenerating || sections.length === 0}
+          loading={isGenerating}
           data-testid="button-generate-epics"
         >
-          {isGenerating ? <Spinner className="h-3.5 w-3.5" /> : null}
-          Generate Epics
+          {isGenerating ? 'Generating Epics…' : 'Generate Epics'}
         </Button>
       </StepActionBar>
     </div>

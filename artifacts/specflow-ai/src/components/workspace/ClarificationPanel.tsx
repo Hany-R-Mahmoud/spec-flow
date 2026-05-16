@@ -4,7 +4,6 @@ import { ChevronDown, ChevronRight, AlertCircle } from 'lucide-react';
 import { ClarificationQuestion, GenerationStepState } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Spinner } from '@/components/ui/spinner';
 import { useToast } from '@/hooks/use-toast';
 import { useSessionStore } from '@/store/session-store';
 import { StepActionBar } from '@/components/workspace/StepActionBar';
@@ -16,6 +15,7 @@ interface ClarificationPanelProps {
   onGenerateClarification: () => void;
   onGeneratePRD: () => void;
   isAiBusy?: boolean;
+  onCancel?: () => void;
 }
 
 type ClarificationFormValues = {
@@ -32,6 +32,7 @@ export function ClarificationPanel({
   onGenerateClarification,
   onGeneratePRD,
   isAiBusy = false,
+  onCancel,
 }: ClarificationPanelProps) {
   const { saveClarificationQuestions } = useSessionStore();
   const { toast } = useToast();
@@ -138,11 +139,13 @@ export function ClarificationPanel({
 
       <GenerationStatusNotice
         generationStep={generationStep}
+        stepLabel="clarification questions"
         successMessage="Clarification questions generated and saved."
         failedMessage="Clarification generation failed. Retry when ready."
         unavailableMessage="Clarification generation is unavailable right now."
         onRetry={onGenerateClarification}
         retryLabel="Clarification"
+        onCancel={onCancel}
       />
 
       <div className="space-y-2">
@@ -251,19 +254,19 @@ export function ClarificationPanel({
           variant="outline"
           onClick={onGenerateClarification}
           disabled={isGenerating}
+          loading={isGenerating}
           data-testid="button-generate-clarification"
         >
-          {isGenerating ? <Spinner className="h-3.5 w-3.5" /> : null}
-          {questions.length > 0 ? 'Regenerate Questions' : 'Generate Questions'}
+          {questions.length > 0 ? (isGenerating ? 'Regenerating…' : 'Regenerate Questions') : (isGenerating ? 'Generating…' : 'Generate Questions')}
         </Button>
         <Button
           size="sm"
           onClick={handleGeneratePRD}
           disabled={!allRequiredAnswered || isGenerating}
+          loading={isGenerating && allRequiredAnswered}
           data-testid="button-generate-prd"
         >
-          {isGenerating ? <Spinner className="h-3.5 w-3.5" /> : null}
-          Generate PRD
+          {isGenerating ? 'Generating PRD…' : 'Generate PRD'}
         </Button>
         <Button
           size="sm"
@@ -272,7 +275,6 @@ export function ClarificationPanel({
           disabled={isGenerating}
           data-testid="button-save-clarifications"
         >
-          {isGenerating ? <Spinner className="h-3.5 w-3.5" /> : null}
           Save Answers
         </Button>
       </StepActionBar>

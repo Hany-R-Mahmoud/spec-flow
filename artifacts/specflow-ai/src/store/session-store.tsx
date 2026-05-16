@@ -4,6 +4,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react';
@@ -247,11 +248,13 @@ const SessionContext = createContext<{
     sessionId: string,
     step: GenerationStepKey,
   ) => Promise<ProjectSession | null>;
+  cancelGeneration: () => void;
   reload: () => Promise<void>;
 } | undefined>(undefined);
 
 export function SessionProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<State>(INITIAL_STATE);
+  const generationAbortRef = useRef<AbortController | null>(null);
 
   const load = useCallback(async () => {
     setState((current) => ({ ...current, isLoading: true, error: null }));
@@ -270,9 +273,29 @@ export function SessionProvider({ children }: { children: ReactNode }) {
           getAiCapability(),
         ]);
 
+      const sanitized = sessionsResponse.sessions.map((session) => {
+        const steps = ['clarification', 'prd', 'epics', 'stories', 'quality'] as const;
+        const anyStale = steps.some((s) => session.generation[s].status === 'running');
+        if (!anyStale) return session;
+        return {
+          ...session,
+          generation: {
+            ...session.generation,
+            ...Object.fromEntries(
+              steps.map((s) => [
+                s,
+                session.generation[s].status === 'running'
+                  ? { ...session.generation[s], status: 'failed' as const, errorMessage: 'Generation was interrupted. Retry when ready.' }
+                  : session.generation[s],
+              ]),
+            ),
+          },
+        };
+      });
+
       setState((current) =>
         deriveState(
-          sessionsResponse.sessions,
+          sanitized,
           current.activeSessionId,
           settingsResponse,
           aiCapabilityResponse,
@@ -700,6 +723,13 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     return capability;
   }, []);
 
+  const cancelGeneration = useCallback(() => {
+    if (generationAbortRef.current) {
+      generationAbortRef.current.abort();
+      generationAbortRef.current = null;
+    }
+  }, []);
+
   const runGeneration = useCallback(
     async (sessionId: string, step: GenerationStepKey) => {
       const activeSession = state.sessions.find((session) => session.id === sessionId);
@@ -728,6 +758,11 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         }));
         return null;
       }
+
+      // Cancel any in-flight generation before starting a new one
+      cancelGeneration();
+      const controller = new AbortController();
+      generationAbortRef.current = controller;
 
       setState((current) =>
         deriveState(
@@ -759,14 +794,16 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         const request = { force: true, stepSkill };
         const updatedSession =
           step === 'clarification'
-            ? await generateClarificationRequest(sessionId, request)
+            ? await generateClarificationRequest(sessionId, request, { signal: controller.signal })
             : step === 'prd'
-              ? await generatePrdRequest(sessionId, request)
+              ? await generatePrdRequest(sessionId, request, { signal: controller.signal })
               : step === 'epics'
-                ? await generateEpicsRequest(sessionId, request)
+                ? await generateEpicsRequest(sessionId, request, { signal: controller.signal })
                 : step === 'stories'
-                  ? await generateStoriesRequest(sessionId, request)
-                  : await generateQualityRequest(sessionId, request);
+                  ? await generateStoriesRequest(sessionId, request, { signal: controller.signal })
+                  : await generateQualityRequest(sessionId, request, { signal: controller.signal });
+
+        generationAbortRef.current = null;
 
         setState((current) =>
           deriveState(
@@ -783,6 +820,32 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 
         return updatedSession;
       } catch (error) {
+        generationAbortRef.current = null;
+
+        // Treat abort as a clean cancel — reset to idle, don't show error
+        if (error instanceof DOMException && error.name === 'AbortError') {
+          setState((current) =>
+            deriveState(
+              patchSessionById(current.sessions, sessionId, (session) => ({
+                ...session,
+                generation: patchGeneration(session.generation, step, {
+                  status: 'idle',
+                  errorMessage: null,
+                  updatedAt: new Date().toISOString(),
+                }),
+              })),
+              current.activeSessionId,
+              current.settings,
+              current.aiCapability,
+              current.exportPackages,
+              false,
+              null,
+              'api',
+            ),
+          );
+          return null;
+        }
+
         const message = formatGenerationErrorMessage(error);
 
         setState((current) =>
@@ -808,7 +871,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         throw new Error(message);
       }
       },
-    [state.sessions, state.aiCapability],
+    [state.sessions, state.aiCapability, cancelGeneration],
   );
 
   const value = useMemo(
@@ -823,6 +886,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       saveSettings,
       refreshAiCapability,
       runGeneration,
+      cancelGeneration,
       reload: load,
     }),
     [
@@ -836,6 +900,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       saveSettings,
       refreshAiCapability,
       runGeneration,
+      cancelGeneration,
       load,
     ],
   );
