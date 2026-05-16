@@ -21,10 +21,15 @@ async function ensureWorkspaceSchema(): Promise<void> {
       `ALTER TABLE "${tableName}" ADD COLUMN IF NOT EXISTS "workspace_id" text`,
     );
   }
+
+  await pool.query(
+    `ALTER TABLE "ai_provider_config" ADD COLUMN IF NOT EXISTS "base_url" text NOT NULL DEFAULT 'https://api.openai.com/v1'`,
+  );
 }
 
 export async function createApiServer(): Promise<ReturnType<typeof createApp>> {
   const config = loadApiServerConfig();
+  await ensureWorkspaceSchema();
   return createApp(config);
 }
 

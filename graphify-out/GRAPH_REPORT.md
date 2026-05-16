@@ -1,11 +1,11 @@
 # Graph Report - spec-flow  (2026-05-16)
 
 ## Corpus Check
-- 267 files · ~226,364 words
+- 267 files · ~226,400 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 689 nodes · 835 edges · 35 communities detected
+- 689 nodes · 836 edges · 35 communities detected
 - Extraction: 87% EXTRACTED · 13% INFERRED · 0% AMBIGUOUS · INFERRED: 108 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
@@ -93,11 +93,11 @@ Cohesion: 0.11
 Nodes (12): getAiProviderUiState(), emptyState(), getStepSkillSnapshotForPhase(), parseStoredState(), useStepSkills(), buildGuidanceItems(), handleSendStoryToReview(), handleSplitStory() (+4 more)
 
 ### Community 5 - "Community 5"
-Cohesion: 0.22
+Cohesion: 0.19
 Nodes (7): sendAiProviderRouteError(), getWorkspaceAuthContext(), requireAuthContext(), requireMutableWorkspaceContext(), hasZodIssues(), sendError(), sendUnexpectedError()
 
 ### Community 6 - "Community 6"
-Cohesion: 0.23
+Cohesion: 0.24
 Nodes (11): createApp(), loadApiServerConfig(), loadLocalEnv(), normalizeOrigin(), parseAllowedOrigins(), readAppOrigin(), readRequiredEnv(), readVercelOrigins() (+3 more)
 
 ### Community 7 - "Community 7"
@@ -142,11 +142,11 @@ Nodes (3): cn(), ItemGroup(), ItemSeparator()
 
 ### Community 19 - "Community 19"
 Cohesion: 0.67
-Nodes (2): Calendar(), cn()
+Nodes (2): cn(), useChart()
 
 ### Community 20 - "Community 20"
 Cohesion: 0.67
-Nodes (2): cn(), useChart()
+Nodes (2): Calendar(), cn()
 
 ### Community 22 - "Community 22"
 Cohesion: 1.0
@@ -213,9 +213,9 @@ Cohesion: 1.0
 Nodes (2): appPath(), joinAppPath()
 
 ## Knowledge Gaps
-- **Thin community `Community 19`** (4 nodes): `calendar.tsx`, `calendar.tsx`, `Calendar()`, `cn()`
+- **Thin community `Community 19`** (4 nodes): `chart.tsx`, `chart.tsx`, `cn()`, `useChart()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 20`** (4 nodes): `chart.tsx`, `chart.tsx`, `cn()`, `useChart()`
+- **Thin community `Community 20`** (4 nodes): `calendar.tsx`, `calendar.tsx`, `Calendar()`, `cn()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 22`** (3 nodes): `App.tsx`, `loadComponent()`, `_resolveComponent()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.

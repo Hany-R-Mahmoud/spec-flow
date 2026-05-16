@@ -178,7 +178,7 @@
       "label": "createApiServer()",
       "file_type": "code",
       "source_file": "artifacts/api-server/src/server.ts",
-      "source_location": "L26",
+      "source_location": "L30",
       "id": "src_server_createapiserver",
       "community": 6,
       "norm_label": "createapiserver()"
@@ -187,7 +187,7 @@
       "label": "startApiServer()",
       "file_type": "code",
       "source_file": "artifacts/api-server/src/server.ts",
-      "source_location": "L31",
+      "source_location": "L36",
       "id": "src_server_startapiserver",
       "community": 6,
       "norm_label": "startapiserver()"
@@ -576,7 +576,7 @@
       "source_file": "artifacts/api-server/src/lib/rate-limit.ts",
       "source_location": "L1",
       "id": "artifacts_api_server_src_lib_rate_limit_ts",
-      "community": 1,
+      "community": 5,
       "norm_label": "rate-limit.ts"
     },
     {
@@ -585,7 +585,7 @@
       "source_file": "artifacts/api-server/src/lib/rate-limit.ts",
       "source_location": "L3",
       "id": "lib_rate_limit_consumeratelimit",
-      "community": 1,
+      "community": 5,
       "norm_label": "consumeratelimit()"
     },
     {
@@ -1413,7 +1413,7 @@
       "source_file": "artifacts/mockup-sandbox/src/components/ui/chart.tsx",
       "source_location": "L1",
       "id": "artifacts_mockup_sandbox_src_components_ui_chart_tsx",
-      "community": 20,
+      "community": 19,
       "norm_label": "chart.tsx"
     },
     {
@@ -1422,7 +1422,7 @@
       "source_file": "artifacts/specflow-ai/src/components/ui/chart.tsx",
       "source_location": "L25",
       "id": "ui_chart_usechart",
-      "community": 20,
+      "community": 19,
       "norm_label": "usechart()"
     },
     {
@@ -1431,7 +1431,7 @@
       "source_file": "artifacts/specflow-ai/src/components/ui/chart.tsx",
       "source_location": "L52",
       "id": "ui_chart_cn",
-      "community": 20,
+      "community": 19,
       "norm_label": "cn()"
     },
     {
@@ -1593,7 +1593,7 @@
       "source_file": "artifacts/mockup-sandbox/src/components/ui/calendar.tsx",
       "source_location": "L1",
       "id": "artifacts_mockup_sandbox_src_components_ui_calendar_tsx",
-      "community": 19,
+      "community": 20,
       "norm_label": "calendar.tsx"
     },
     {
@@ -1602,7 +1602,7 @@
       "source_file": "artifacts/specflow-ai/src/components/ui/calendar.tsx",
       "source_location": "L14",
       "id": "ui_calendar_calendar",
-      "community": 19,
+      "community": 20,
       "norm_label": "calendar()"
     },
     {
@@ -1611,7 +1611,7 @@
       "source_file": "artifacts/specflow-ai/src/components/ui/calendar.tsx",
       "source_location": "L203",
       "id": "ui_calendar_cn",
-      "community": 19,
+      "community": 20,
       "norm_label": "cn()"
     },
     {
@@ -2286,7 +2286,7 @@
       "source_file": "artifacts/specflow-ai/src/components/ui/chart.tsx",
       "source_location": "L1",
       "id": "artifacts_specflow_ai_src_components_ui_chart_tsx",
-      "community": 20,
+      "community": 19,
       "norm_label": "chart.tsx"
     },
     {
@@ -2421,7 +2421,7 @@
       "source_file": "artifacts/specflow-ai/src/components/ui/calendar.tsx",
       "source_location": "L1",
       "id": "artifacts_specflow_ai_src_components_ui_calendar_tsx",
-      "community": 19,
+      "community": 20,
       "norm_label": "calendar.tsx"
     },
     {
@@ -6630,7 +6630,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/server.ts",
-      "source_location": "L26",
+      "source_location": "L30",
       "weight": 1.0,
       "_src": "artifacts_api_server_src_server_ts",
       "_tgt": "src_server_createapiserver",
@@ -6642,7 +6642,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/server.ts",
-      "source_location": "L31",
+      "source_location": "L36",
       "weight": 1.0,
       "_src": "artifacts_api_server_src_server_ts",
       "_tgt": "src_server_startapiserver",
@@ -6654,7 +6654,19 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/server.ts",
-      "source_location": "L33",
+      "source_location": "L32",
+      "weight": 1.0,
+      "_src": "src_server_createapiserver",
+      "_tgt": "src_server_ensureworkspaceschema",
+      "source": "src_server_ensureworkspaceschema",
+      "target": "src_server_createapiserver",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "artifacts/api-server/src/server.ts",
+      "source_location": "L38",
       "weight": 1.0,
       "_src": "src_server_startapiserver",
       "_tgt": "src_server_ensureworkspaceschema",

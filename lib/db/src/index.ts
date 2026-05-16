@@ -45,6 +45,10 @@ export async function ensureWorkspaceSchema(): Promise<void> {
         `ALTER TABLE "${tableName}" ADD COLUMN IF NOT EXISTS "workspace_id" text`,
       );
     }
+
+    await dbPool.query(
+      `ALTER TABLE "ai_provider_config" ADD COLUMN IF NOT EXISTS "base_url" text NOT NULL DEFAULT 'https://api.openai.com/v1'`,
+    );
   })();
 
   return schemaReadyPromise;
