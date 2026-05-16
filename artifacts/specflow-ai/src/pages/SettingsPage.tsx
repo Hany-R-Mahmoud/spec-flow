@@ -121,8 +121,8 @@ function AiProviderSection() {
   const status = provider?.status ?? 'not_configured';
   const configured = providerUi.isValidated;
   const hasSavedKey = providerUi.hasSavedKey;
+  const canEditKeyInline = !configured || showKeyInput || !hasSavedKey;
   const showValidationError = Boolean(provider?.validationError);
-  const apiKeyPlaceholder = hasSavedKey ? 'Paste replacement provider API key' : 'Paste provider API key';
   const apiKeyHelper = hasSavedKey
     ? providerUi.helperText
     : 'Use your own key and endpoint for generation. The key is stored securely on the API server.';
@@ -140,26 +140,36 @@ function AiProviderSection() {
   const saveProvider = async () => {
     try {
       setIsSaving(true);
+      const keyValue = apiKey.trim();
       if (hasSavedKey && !showKeyInput) {
+        if (keyValue.length > 0) {
+          await rotateAiProvider({
+            apiKey: keyValue,
+            baseUrl: normalizedBaseUrl,
+          });
+        } else {
+          await updateAiProvider({
+            provider: 'openai',
+            model,
+            baseUrl: normalizedBaseUrl,
+            enabled: true,
+          });
+        }
+      } else if (hasSavedKey) {
         await updateAiProvider({
           provider: 'openai',
           model,
           baseUrl: normalizedBaseUrl,
+          apiKey: keyValue,
           enabled: true,
         });
-      } else if (hasSavedKey) {
-        await rotateAiProvider({
-          apiKey,
-          baseUrl: normalizedBaseUrl,
-        });
         setShowKeyInput(false);
-        setApiKey('');
       } else {
         await updateAiProvider({
           provider: 'openai',
           model,
           baseUrl: normalizedBaseUrl,
-          apiKey,
+          apiKey: keyValue,
           enabled: true,
         });
       }
@@ -336,7 +346,7 @@ function AiProviderSection() {
         </div>
       </div>
 
-      {(!hasSavedKey || showKeyInput) ? (
+      {canEditKeyInline ? (
         <div>
           <Label className="text-xs font-medium mb-1.5 block">API Key</Label>
           <Input
@@ -344,13 +354,15 @@ function AiProviderSection() {
             onChange={(event) => setApiKey(event.target.value)}
             className="h-8 text-xs font-mono"
             type="password"
-            placeholder={apiKeyPlaceholder}
+            placeholder={hasSavedKey ? 'Paste replacement provider API key' : 'Paste provider API key'}
             autoComplete="off"
             aria-describedby="ai-provider-key-help"
             data-testid="input-ai-provider-key"
           />
           <p id="ai-provider-key-help" className="mt-1 text-xs text-muted-foreground">
-            {apiKeyHelper}
+            {hasSavedKey
+              ? 'Enter a replacement key to fix validation, or leave it empty to update the endpoint/model only.'
+              : apiKeyHelper}
           </p>
         </div>
       ) : null}
