@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { PriorityBadge } from '@/components/shared/PriorityBadge';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { StepActionBar } from '@/components/workspace/StepActionBar';
 
 interface EpicsPanelProps {
   epics: Epic[];
@@ -39,18 +40,10 @@ export function EpicsPanel({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div>
         <div>
           <h2 className="text-sm font-semibold text-foreground">Epics</h2>
           <p className="text-xs text-muted-foreground mt-0.5">{epics.length} epics mapped to business goals</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button size="sm" variant="outline" onClick={onGenerateEpics} disabled={isGenerating}>
-            Regenerate Epics
-          </Button>
-          <Button size="sm" onClick={onGenerateStories} disabled={isGenerating || epics.length === 0} data-testid="button-generate-stories">
-            Generate Stories
-          </Button>
         </div>
       </div>
 
@@ -157,6 +150,15 @@ export function EpicsPanel({
           );
         })}
       </div>
+
+      <StepActionBar>
+        <Button size="sm" variant="outline" onClick={onGenerateEpics} disabled={isGenerating}>
+          Regenerate Epics
+        </Button>
+        <Button size="sm" onClick={onGenerateStories} disabled={isGenerating || epics.length === 0} data-testid="button-generate-stories">
+          Generate Stories
+        </Button>
+      </StepActionBar>
     </div>
   );
 }

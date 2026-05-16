@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 import { CheckCircle, Edit3, Save, XCircle } from 'lucide-react';
 import { GenerationStepState, PRDSection } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -7,12 +7,14 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useSessionStore } from '@/store/session-store';
+import { StepActionBar } from '@/components/workspace/StepActionBar';
 
 interface PRDPanelProps {
   sections: PRDSection[];
   generationStep: GenerationStepState;
   onGeneratePRD: () => void;
   onGenerateEpics: () => void;
+  onDraftChange?: (sections: PRDSection[]) => void;
 }
 
 type PRDFormValues = {
@@ -24,6 +26,7 @@ export function PRDPanel({
   generationStep,
   onGeneratePRD,
   onGenerateEpics,
+  onDraftChange,
 }: PRDPanelProps) {
   const { savePrdSections } = useSessionStore();
   const { toast } = useToast();
@@ -38,6 +41,7 @@ export function PRDPanel({
 
   const completedCount = sections.filter((section) => section.complete).length;
   const editingSection = sections.find((section) => section.id === editingId) ?? null;
+  const contentDraft = useWatch({ control: form.control, name: 'content' }) ?? '';
 
   useEffect(() => {
     if (editingSection) {
@@ -46,6 +50,24 @@ export function PRDPanel({
       form.reset({ content: '' });
     }
   }, [editingSection, form]);
+
+  useEffect(() => {
+    if (!onDraftChange) {
+      return;
+    }
+
+    onDraftChange(
+      sections.map((section) =>
+        section.id === editingId && editingSection
+          ? {
+              ...section,
+              content: contentDraft,
+              complete: contentDraft.trim().length > 0,
+            }
+          : section,
+      ),
+    );
+  }, [contentDraft, editingId, editingSection, onDraftChange, sections]);
 
   const startEdit = (section: PRDSection) => {
     setEditingId(section.id);
@@ -90,25 +112,12 @@ export function PRDPanel({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div>
         <div>
           <h2 className="text-sm font-semibold text-foreground">Product Requirements Document</h2>
           <p className="text-xs text-muted-foreground mt-0.5">
             {completedCount}/{sections.length} sections complete — review and edit as needed
           </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button size="sm" variant="outline" onClick={onGeneratePRD} disabled={isGenerating}>
-            Regenerate PRD
-          </Button>
-          <Button
-            size="sm"
-            onClick={onGenerateEpics}
-            disabled={isGenerating || sections.length === 0}
-            data-testid="button-generate-epics"
-          >
-            Generate Epics
-          </Button>
         </div>
       </div>
 
@@ -210,6 +219,20 @@ export function PRDPanel({
             );
           })}
       </div>
+
+      <StepActionBar>
+        <Button size="sm" variant="outline" onClick={onGeneratePRD} disabled={isGenerating}>
+          Regenerate PRD
+        </Button>
+        <Button
+          size="sm"
+          onClick={onGenerateEpics}
+          disabled={isGenerating || sections.length === 0}
+          data-testid="button-generate-epics"
+        >
+          Generate Epics
+        </Button>
+      </StepActionBar>
     </div>
   );
 }

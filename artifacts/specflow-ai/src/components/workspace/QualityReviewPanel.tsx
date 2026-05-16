@@ -8,6 +8,7 @@ import { ScoreBar } from '@/components/shared/ScoreBar';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useSessionStore } from '@/store/session-store';
+import { StepActionBar } from '@/components/workspace/StepActionBar';
 
 interface QualityReviewPanelProps {
   stories: Story[];
@@ -87,21 +88,12 @@ export function QualityReviewPanel({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div>
         <div>
           <h2 className="text-sm font-semibold text-foreground">Quality Review</h2>
           <p className="text-xs text-muted-foreground mt-0.5">
             {stories.length} stories · avg {avgScore}/100 · {totalWarnings} warnings
           </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button size="sm" variant="outline" onClick={onGenerateQuality} disabled={isGenerating || stories.length === 0}>
-            Refresh Scores
-          </Button>
-          <Button size="sm" onClick={onSendToDevReview} disabled={isGenerating || stories.length === 0} data-testid="button-send-all-review">
-            <Send className="w-3 h-3 mr-1.5" />
-            Send All to Dev Review
-          </Button>
         </div>
       </div>
 
@@ -262,6 +254,16 @@ export function QualityReviewPanel({
           })}
         </div>
       </div>
+
+      <StepActionBar>
+        <Button size="sm" variant="outline" onClick={onGenerateQuality} disabled={isGenerating || stories.length === 0}>
+          Refresh Scores
+        </Button>
+        <Button size="sm" onClick={onSendToDevReview} disabled={isGenerating || stories.length === 0} data-testid="button-send-all-review">
+          <Send className="w-3 h-3 mr-1.5" />
+          Send All to Dev Review
+        </Button>
+      </StepActionBar>
     </div>
   );
 }

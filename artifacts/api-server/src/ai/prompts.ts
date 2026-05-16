@@ -18,6 +18,21 @@ export type WorkflowPrompt = {
   buildPrompt: (session: WorkflowPromptContext) => string;
 };
 
+export type GuidancePromptContext = {
+  phase: Phase;
+  phaseStatus: string;
+  session: WorkflowPromptContext;
+  flowSummary: Record<string, unknown>;
+  stepSkills: Array<{
+    id: string;
+    phase: string;
+    name: string;
+    version: number;
+    source: "default" | "custom";
+    content: string;
+  }>;
+};
+
 function summarizeSession(session: WorkflowPromptContext): string {
   return [
     `Session: ${session.name}`,
@@ -91,3 +106,21 @@ export const workflowPrompts = {
     },
   },
 } satisfies Record<string, WorkflowPrompt>;
+
+export const guidancePrompt = {
+  version: "guidance-v1",
+  buildPrompt(context: GuidancePromptContext) {
+    return [
+      "Generate concise AI guidance items for the current workflow phase and the whole breakdown flow.",
+      "Return JSON only in this shape: {\"items\":[{\"type\":\"action\"|\"success\"|\"warning\"|\"error\",\"message\":\"string\",\"actionKey\":\"generate-prd\"|\"generate-epics\"|\"generate-stories\"|\"generate-quality\"|\"send-to-dev-review\"|\"complete-review\"|\"edit-step-skill\"|null}]}",
+      "Rules:",
+      "- Max 4 items.",
+      "- Prefer the next best action.",
+      "- Mention blockers, quality gaps, or next workflow step.",
+      "- Use actionKey only when the UI can perform that action.",
+      "- Keep messages short and specific.",
+      "Context:",
+      JSON.stringify(context),
+    ].join("\n\n");
+  },
+} as const;

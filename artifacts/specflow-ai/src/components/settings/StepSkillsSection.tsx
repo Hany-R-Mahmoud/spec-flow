@@ -15,7 +15,11 @@ import {
 } from '@/lib/step-skills';
 import { useSessionStore } from '@/store/session-store';
 
-export function StepSkillsSection() {
+type StepSkillsSectionProps = {
+  initialPhase?: StepSkillPhase;
+};
+
+export function StepSkillsSection({ initialPhase = 'clarification' }: StepSkillsSectionProps) {
   const { toast } = useToast();
   const { state: sessionState } = useSessionStore();
   const {
@@ -26,13 +30,17 @@ export function StepSkillsSection() {
     assignDefaultSkill,
     resetCustomSkill,
   } = useStepSkills();
-  const [phase, setPhase] = useState<StepSkillPhase>('clarification');
+  const [phase, setPhase] = useState<StepSkillPhase>(initialPhase);
   const activeSkill = getSkill(phase);
   const customSkill = state.customSkills[phase];
   const aiEnabled = Boolean(sessionState.aiCapability?.canEditSkills);
   const [name, setName] = useState(activeSkill.name);
   const [content, setContent] = useState(activeSkill.content);
   const warnings = useMemo(() => validateStepSkill(content), [content]);
+
+  useEffect(() => {
+    setPhase(initialPhase);
+  }, [initialPhase]);
 
   useEffect(() => {
     setName(activeSkill.name);
@@ -84,7 +92,7 @@ export function StepSkillsSection() {
   };
 
   return (
-    <div className="bg-card border border-border rounded-md overflow-hidden">
+    <div id="step-skills" className="bg-card border border-border rounded-md overflow-hidden">
       <div className="px-4 py-3 border-b border-border bg-muted flex items-center justify-between gap-3">
         <div>
           <span className="text-sm font-semibold text-foreground">Step Skills</span>

@@ -14,7 +14,7 @@ import { Label } from '@/components/ui/label';
 import { useSessionStore } from '@/store/session-store';
 import { useToast } from '@/hooks/use-toast';
 import { analyzeAdaptiveIntake, buildAdaptiveArtifacts, buildAdaptivePhasePatch } from '@/lib/adaptive-intake';
-import { ArrowRight, FileSearch, X } from 'lucide-react';
+import { AlertCircle, ArrowRight, FileSearch, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const schema = z.object({
@@ -79,7 +79,11 @@ function ChipsInput({ value, onChange, placeholder }: { value: string[]; onChang
 
 export function NewBreakdown() {
   const { createSession, state } = useSessionStore();
-  const canGenerate = Boolean(state.aiCapability?.canGenerate);
+  const provider = state.aiCapability?.provider;
+  const showManualModeBanner = !provider?.id;
+  const headerCopy = provider?.id
+    ? 'Fill in the intake form to start an AI-assisted breakdown'
+    : 'Fill in the intake form to organize a manual breakdown.';
   const { toast } = useToast();
   const [, setLocation] = useLocation();
 
@@ -178,12 +182,20 @@ export function NewBreakdown() {
     <div className="max-w-5xl mx-auto space-y-6">
       <div>
         <h1 className="text-lg font-semibold text-foreground">New Breakdown</h1>
-        <p className="text-xs text-muted-foreground mt-0.5">
-          {canGenerate
-            ? 'Fill in the intake form to start an AI-assisted breakdown'
-            : 'Fill in the intake form to organize a manual breakdown. Connect an AI provider key in settings to enable generation.'}
-        </p>
+        <p className="text-xs text-muted-foreground mt-0.5">{headerCopy}</p>
       </div>
+
+      {showManualModeBanner ? (
+        <div className="rounded-md border border-[var(--color-warning)]/30 bg-[var(--color-warning-soft)] px-4 py-3 text-xs text-foreground">
+          <div className="flex items-center gap-2 font-medium text-[var(--color-warning)]">
+            <AlertCircle className="h-4 w-4" />
+            Manual mode
+          </div>
+          <p className="mt-1 text-muted-foreground">
+            No AI provider key is saved yet. You can continue in manual mode, or add a provider key in Settings to enable generation.
+          </p>
+        </div>
+      ) : null}
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-0">
@@ -447,11 +459,6 @@ export function NewBreakdown() {
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
 
-              <p className="text-xs text-muted-foreground text-center">
-                {canGenerate
-                  ? 'AI will generate clarification questions, PRD, epics, and Jira-ready stories based on your input.'
-                  : 'Manual mode preserves your structure and handoff flow without model calls or custom generation skills.'}
-              </p>
             </div>
           </div>
         </form>

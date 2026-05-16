@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useLocation, useRoute } from 'wouter';
 import { useSessionStore } from '@/store/session-store';
 import { Phase } from '@/lib/types';
@@ -15,6 +15,9 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import type { GuidanceItem } from '@/components/workspace/GuidancePanel';
 import type { ClarificationQuestion, GenerationStepState, PRDSection, Story } from '@/lib/types';
+import { type StepSkillPhase } from '@/lib/step-skills';
+import { useStepSkills, type StepSkill } from '@/lib/step-skills';
+import { getWorkflowGuidance, type AiGuidanceItem, type GuidanceActionKey } from '@workspace/api-client-react';
 
 type GuidanceActions = {
   onGeneratePRD: () => void;
@@ -23,6 +26,7 @@ type GuidanceActions = {
   onGenerateQuality: () => void;
   onSendToDevReview: () => void;
   onCompleteReview: () => void;
+  onEditStepSkill?: (phase: StepSkillPhase) => void;
 };
 
 type GenerationPhase = 'clarification' | 'prd' | 'epics' | 'stories' | 'quality';
@@ -30,6 +34,68 @@ type GenerationPhase = 'clarification' | 'prd' | 'epics' | 'stories' | 'quality'
 function getSkillProvenance(promptVersion: string): string | null {
   const match = promptVersion.match(/\+skill:(.+)$/);
   return match?.[1] ?? null;
+}
+
+function resolveStepSkillPhase(phase: Phase): StepSkillPhase {
+  if (
+    phase === 'clarification' ||
+    phase === 'prd' ||
+    phase === 'epics' ||
+    phase === 'stories' ||
+    phase === 'quality' ||
+    phase === 'export'
+  ) {
+    return phase;
+  }
+
+  return phase === 'devReview' ? 'quality' : 'clarification';
+}
+
+function toSkillSnapshot(skill: StepSkill): {
+  id: string;
+  phase: StepSkillPhase;
+  name: string;
+  version: number;
+  source: 'default' | 'custom';
+  content: string;
+} {
+  return {
+    id: skill.id,
+    phase: skill.phase,
+    name: skill.name,
+    version: skill.version,
+    source: skill.source,
+    content: skill.content,
+  };
+}
+
+function mapGuidanceItem(
+  item: AiGuidanceItem,
+  phase: Phase,
+  actions: Partial<GuidanceActions>,
+): GuidanceItem {
+  const actionMap: Record<GuidanceActionKey, (() => void) | undefined> = {
+    'generate-prd': actions.onGeneratePRD,
+    'generate-epics': actions.onGenerateEpics,
+    'generate-stories': actions.onGenerateStories,
+    'generate-quality': actions.onGenerateQuality,
+    'send-to-dev-review': actions.onSendToDevReview,
+    'complete-review': actions.onCompleteReview,
+    'edit-step-skill': () => {},
+  };
+
+  const onAction =
+    item.actionKey === 'edit-step-skill'
+      ? () => actions.onEditStepSkill?.(resolveStepSkillPhase(phase))
+      : item.actionKey
+        ? actionMap[item.actionKey]
+        : undefined;
+
+  return {
+    type: item.type,
+    message: item.message,
+    onAction: onAction ?? undefined,
+  };
 }
 
 function buildGuidanceItems(
@@ -149,13 +215,19 @@ export function WorkflowWorkspace() {
   const [, setLocation] = useLocation();
   const [, params] = useRoute('/workspace/:id');
   const sessionId = params?.id;
-  const { state, dispatch, runGeneration, saveWorkflowArtifacts } = useSessionStore();
+  const { state, dispatch, runGeneration, saveWorkflowArtifacts, refreshAiCapability } = useSessionStore();
+  const { skillsByPhase } = useStepSkills();
   const { toast } = useToast();
 
   const session = state.sessions.find(s => s.id === sessionId);
   const aiCapability = state.aiCapability;
   const canGenerate = Boolean(aiCapability?.canGenerate);
+  const canEditSkills = Boolean(aiCapability?.canEditSkills);
   const [activePhase, setActivePhase] = useState<Phase>(session?.currentPhase || 'clarification');
+  const [liveQuestions, setLiveQuestions] = useState<ClarificationQuestion[]>(session?.clarificationQuestions ?? []);
+  const [livePrdSections, setLivePrdSections] = useState<PRDSection[]>(session?.prdSections ?? []);
+  const [guidanceItems, setGuidanceItems] = useState<GuidanceItem[]>([]);
+  const [guidanceLoading, setGuidanceLoading] = useState(false);
 
   useEffect(() => {
     if (!sessionId) {
@@ -170,6 +242,15 @@ export function WorkflowWorkspace() {
       setActivePhase(session.currentPhase);
     }
   }, [session?.currentPhase]);
+
+  useEffect(() => {
+    void refreshAiCapability();
+  }, [refreshAiCapability, sessionId]);
+
+  useEffect(() => {
+    setLiveQuestions(session?.clarificationQuestions ?? []);
+    setLivePrdSections(session?.prdSections ?? []);
+  }, [session?.clarificationQuestions, session?.prdSections, session?.id]);
 
   if (state.isLoading) {
     return (
@@ -220,12 +301,14 @@ export function WorkflowWorkspace() {
   const stories = state.stories.filter(s => s.sessionId === session.id);
   const questions = state.clarificationQuestions;
   const prdSections = state.prdSections;
+  const activeQuestions = activePhase === 'clarification' ? liveQuestions : questions;
+  const activePrdSections = activePhase === 'prd' ? livePrdSections : prdSections;
 
-  const advancePhase = (nextPhase: Phase) => {
+  const advancePhase = useCallback((nextPhase: Phase) => {
     setActivePhase(nextPhase);
     dispatch({ type: 'SET_PHASE', payload: { sessionId: session.id, phase: nextPhase } });
     toast({ title: 'Phase advanced', description: `Now in ${nextPhase} phase.` });
-  };
+  }, [dispatch, session.id, toast]);
 
   const handleSendStoryToReview = async (storyId: string) => {
     const targetStory = stories.find((story) => story.id === storyId);
@@ -374,7 +457,7 @@ export function WorkflowWorkspace() {
   })();
 
   const canCompleteReview = completionBlocker === null;
-  const handleCompleteReview = () => {
+  const handleCompleteReview = useCallback(() => {
     if (!canCompleteReview) {
       toast({
         title: 'Review not complete',
@@ -384,17 +467,27 @@ export function WorkflowWorkspace() {
     }
 
     advancePhase('export');
-  };
+  }, [advancePhase, canCompleteReview, completionBlocker, toast]);
 
-  const handleGeneration = async (step: 'clarification' | 'prd' | 'epics' | 'stories' | 'quality') => {
+  const handleGeneration = useCallback(async (step: 'clarification' | 'prd' | 'epics' | 'stories' | 'quality') => {
     if (!canGenerate) {
+      if (step !== 'clarification') {
+        const nextPhase =
+          step === 'prd'
+            ? 'prd'
+            : step === 'epics'
+              ? 'epics'
+              : step === 'stories'
+                ? 'stories'
+                : 'quality';
+
+        advancePhase(nextPhase);
+      }
+
       toast({
-        title: 'AI provider required',
-        description:
-          aiCapability?.reason ??
-          'Connect and validate an AI provider key in settings to enable generation.',
+        title: 'Manual mode',
+        description: 'No validated AI provider found. Continued without AI generation.',
       });
-      setLocation('/settings');
       return;
     }
 
@@ -421,16 +514,111 @@ export function WorkflowWorkspace() {
       title: step === 'quality' ? 'Quality refreshed' : 'Generation complete',
       description: 'Workflow output generated and saved.',
     });
-  };
+  }, [advancePhase, canGenerate, runGeneration, session.id, toast]);
+
+  const handleEditSkill = useCallback((phase: StepSkillPhase) => {
+    setLocation(`/settings?step-skill=${phase}`);
+  }, [setLocation]);
+
+  useEffect(() => {
+    if (!session) {
+      return;
+    }
+
+    const callbacks = {
+      onGeneratePRD: () => void handleGeneration('prd'),
+      onGenerateEpics: () => void handleGeneration('epics'),
+      onGenerateStories: () => void handleGeneration('stories'),
+      onGenerateQuality: () => void handleGeneration('quality'),
+      onSendToDevReview: () => advancePhase('devReview'),
+      onCompleteReview: handleCompleteReview,
+      onEditStepSkill: handleEditSkill,
+    };
+
+    if (!canGenerate) {
+      setGuidanceItems(
+        buildGuidanceItems(activePhase, activeQuestions, activePrdSections, session.stories, callbacks),
+      );
+      setGuidanceLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    const loadGuidance = async () => {
+      setGuidanceLoading(true);
+
+      try {
+        const response = await getWorkflowGuidance(session.id, {
+          phase: activePhase,
+          phaseStatus: session.phases[activePhase],
+          session: {
+            name: session.name,
+            inputType: session.inputType,
+            outputDepth: session.outputDepth,
+            jiraKey: session.jiraKey,
+            targetUsers: session.targetUsers,
+            businessGoal: session.businessGoal,
+            knownConstraints: session.knownConstraints,
+            labels: session.labels,
+            rawInput: session.rawInput,
+          },
+          flowSummary: {
+            sessionId: session.id,
+            sessionName: session.name,
+            currentPhase: session.currentPhase,
+            phaseStatuses: session.phases,
+            clarificationQuestions: activeQuestions,
+            prdSections: activePrdSections,
+            epics: session.epics,
+            stories: session.stories,
+          },
+          stepSkills: Object.values(skillsByPhase).map(toSkillSnapshot),
+        });
+
+        if (cancelled) {
+          return;
+        }
+
+        setGuidanceItems(response.items.map((item) => mapGuidanceItem(item, activePhase, callbacks)));
+      } catch {
+        if (!cancelled) {
+          setGuidanceItems(buildGuidanceItems(activePhase, activeQuestions, activePrdSections, session.stories, callbacks));
+        }
+      } finally {
+        if (!cancelled) {
+          setGuidanceLoading(false);
+        }
+      }
+    };
+
+    void loadGuidance();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    activePhase,
+    canGenerate,
+    handleGeneration,
+    handleCompleteReview,
+    handleEditSkill,
+    session?.updatedAt,
+    session,
+    skillsByPhase,
+    advancePhase,
+    activeQuestions,
+    activePrdSections,
+  ]);
 
   const completionCount = (() => {
     if (activePhase === 'clarification') {
-      const answered = questions.filter(q => q.answer || q.skipped).length;
-      return { done: answered, total: questions.length };
+      const answered = activeQuestions.filter(q => q.answer || q.skipped).length;
+      return { done: answered, total: activeQuestions.length };
     }
     if (activePhase === 'prd') {
-      const completed = prdSections.filter(s => s.complete).length;
-      return { done: completed, total: prdSections.length };
+      const completed = activePrdSections.filter(s => s.complete).length;
+      return { done: completed, total: activePrdSections.length };
     }
     if (activePhase === 'stories') {
       const ready = stories.filter(s => s.readinessScore.total >= 75).length;
@@ -443,14 +631,6 @@ export function WorkflowWorkspace() {
     return undefined;
   })();
 
-  const guidanceItems = buildGuidanceItems(activePhase, questions, prdSections, stories, {
-    onGeneratePRD: () => void handleGeneration('prd'),
-    onGenerateEpics: () => void handleGeneration('epics'),
-    onGenerateStories: () => void handleGeneration('stories'),
-    onGenerateQuality: () => void handleGeneration('quality'),
-    onSendToDevReview: () => advancePhase('devReview'),
-    onCompleteReview: handleCompleteReview,
-  });
   const activeGenerationStep: GenerationStepState | null =
     activePhase === 'clarification' ||
     activePhase === 'prd' ||
@@ -470,6 +650,8 @@ export function WorkflowWorkspace() {
         session={session}
         activePhase={activePhase}
         onPhaseClick={advancePhase}
+        onEditSkill={handleEditSkill}
+        canEditSkills={canEditSkills}
       />
 
       {/* Content area */}
@@ -514,6 +696,7 @@ export function WorkflowWorkspace() {
               generationStep={session.generation.clarification}
               onGenerateClarification={() => void handleGeneration('clarification')}
               onGeneratePRD={() => void handleGeneration('prd')}
+              onDraftChange={setLiveQuestions}
             />
             )}
 
@@ -523,6 +706,7 @@ export function WorkflowWorkspace() {
               generationStep={session.generation.prd}
               onGeneratePRD={() => void handleGeneration('prd')}
               onGenerateEpics={() => void handleGeneration('epics')}
+              onDraftChange={setLivePrdSections}
             />
             )}
 
@@ -598,6 +782,8 @@ export function WorkflowWorkspace() {
             phase={activePhase}
             phaseStatus={session.phases[activePhase]}
             items={guidanceItems}
+            isLoading={guidanceLoading}
+            loadingLabel={canGenerate ? 'AI is analyzing this step…' : 'Manual guidance is loading…'}
             completionCount={completionCount}
           />
         </div>

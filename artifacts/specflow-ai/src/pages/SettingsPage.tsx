@@ -11,6 +11,7 @@ import { KeyRound, ShieldCheck, Trash2, X } from 'lucide-react';
 import { useSessionStore } from '@/store/session-store';
 import { ThemeModeToggle } from '@/components/shared/ThemeModeToggle';
 import { StepSkillsSection } from '@/components/settings/StepSkillsSection';
+import { STEP_SKILL_PHASES, type StepSkillPhase } from '@/lib/step-skills';
 import { Badge } from '@/components/ui/badge';
 import {
   deleteAiProvider,
@@ -81,6 +82,21 @@ function SettingsSection({
       <div className="p-4 space-y-4">{children}</div>
     </div>
   );
+}
+
+function getStepSkillPhaseFromLocation(): StepSkillPhase | undefined {
+  if (typeof window === 'undefined') {
+    return undefined;
+  }
+
+  const value = new URLSearchParams(window.location.search).get('step-skill');
+  if (!value) {
+    return undefined;
+  }
+
+  return STEP_SKILL_PHASES.some((item) => item.phase === value)
+    ? (value as StepSkillPhase)
+    : undefined;
 }
 
 function AiProviderSection() {
@@ -355,6 +371,7 @@ function AiProviderSection() {
 export function SettingsPage() {
   const { toast } = useToast();
   const { saveSettings, state } = useSessionStore();
+  const [initialStepSkillPhase] = useState<StepSkillPhase | undefined>(() => getStepSkillPhaseFromLocation());
 
   const form = useForm<SettingsFormValues>({
     defaultValues: {
@@ -387,6 +404,18 @@ export function SettingsPage() {
       showReadinessWarnings: state.settings.showReadinessWarnings,
     });
   }, [form, state.settings]);
+
+  useEffect(() => {
+    if (!initialStepSkillPhase) {
+      return;
+    }
+
+    const frame = window.requestAnimationFrame(() => {
+      document.getElementById('step-skills')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [initialStepSkillPhase]);
 
   const save = async (section: string, values: Partial<SettingsFormValues>) => {
     if (!state.settings) {
@@ -469,7 +498,7 @@ export function SettingsPage() {
 
       <AiProviderSection />
 
-      <StepSkillsSection />
+      <StepSkillsSection initialPhase={initialStepSkillPhase} />
 
       <form onSubmit={e => e.preventDefault()} className="space-y-6">
         <SettingsSection title="Workspace" onSave={saveWorkspace}>

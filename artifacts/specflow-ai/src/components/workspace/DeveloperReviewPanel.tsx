@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { useSessionStore } from '@/store/session-store';
 import { ReviewStatus } from '@/lib/types';
+import { StepActionBar } from '@/components/workspace/StepActionBar';
 
 interface DeveloperReviewPanelProps {
   stories: Story[];
@@ -132,16 +133,13 @@ export function DeveloperReviewPanel({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div>
         <div>
           <h2 className="text-sm font-semibold text-foreground">Developer Review</h2>
           <p className="text-xs text-muted-foreground mt-0.5">
             Review queue: {stories.length} {stories.length === 1 ? 'story' : 'stories'}
           </p>
         </div>
-        <Button size="sm" onClick={onComplete} disabled={completionBlocked} data-testid="button-complete-review">
-          Complete Review
-        </Button>
       </div>
 
       {completionBlocked && (
@@ -316,6 +314,12 @@ export function DeveloperReviewPanel({
           )}
         </div>
       </div>
+
+      <StepActionBar>
+        <Button size="sm" onClick={onComplete} disabled={completionBlocked} data-testid="button-complete-review">
+          Complete Review
+        </Button>
+      </StepActionBar>
     </div>
   );
 }

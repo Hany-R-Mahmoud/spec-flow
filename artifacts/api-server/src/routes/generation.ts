@@ -17,7 +17,7 @@ import {
   sessionsTable,
   type WorkflowGeneration,
 } from "@workspace/db";
-import { workflowPrompts } from "../ai/prompts.js";
+import { guidancePrompt, workflowPrompts } from "../ai/prompts.js";
 import { AiProviderError, runOpenAiJson } from "../ai/provider-client.js";
 import {
   getAiProviderSecret,
@@ -49,6 +49,55 @@ type GenerationRouteStep =
   | "epics"
   | "stories"
   | "quality";
+
+type GuidancePhase =
+  | "intake"
+  | "clarification"
+  | "prd"
+  | "epics"
+  | "stories"
+  | "quality"
+  | "devReview"
+  | "export";
+
+type GuidanceActionKey =
+  | "generate-prd"
+  | "generate-epics"
+  | "generate-stories"
+  | "generate-quality"
+  | "send-to-dev-review"
+  | "complete-review"
+  | "edit-step-skill";
+
+type GuidanceItem = {
+  type: "error" | "warning" | "success" | "action";
+  message: string;
+  actionKey?: GuidanceActionKey | null;
+};
+
+type GuidanceRequestBody = {
+  phase: GuidancePhase;
+  session?: {
+    name: string;
+    inputType: string;
+    outputDepth: string;
+    jiraKey: string;
+    targetUsers: string[];
+    businessGoal: string;
+    knownConstraints: string;
+    labels: string[];
+    rawInput: string;
+  };
+  flowSummary?: Record<string, unknown>;
+  stepSkills?: Array<{
+    id: string;
+    phase: GuidancePhase;
+    name: string;
+    version: number;
+    source: "default" | "custom";
+    content: string;
+  }>;
+};
 
 type StepSkillSnapshot = {
   id: string;
@@ -96,6 +145,122 @@ function validateStepSkillSnapshot(
   }
 
   return stepSkill;
+}
+
+function validateGuidanceStepSkills(
+  stepSkills: GuidanceRequestBody["stepSkills"],
+): GuidanceRequestBody["stepSkills"] {
+  if (!stepSkills) {
+    return undefined;
+  }
+
+  return stepSkills.map((skill) => {
+    if (skill.content.length > 12_000) {
+      throw new Error("Step skill is too large for live guidance.");
+    }
+
+    const forbiddenPatterns = [
+      /api\s*key/i,
+      /secret/i,
+      /token/i,
+      /ignore\s+(all\s+)?previous/i,
+      /system\s+prompt/i,
+    ];
+
+    if (forbiddenPatterns.some((pattern) => pattern.test(skill.content))) {
+      throw new Error("Step skill contains unsafe instructions for live guidance.");
+    }
+
+    return skill;
+  });
+}
+
+function parseGuidanceItem(raw: unknown): GuidanceItem {
+  if (!raw || typeof raw !== "object") {
+    throw new Error("AI guidance item has an invalid shape.");
+  }
+
+  const item = raw as Record<string, unknown>;
+  const type = item.type;
+  const message = item.message;
+  const actionKey = item.actionKey;
+
+  if (
+    (type !== "error" && type !== "warning" && type !== "success" && type !== "action") ||
+    typeof message !== "string" ||
+    message.trim().length === 0
+  ) {
+    throw new Error("AI guidance item is missing required fields.");
+  }
+
+  if (
+    actionKey !== undefined &&
+    actionKey !== null &&
+    actionKey !== "generate-prd" &&
+    actionKey !== "generate-epics" &&
+    actionKey !== "generate-stories" &&
+    actionKey !== "generate-quality" &&
+    actionKey !== "send-to-dev-review" &&
+    actionKey !== "complete-review" &&
+    actionKey !== "edit-step-skill"
+  ) {
+    throw new Error("AI guidance item action is invalid.");
+  }
+
+  return {
+    type,
+    message: message.trim(),
+    actionKey: actionKey ?? null,
+  };
+}
+
+function parseGuidanceResponse(content: string): GuidanceItem[] {
+  const parsed = parseProviderJson(content);
+  const items = parsed.items;
+
+  if (!Array.isArray(items)) {
+    throw new Error("AI guidance response must include an items array.");
+  }
+
+  return items.slice(0, 4).map(parseGuidanceItem);
+}
+
+function buildFlowSummary(row: NonNullable<Awaited<ReturnType<typeof getSessionArtifactsRecord>>>): Record<string, unknown> {
+  const clarificationQuestions = row.artifacts?.clarificationQuestions ?? [];
+  const prdSections = row.artifacts?.prdSections ?? [];
+  const epics = row.artifacts?.epics ?? [];
+  const stories = row.artifacts?.stories ?? [];
+
+  return {
+    sessionId: row.session.id,
+    sessionName: row.session.name,
+    currentPhase: row.session.currentPhase,
+    phaseStatuses: row.session.phases,
+    clarification: {
+      total: clarificationQuestions.length,
+      unanswered: clarificationQuestions.filter((question) => question.required && !question.answer && !question.skipped).length,
+      skipped: clarificationQuestions.filter((question) => question.skipped).length,
+    },
+    prd: {
+      total: prdSections.length,
+      incomplete: prdSections.filter((section) => !section.complete).length,
+    },
+    epics: {
+      total: epics.length,
+    },
+    stories: {
+      total: stories.length,
+      ready: stories.filter((story) => story.readinessScore.total >= 90 || story.reviewStatus === "approved").length,
+      needsReview: stories.filter((story) =>
+        story.readinessScore.total < 90 && story.reviewStatus !== "approved",
+      ).length,
+      lowReadiness: stories.filter((story) => story.readinessScore.total < 75).length,
+      pendingReview: stories.filter((story) => story.reviewStatus === "pending").length,
+    },
+    export: {
+      ready: stories.filter((story) => story.readinessScore.total >= 90 || story.reviewStatus === "approved").length,
+    },
+  };
 }
 
 function parseProviderJson(content: string): Record<string, unknown> {
@@ -571,5 +736,88 @@ handleStep("prd");
 handleStep("epics");
 handleStep("stories");
 handleStep("quality");
+
+router.post("/sessions/:sessionId/guidance", async (req, res) => {
+  try {
+    const db = requireDatabase();
+    const auth = requireAuthContext(req, res);
+    if (!auth) {
+      return;
+    }
+
+    const body = req.body as GuidanceRequestBody | null;
+    if (!body || typeof body !== "object") {
+      sendError(res, 400, "Invalid guidance request.");
+      return;
+    }
+
+    if (
+      body.phase !== "intake" &&
+      body.phase !== "clarification" &&
+      body.phase !== "prd" &&
+      body.phase !== "epics" &&
+      body.phase !== "stories" &&
+      body.phase !== "quality" &&
+      body.phase !== "devReview" &&
+      body.phase !== "export"
+    ) {
+      sendError(res, 400, "Invalid guidance phase.");
+      return;
+    }
+
+    const existing = await getSessionArtifactsRecord(db, req.params.sessionId, auth.workspaceId);
+    if (!existing?.artifacts) {
+      sendError(res, 404, "Session not found.");
+      return;
+    }
+
+    const providerSecret = await getAiProviderSecret(db, auth.workspaceId);
+    if (!providerSecret) {
+      res.json({ items: [] as GuidanceItem[] });
+      return;
+    }
+
+    const stepSkills = validateGuidanceStepSkills(body.stepSkills);
+    const flowSummary = body.flowSummary ?? buildFlowSummary(existing);
+    const sessionSnapshot = body.session ?? {
+      name: existing.session.name,
+      inputType: existing.session.inputType,
+      outputDepth: existing.session.outputDepth,
+      jiraKey: existing.session.jiraKey,
+      targetUsers: existing.session.targetUsers,
+      businessGoal: existing.session.businessGoal,
+      knownConstraints: existing.session.knownConstraints,
+      labels: existing.session.labels,
+      rawInput: existing.session.rawInput,
+    };
+
+    const liveResult = await runOpenAiJson({
+      apiKey: providerSecret.apiKey,
+      model: providerSecret.model,
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are SpecFlow AI's in-flow guidance agent. Return concise JSON only. Focus on next-best actions, blockers, and phase-specific advice. Keep suggestions practical and tied to the current workflow state.",
+        },
+        {
+          role: "user",
+          content: guidancePrompt.buildPrompt({
+            phase: body.phase,
+            phaseStatus: String(existing.session.phases[body.phase as GuidancePhase] ?? "not-started"),
+            session: sessionSnapshot,
+            flowSummary,
+            stepSkills: stepSkills ?? [],
+          }),
+        },
+      ],
+    });
+
+    const items = parseGuidanceResponse(liveResult.content);
+    res.json({ items });
+  } catch (error) {
+    sendUnexpectedError(res, error);
+  }
+});
 
 export default router;

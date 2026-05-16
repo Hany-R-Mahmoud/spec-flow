@@ -8,6 +8,7 @@ import { ReadinessScoreRing } from '@/components/shared/ReadinessScore';
 import { WarningList } from '@/components/shared/WarningBadge';
 import { ScoreBar } from '@/components/shared/ScoreBar';
 import { Button } from '@/components/ui/button';
+import { StepActionBar } from '@/components/workspace/StepActionBar';
 
 interface StoriesPanelProps {
   epics: Epic[];
@@ -272,20 +273,12 @@ export function StoriesPanel({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div>
         <div>
           <h2 className="text-sm font-semibold text-foreground">User Stories</h2>
           <p className="text-xs text-muted-foreground mt-0.5">
             {stories.length} stories across {epics.length} epics · avg readiness {totalScore}/100
           </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button size="sm" variant="outline" onClick={onGenerateStories} disabled={isGenerating || epics.length === 0}>
-            Regenerate Stories
-          </Button>
-          <Button size="sm" onClick={onGenerateQuality} disabled={isGenerating || stories.length === 0} data-testid="button-review-quality">
-            Review Quality
-          </Button>
         </div>
       </div>
 
@@ -338,6 +331,15 @@ export function StoriesPanel({
           );
         })}
       </div>
+
+      <StepActionBar>
+        <Button size="sm" variant="outline" onClick={onGenerateStories} disabled={isGenerating || epics.length === 0}>
+          Regenerate Stories
+        </Button>
+        <Button size="sm" onClick={onGenerateQuality} disabled={isGenerating || stories.length === 0} data-testid="button-review-quality">
+          Review Quality
+        </Button>
+      </StepActionBar>
     </div>
   );
 }

@@ -6,12 +6,14 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useSessionStore } from '@/store/session-store';
+import { StepActionBar } from '@/components/workspace/StepActionBar';
 
 interface ClarificationPanelProps {
   questions: ClarificationQuestion[];
   generationStep: GenerationStepState;
   onGenerateClarification: () => void;
   onGeneratePRD: () => void;
+  onDraftChange?: (questions: ClarificationQuestion[]) => void;
 }
 
 type ClarificationFormValues = {
@@ -27,6 +29,7 @@ export function ClarificationPanel({
   generationStep,
   onGenerateClarification,
   onGeneratePRD,
+  onDraftChange,
 }: ClarificationPanelProps) {
   const { saveClarificationQuestions } = useSessionStore();
   const { toast } = useToast();
@@ -59,6 +62,20 @@ export function ClarificationPanel({
   }, [form, questions]);
 
   const watchedQuestions = useWatch({ control: form.control, name: 'questions' }) ?? [];
+
+  useEffect(() => {
+    if (!onDraftChange) {
+      return;
+    }
+
+    onDraftChange(
+      questions.map((question, index) => ({
+        ...question,
+        answer: watchedQuestions[index]?.answer ?? question.answer ?? '',
+        skipped: watchedQuestions[index]?.skipped ?? question.skipped ?? false,
+      })),
+    );
+  }, [onDraftChange, questions, watchedQuestions]);
 
   const groupedQuestions = useMemo(() => {
     return Array.from(new Set(questions.map((question) => question.group)));
@@ -121,47 +138,13 @@ export function ClarificationPanel({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div>
         <div>
           <h2 className="text-sm font-semibold text-foreground">Clarification Questions</h2>
           <p className="text-xs text-muted-foreground mt-0.5">
             Answer questions to generate accurate requirements. Required questions marked with
             <span className="text-[var(--color-danger)] ml-1">*</span>
           </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={onGenerateClarification}
-            disabled={isGenerating}
-            data-testid="button-generate-clarification"
-          >
-            {questions.length > 0 ? 'Regenerate Questions' : 'Generate Questions'}
-          </Button>
-          {!allRequiredAnswered && (
-            <span className="text-xs text-[var(--color-danger)] flex items-center gap-1">
-              <AlertCircle className="w-3.5 h-3.5" />
-              {requiredUnanswered.length} required unanswered
-            </span>
-          )}
-          <Button
-            size="sm"
-            onClick={handleGeneratePRD}
-            disabled={!allRequiredAnswered || isGenerating}
-            data-testid="button-generate-prd"
-          >
-            Generate PRD
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={saveDraft}
-            disabled={isGenerating}
-            data-testid="button-save-clarifications"
-          >
-            Save Answers
-          </Button>
         </div>
       </div>
 
@@ -274,12 +257,40 @@ export function ClarificationPanel({
         })}
       </div>
 
-      {!allRequiredAnswered && (
-        <div className="flex items-center gap-2 p-3 bg-[var(--color-warning-soft)] border border-yellow-200 rounded text-xs text-[var(--color-warning)]">
-          <AlertCircle className="w-4 h-4 flex-shrink-0" />
-          <span>Answer all required questions before generating a PRD. Missing context will reduce story quality.</span>
-        </div>
-      )}
+      <StepActionBar>
+        {!allRequiredAnswered && (
+          <span className="mr-auto text-xs text-[var(--color-danger)] flex items-center gap-1">
+            <AlertCircle className="w-3.5 h-3.5" />
+            {requiredUnanswered.length} required unanswered
+          </span>
+        )}
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={onGenerateClarification}
+          disabled={isGenerating}
+          data-testid="button-generate-clarification"
+        >
+          {questions.length > 0 ? 'Regenerate Questions' : 'Generate Questions'}
+        </Button>
+        <Button
+          size="sm"
+          onClick={handleGeneratePRD}
+          disabled={!allRequiredAnswered || isGenerating}
+          data-testid="button-generate-prd"
+        >
+          Generate PRD
+        </Button>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={saveDraft}
+          disabled={isGenerating}
+          data-testid="button-save-clarifications"
+        >
+          Save Answers
+        </Button>
+      </StepActionBar>
     </div>
   );
 }

@@ -1,6 +1,8 @@
 import { AlertCircle, AlertTriangle, ArrowRight, CheckCircle, Lightbulb } from 'lucide-react';
 import { Phase, PhaseStatus } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { Spinner } from '@/components/ui/spinner';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export interface GuidanceItem {
   type: 'error' | 'warning' | 'success' | 'action';
@@ -13,6 +15,8 @@ interface GuidancePanelProps {
   phase: Phase;
   phaseStatus: PhaseStatus;
   items: GuidanceItem[];
+  isLoading?: boolean;
+  loadingLabel?: string;
   readinessLabel?: string;
   completionCount?: { done: number; total: number };
   className?: string;
@@ -29,7 +33,7 @@ const phaseDescriptions: Record<Phase, string> = {
   export: 'Copy or download Jira-ready output.',
 };
 
-export function GuidancePanel({ phase, phaseStatus, items, readinessLabel, completionCount, className }: GuidancePanelProps) {
+export function GuidancePanel({ phase, phaseStatus, items, isLoading = false, loadingLabel, readinessLabel, completionCount, className }: GuidancePanelProps) {
   const errors = items.filter(i => i.type === 'error');
   const warnings = items.filter(i => i.type === 'warning');
   const actions = items.filter(i => i.type === 'action');
@@ -75,6 +79,25 @@ export function GuidancePanel({ phase, phaseStatus, items, readinessLabel, compl
       </div>
 
       <div className="flex-1 overflow-y-auto">
+        {isLoading ? (
+          <div className="px-4 py-4 border-b border-border">
+            <div className="flex items-center gap-2">
+              <Spinner className="h-4 w-4 text-primary" />
+              <div className="text-xs font-semibold text-foreground">
+                {loadingLabel ?? 'AI is analyzing this step…'}
+              </div>
+            </div>
+            <div className="mt-2 text-xs text-muted-foreground">
+              Reading the current phase, workflow state, and step skills.
+            </div>
+            <div className="mt-4 space-y-2">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-11/12" />
+              <Skeleton className="h-10 w-10/12" />
+            </div>
+          </div>
+        ) : (
+          <>
         {/* Errors */}
         {errors.length > 0 && (
           <div className="px-4 py-3 border-b border-border">
@@ -161,6 +184,8 @@ export function GuidancePanel({ phase, phaseStatus, items, readinessLabel, compl
             <CheckCircle className="w-8 h-8 text-[var(--color-success)] mx-auto mb-2" />
             <div className="text-xs text-muted-foreground">No issues detected for this phase.</div>
           </div>
+        )}
+          </>
         )}
       </div>
     </div>
