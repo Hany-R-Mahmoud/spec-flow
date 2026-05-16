@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { useToast } from '@/hooks/use-toast';
 import { StepActionBar } from '@/components/workspace/StepActionBar';
+import { GenerationStatusNotice } from '@/components/workspace/GenerationStatusNotice';
 
 interface EpicsPanelProps {
   epics: Epic[];
@@ -50,19 +51,14 @@ export function EpicsPanel({
         </div>
       </div>
 
-      {(generationStep.status === 'succeeded' || generationStep.status === 'failed' || generationStep.status === 'unavailable' || generationStep.errorMessage) && (
-        <div className="rounded-md border border-border bg-card px-3 py-2 text-xs text-muted-foreground">
-          {generationStep.status === 'succeeded' && (
-            <span>Epics generated and saved.</span>
-          )}
-          {generationStep.status === 'failed' && (
-            <span className="text-[var(--color-danger)]">{generationStep.errorMessage || 'Epic generation failed. Retry when ready.'}</span>
-          )}
-          {generationStep.status === 'unavailable' && (
-            <span className="text-[var(--color-warning)]">{generationStep.errorMessage || 'Epic generation is unavailable right now.'}</span>
-          )}
-        </div>
-      )}
+      <GenerationStatusNotice
+        generationStep={generationStep}
+        successMessage="Epics generated and saved."
+        failedMessage="Epic generation failed. Retry when ready."
+        unavailableMessage="Epic generation is unavailable right now."
+        onRetry={onGenerateEpics}
+        retryLabel="Epics"
+      />
 
       <div className="space-y-3">
         {epics.map((epic, idx) => {

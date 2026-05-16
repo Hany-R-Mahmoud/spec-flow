@@ -198,6 +198,32 @@ function patchSessionById(
   );
 }
 
+function formatGenerationErrorMessage(error: unknown): string {
+  const fallback = 'Generation failed before valid output could be saved.';
+
+  if (typeof error !== 'object' || error === null) {
+    return fallback;
+  }
+
+  const status = 'status' in error ? Number((error as { status?: unknown }).status) : NaN;
+  const message =
+    'message' in error && typeof (error as { message?: unknown }).message === 'string'
+      ? (error as { message: string }).message
+      : fallback;
+
+  if (status === 429) {
+    const headers = 'headers' in error ? (error as { headers?: Headers }).headers : undefined;
+    const retryAfter = headers?.get('retry-after');
+    const retryAfterSeconds = retryAfter ? Number(retryAfter) : NaN;
+    const retryMinutes = Number.isFinite(retryAfterSeconds)
+      ? Math.max(1, Math.ceil(retryAfterSeconds / 60))
+      : 15;
+    return `Rate limit hit. Wait about ${retryMinutes} minute${retryMinutes === 1 ? '' : 's'}, then retry.`;
+  }
+
+  return message.replace(/^HTTP \d+ [^:]+:\s*/, '').trim() || fallback;
+}
+
 const SessionContext = createContext<{
   state: State;
   dispatch: (action: Action) => void;
@@ -757,10 +783,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 
         return updatedSession;
       } catch (error) {
-        const message =
-          error instanceof Error
-            ? error.message
-            : 'Generation failed before valid output could be saved.';
+        const message = formatGenerationErrorMessage(error);
 
         setState((current) =>
           deriveState(

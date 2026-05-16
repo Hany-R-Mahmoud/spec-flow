@@ -10,6 +10,7 @@ import { ScoreBar } from '@/components/shared/ScoreBar';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { StepActionBar } from '@/components/workspace/StepActionBar';
+import { GenerationStatusNotice } from '@/components/workspace/GenerationStatusNotice';
 
 interface StoriesPanelProps {
   epics: Epic[];
@@ -285,19 +286,14 @@ export function StoriesPanel({
         </div>
       </div>
 
-      {(generationStep.status === 'succeeded' || generationStep.status === 'failed' || generationStep.status === 'unavailable' || generationStep.errorMessage) && (
-        <div className="rounded-md border border-border bg-card px-3 py-2 text-xs text-muted-foreground">
-          {generationStep.status === 'succeeded' && (
-            <span>Stories generated and saved.</span>
-          )}
-          {generationStep.status === 'failed' && (
-            <span className="text-[var(--color-danger)]">{generationStep.errorMessage || 'Story generation failed. Retry when ready.'}</span>
-          )}
-          {generationStep.status === 'unavailable' && (
-            <span className="text-[var(--color-warning)]">{generationStep.errorMessage || 'Story generation is unavailable right now.'}</span>
-          )}
-        </div>
-      )}
+      <GenerationStatusNotice
+        generationStep={generationStep}
+        successMessage="Stories generated and saved."
+        failedMessage="Story generation failed. Retry when ready."
+        unavailableMessage="Story generation is unavailable right now."
+        onRetry={onGenerateStories}
+        retryLabel="Stories"
+      />
 
       <div className="space-y-6">
         {epics.map((epic, epicIdx) => {

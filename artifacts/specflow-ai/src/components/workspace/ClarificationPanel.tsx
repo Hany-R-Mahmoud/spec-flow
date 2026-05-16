@@ -8,6 +8,7 @@ import { Spinner } from '@/components/ui/spinner';
 import { useToast } from '@/hooks/use-toast';
 import { useSessionStore } from '@/store/session-store';
 import { StepActionBar } from '@/components/workspace/StepActionBar';
+import { GenerationStatusNotice } from '@/components/workspace/GenerationStatusNotice';
 
 interface ClarificationPanelProps {
   questions: ClarificationQuestion[];
@@ -135,19 +136,14 @@ export function ClarificationPanel({
         </div>
       </div>
 
-      {(generationStep.status === 'succeeded' || generationStep.status === 'failed' || generationStep.status === 'unavailable' || generationStep.errorMessage) && (
-        <div className="rounded-md border border-border bg-card px-3 py-2 text-xs text-muted-foreground">
-          {generationStep.status === 'succeeded' && (
-            <span>Clarification questions generated and saved.</span>
-          )}
-          {generationStep.status === 'failed' && (
-            <span className="text-[var(--color-danger)]">{generationStep.errorMessage || 'Clarification generation failed. Retry when ready.'}</span>
-          )}
-          {generationStep.status === 'unavailable' && (
-            <span className="text-[var(--color-warning)]">{generationStep.errorMessage || 'Clarification generation is unavailable right now.'}</span>
-          )}
-        </div>
-      )}
+      <GenerationStatusNotice
+        generationStep={generationStep}
+        successMessage="Clarification questions generated and saved."
+        failedMessage="Clarification generation failed. Retry when ready."
+        unavailableMessage="Clarification generation is unavailable right now."
+        onRetry={onGenerateClarification}
+        retryLabel="Clarification"
+      />
 
       <div className="space-y-2">
         {groupedQuestions.map((group) => {
