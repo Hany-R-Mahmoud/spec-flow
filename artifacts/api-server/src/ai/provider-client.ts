@@ -20,6 +20,54 @@ export class AiProviderError extends Error {
 }
 
 const DEFAULT_AI_PROVIDER_BASE_URL = "https://api.openai.com/v1";
+const DEFAULT_AI_PROVIDER_TIMEOUT_MS = 45_000;
+const DEFAULT_AI_PROVIDER_VALIDATION_TIMEOUT_MS = 10_000;
+
+function readTimeoutMs(envName: string, fallback: number): number {
+  const raw = process.env[envName];
+  if (!raw) {
+    return fallback;
+  }
+
+  const parsed = Number(raw);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+function createTimeoutSignal(timeoutMs: number): AbortSignal {
+  const signalWithTimeout = AbortSignal as typeof AbortSignal & {
+    timeout?: (milliseconds: number) => AbortSignal;
+  };
+
+  if (signalWithTimeout.timeout) {
+    return signalWithTimeout.timeout(timeoutMs);
+  }
+
+  const controller = new AbortController();
+  setTimeout(() => controller.abort(), timeoutMs);
+  return controller.signal;
+}
+
+function toProviderFetchError(error: unknown, timeoutMs: number): AiProviderError {
+  if (error instanceof AiProviderError) {
+    return error;
+  }
+
+  if (error instanceof DOMException && error.name === "TimeoutError") {
+    return new AiProviderError(
+      `AI provider did not respond within ${Math.round(timeoutMs / 1000)} seconds. Try again or choose a faster model.`,
+      "timeout",
+    );
+  }
+
+  if (error instanceof DOMException && error.name === "AbortError") {
+    return new AiProviderError(
+      `AI provider request was aborted after ${Math.round(timeoutMs / 1000)} seconds. Try again or choose a faster model.`,
+      "timeout",
+    );
+  }
+
+  throw error;
+}
 
 function normalizeBaseUrl(baseUrl: string | null | undefined): string {
   const trimmed = baseUrl?.trim();
@@ -129,6 +177,7 @@ async function postChatCompletion(args: {
   baseUrl?: string;
   messages: LiveAiMessage[];
   jsonMode: boolean;
+  timeoutMs: number;
 }): Promise<Response> {
   const body: Record<string, unknown> = {
     model: args.model,
@@ -147,6 +196,7 @@ async function postChatCompletion(args: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify(body),
+    signal: createTimeoutSignal(args.timeoutMs),
   });
 }
 
@@ -155,21 +205,32 @@ export async function validateOpenAiKey(args: {
   model: string;
   baseUrl?: string;
 }): Promise<void> {
-  const response = await fetch(buildProviderUrl(args.baseUrl, "chat/completions"), {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${args.apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: args.model,
-      messages: [
-        { role: "system", content: "Reply with one word." },
-        { role: "user", content: "ok" },
-      ],
-      max_tokens: 1,
-    }),
-  });
+  const timeoutMs = readTimeoutMs(
+    "AI_PROVIDER_VALIDATION_TIMEOUT_MS",
+    DEFAULT_AI_PROVIDER_VALIDATION_TIMEOUT_MS,
+  );
+  let response: Response;
+
+  try {
+    response = await fetch(buildProviderUrl(args.baseUrl, "chat/completions"), {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${args.apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: args.model,
+        messages: [
+          { role: "system", content: "Reply with one word." },
+          { role: "user", content: "ok" },
+        ],
+        max_tokens: 1,
+      }),
+      signal: createTimeoutSignal(timeoutMs),
+    });
+  } catch (error) {
+    throw toProviderFetchError(error, timeoutMs);
+  }
 
   if (!response.ok) {
     throw await parseProviderError(response);
@@ -182,7 +243,17 @@ export async function runOpenAiJson(args: {
   baseUrl?: string;
   messages: LiveAiMessage[];
 }): Promise<LiveAiResult> {
-  let response = await postChatCompletion({ ...args, jsonMode: true });
+  const timeoutMs = readTimeoutMs(
+    "AI_PROVIDER_TIMEOUT_MS",
+    DEFAULT_AI_PROVIDER_TIMEOUT_MS,
+  );
+  let response: Response;
+
+  try {
+    response = await postChatCompletion({ ...args, jsonMode: true, timeoutMs });
+  } catch (error) {
+    throw toProviderFetchError(error, timeoutMs);
+  }
 
   if (!response.ok) {
     const jsonModeError = await parseProviderError(response);
@@ -190,7 +261,12 @@ export async function runOpenAiJson(args: {
       throw jsonModeError;
     }
 
-    response = await postChatCompletion({ ...args, jsonMode: false });
+    try {
+      response = await postChatCompletion({ ...args, jsonMode: false, timeoutMs });
+    } catch (error) {
+      throw toProviderFetchError(error, timeoutMs);
+    }
+
     if (!response.ok) {
       throw await parseProviderError(response);
     }

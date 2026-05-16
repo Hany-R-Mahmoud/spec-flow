@@ -732,6 +732,10 @@ function getGenerationErrorStatus(error: unknown): number {
       return 429;
     }
 
+    if (error.errorClass === "timeout") {
+      return 504;
+    }
+
     if (error.errorClass === "request") {
       return 400;
     }

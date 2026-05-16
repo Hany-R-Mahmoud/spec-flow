@@ -3,7 +3,8 @@
   "outputDirectory": "artifacts/specflow-ai/dist/public",
   "functions": {
     "api/[...path].ts": {
-      "includeFiles": "artifacts/api-server/dist/**"
+      "includeFiles": "artifacts/api-server/dist/**",
+      "maxDuration": 60
     }
   },
   "routes": [

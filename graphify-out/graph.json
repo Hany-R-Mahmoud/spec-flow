@@ -198,7 +198,7 @@
       "source_file": "artifacts/api-server/src/ai/provider-client.ts",
       "source_location": "L1",
       "id": "artifacts_api_server_src_ai_provider_client_ts",
-      "community": 10,
+      "community": 8,
       "norm_label": "provider-client.ts"
     },
     {
@@ -207,7 +207,7 @@
       "source_file": "artifacts/api-server/src/ai/provider-client.ts",
       "source_location": "L12",
       "id": "ai_provider_client_aiprovidererror",
-      "community": 10,
+      "community": 8,
       "norm_label": "aiprovidererror"
     },
     {
@@ -216,88 +216,115 @@
       "source_file": "artifacts/api-server/src/ai/provider-client.ts",
       "source_location": "L13",
       "id": "ai_provider_client_aiprovidererror_constructor",
-      "community": 10,
+      "community": 8,
       "norm_label": ".constructor()"
+    },
+    {
+      "label": "readTimeoutMs()",
+      "file_type": "code",
+      "source_file": "artifacts/api-server/src/ai/provider-client.ts",
+      "source_location": "L26",
+      "id": "ai_provider_client_readtimeoutms",
+      "community": 8,
+      "norm_label": "readtimeoutms()"
+    },
+    {
+      "label": "createTimeoutSignal()",
+      "file_type": "code",
+      "source_file": "artifacts/api-server/src/ai/provider-client.ts",
+      "source_location": "L36",
+      "id": "ai_provider_client_createtimeoutsignal",
+      "community": 8,
+      "norm_label": "createtimeoutsignal()"
+    },
+    {
+      "label": "toProviderFetchError()",
+      "file_type": "code",
+      "source_file": "artifacts/api-server/src/ai/provider-client.ts",
+      "source_location": "L50",
+      "id": "ai_provider_client_toproviderfetcherror",
+      "community": 8,
+      "norm_label": "toproviderfetcherror()"
     },
     {
       "label": "normalizeBaseUrl()",
       "file_type": "code",
       "source_file": "artifacts/api-server/src/ai/provider-client.ts",
-      "source_location": "L24",
+      "source_location": "L72",
       "id": "ai_provider_client_normalizebaseurl",
-      "community": 10,
+      "community": 8,
       "norm_label": "normalizebaseurl()"
     },
     {
       "label": "buildProviderUrl()",
       "file_type": "code",
       "source_file": "artifacts/api-server/src/ai/provider-client.ts",
-      "source_location": "L44",
+      "source_location": "L92",
       "id": "ai_provider_client_buildproviderurl",
-      "community": 10,
+      "community": 8,
       "norm_label": "buildproviderurl()"
     },
     {
       "label": "classifyStatus()",
       "file_type": "code",
       "source_file": "artifacts/api-server/src/ai/provider-client.ts",
-      "source_location": "L48",
+      "source_location": "L96",
       "id": "ai_provider_client_classifystatus",
-      "community": 10,
+      "community": 8,
       "norm_label": "classifystatus()"
     },
     {
       "label": "parseProviderError()",
       "file_type": "code",
       "source_file": "artifacts/api-server/src/ai/provider-client.ts",
-      "source_location": "L64",
+      "source_location": "L112",
       "id": "ai_provider_client_parseprovidererror",
-      "community": 10,
+      "community": 8,
       "norm_label": "parseprovidererror()"
     },
     {
       "label": "extractProviderErrorMessage()",
       "file_type": "code",
       "source_file": "artifacts/api-server/src/ai/provider-client.ts",
-      "source_location": "L77",
+      "source_location": "L125",
       "id": "ai_provider_client_extractprovidererrormessage",
-      "community": 10,
+      "community": 8,
       "norm_label": "extractprovidererrormessage()"
     },
     {
       "label": "shouldRetryWithoutJsonMode()",
       "file_type": "code",
       "source_file": "artifacts/api-server/src/ai/provider-client.ts",
-      "source_location": "L110",
+      "source_location": "L158",
       "id": "ai_provider_client_shouldretrywithoutjsonmode",
-      "community": 10,
+      "community": 8,
       "norm_label": "shouldretrywithoutjsonmode()"
     },
     {
       "label": "postChatCompletion()",
       "file_type": "code",
       "source_file": "artifacts/api-server/src/ai/provider-client.ts",
-      "source_location": "L126",
+      "source_location": "L174",
       "id": "ai_provider_client_postchatcompletion",
-      "community": 10,
+      "community": 8,
       "norm_label": "postchatcompletion()"
     },
     {
       "label": "validateOpenAiKey()",
       "file_type": "code",
       "source_file": "artifacts/api-server/src/ai/provider-client.ts",
-      "source_location": "L153",
+      "source_location": "L203",
       "id": "ai_provider_client_validateopenaikey",
-      "community": 10,
+      "community": 8,
       "norm_label": "validateopenaikey()"
     },
     {
       "label": "runOpenAiJson()",
       "file_type": "code",
       "source_file": "artifacts/api-server/src/ai/provider-client.ts",
-      "source_location": "L179",
+      "source_location": "L240",
       "id": "ai_provider_client_runopenaijson",
-      "community": 10,
+      "community": 8,
       "norm_label": "runopenaijson()"
     },
     {
@@ -603,7 +630,7 @@
       "source_file": "artifacts/api-server/src/lib/rate-limit.ts",
       "source_location": "L1",
       "id": "artifacts_api_server_src_lib_rate_limit_ts",
-      "community": 1,
+      "community": 5,
       "norm_label": "rate-limit.ts"
     },
     {
@@ -612,7 +639,7 @@
       "source_file": "artifacts/api-server/src/lib/rate-limit.ts",
       "source_location": "L3",
       "id": "lib_rate_limit_consumeratelimit",
-      "community": 1,
+      "community": 5,
       "norm_label": "consumeratelimit()"
     },
     {
@@ -862,7 +889,7 @@
       "label": "handleStep()",
       "file_type": "code",
       "source_file": "artifacts/api-server/src/routes/generation.ts",
-      "source_location": "L753",
+      "source_location": "L757",
       "id": "routes_generation_handlestep",
       "community": 1,
       "norm_label": "handlestep()"
@@ -871,7 +898,7 @@
       "label": "sendGenerationError()",
       "file_type": "code",
       "source_file": "artifacts/api-server/src/routes/generation.ts",
-      "source_location": "L800",
+      "source_location": "L804",
       "id": "routes_generation_sendgenerationerror",
       "community": 5,
       "norm_label": "sendgenerationerror()"
@@ -880,7 +907,7 @@
       "label": "hasZodIssues()",
       "file_type": "code",
       "source_file": "artifacts/api-server/src/routes/generation.ts",
-      "source_location": "L812",
+      "source_location": "L816",
       "id": "routes_generation_haszodissues",
       "community": 1,
       "norm_label": "haszodissues()"
@@ -3519,7 +3546,7 @@
       "source_file": "artifacts/specflow-ai/src/lib/adaptive-intake.ts",
       "source_location": "L1",
       "id": "artifacts_specflow_ai_src_lib_adaptive_intake_ts",
-      "community": 8,
+      "community": 10,
       "norm_label": "adaptive-intake.ts"
     },
     {
@@ -3528,7 +3555,7 @@
       "source_file": "artifacts/specflow-ai/src/lib/adaptive-intake.ts",
       "source_location": "L100",
       "id": "lib_adaptive_intake_splitlines",
-      "community": 8,
+      "community": 10,
       "norm_label": "splitlines()"
     },
     {
@@ -3537,7 +3564,7 @@
       "source_file": "artifacts/specflow-ai/src/lib/adaptive-intake.ts",
       "source_location": "L107",
       "id": "lib_adaptive_intake_hasprdsignals",
-      "community": 8,
+      "community": 10,
       "norm_label": "hasprdsignals()"
     },
     {
@@ -3546,7 +3573,7 @@
       "source_file": "artifacts/specflow-ai/src/lib/adaptive-intake.ts",
       "source_location": "L118",
       "id": "lib_adaptive_intake_extractsectioncontent",
-      "community": 8,
+      "community": 10,
       "norm_label": "extractsectioncontent()"
     },
     {
@@ -3555,7 +3582,7 @@
       "source_file": "artifacts/specflow-ai/src/lib/adaptive-intake.ts",
       "source_location": "L127",
       "id": "lib_adaptive_intake_extractstorylines",
-      "community": 8,
+      "community": 10,
       "norm_label": "extractstorylines()"
     },
     {
@@ -3564,7 +3591,7 @@
       "source_file": "artifacts/specflow-ai/src/lib/adaptive-intake.ts",
       "source_location": "L133",
       "id": "lib_adaptive_intake_extractacceptancecriteria",
-      "community": 8,
+      "community": 10,
       "norm_label": "extractacceptancecriteria()"
     },
     {
@@ -3573,7 +3600,7 @@
       "source_file": "artifacts/specflow-ai/src/lib/adaptive-intake.ts",
       "source_location": "L145",
       "id": "lib_adaptive_intake_makephaseplan",
-      "community": 8,
+      "community": 10,
       "norm_label": "makephaseplan()"
     },
     {
@@ -3582,7 +3609,7 @@
       "source_file": "artifacts/specflow-ai/src/lib/adaptive-intake.ts",
       "source_location": "L258",
       "id": "lib_adaptive_intake_getrecommendedphase",
-      "community": 8,
+      "community": 10,
       "norm_label": "getrecommendedphase()"
     },
     {
@@ -3591,7 +3618,7 @@
       "source_file": "artifacts/specflow-ai/src/lib/adaptive-intake.ts",
       "source_location": "L273",
       "id": "lib_adaptive_intake_analyzeadaptiveintake",
-      "community": 8,
+      "community": 10,
       "norm_label": "analyzeadaptiveintake()"
     },
     {
@@ -3600,7 +3627,7 @@
       "source_file": "artifacts/specflow-ai/src/lib/adaptive-intake.ts",
       "source_location": "L315",
       "id": "lib_adaptive_intake_buildadaptiveartifacts",
-      "community": 8,
+      "community": 10,
       "norm_label": "buildadaptiveartifacts()"
     },
     {
@@ -3609,7 +3636,7 @@
       "source_file": "artifacts/specflow-ai/src/lib/adaptive-intake.ts",
       "source_location": "L432",
       "id": "lib_adaptive_intake_buildadaptivephasepatch",
-      "community": 8,
+      "community": 10,
       "norm_label": "buildadaptivephasepatch()"
     },
     {
@@ -3726,7 +3753,7 @@
       "source_file": "artifacts/specflow-ai/src/pages/NewBreakdown.tsx",
       "source_location": "L1",
       "id": "artifacts_specflow_ai_src_pages_newbreakdown_tsx",
-      "community": 8,
+      "community": 2,
       "norm_label": "newbreakdown.tsx"
     },
     {
@@ -3735,7 +3762,7 @@
       "source_file": "artifacts/specflow-ai/src/pages/NewBreakdown.tsx",
       "source_location": "L53",
       "id": "pages_newbreakdown_add",
-      "community": 8,
+      "community": 2,
       "norm_label": "add()"
     },
     {
@@ -3744,7 +3771,7 @@
       "source_file": "artifacts/specflow-ai/src/pages/NewBreakdown.tsx",
       "source_location": "L58",
       "id": "pages_newbreakdown_remove",
-      "community": 8,
+      "community": 2,
       "norm_label": "remove()"
     },
     {
@@ -3753,7 +3780,7 @@
       "source_file": "artifacts/specflow-ai/src/pages/NewBreakdown.tsx",
       "source_location": "L147",
       "id": "pages_newbreakdown_onsubmit",
-      "community": 8,
+      "community": 2,
       "norm_label": "onsubmit()"
     },
     {
@@ -4869,7 +4896,7 @@
       "source_file": "lib/api-client-react/src/custom-fetch.ts",
       "source_location": "L48",
       "id": "src_custom_fetch_isrequest",
-      "community": 0,
+      "community": 3,
       "norm_label": "isrequest()"
     },
     {
@@ -4878,7 +4905,7 @@
       "source_file": "lib/api-client-react/src/custom-fetch.ts",
       "source_location": "L52",
       "id": "src_custom_fetch_resolvemethod",
-      "community": 0,
+      "community": 3,
       "norm_label": "resolvemethod()"
     },
     {
@@ -5076,7 +5103,7 @@
       "source_file": "lib/api-client-react/src/custom-fetch.ts",
       "source_location": "L326",
       "id": "src_custom_fetch_customfetch",
-      "community": 0,
+      "community": 3,
       "norm_label": "customfetch()"
     },
     {
@@ -5355,7 +5382,7 @@
       "source_file": "lib/api-client-react/src/generated/api.ts",
       "source_location": "L578",
       "id": "generated_api_getcreatesessionurl",
-      "community": 0,
+      "community": 2,
       "norm_label": "getcreatesessionurl()"
     },
     {
@@ -5364,7 +5391,7 @@
       "source_file": "lib/api-client-react/src/generated/api.ts",
       "source_location": "L582",
       "id": "generated_api_createsession",
-      "community": 0,
+      "community": 2,
       "norm_label": "createsession()"
     },
     {
@@ -6084,7 +6111,7 @@
       "source_file": "lib/api-client-react/src/generated/api.ts",
       "source_location": "L2283",
       "id": "generated_api_getgetexportpackageurl",
-      "community": 0,
+      "community": 12,
       "norm_label": "getgetexportpackageurl()"
     },
     {
@@ -6093,7 +6120,7 @@
       "source_file": "lib/api-client-react/src/generated/api.ts",
       "source_location": "L2287",
       "id": "generated_api_getexportpackage",
-      "community": 0,
+      "community": 12,
       "norm_label": "getexportpackage()"
     },
     {
@@ -6810,7 +6837,43 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/ai/provider-client.ts",
-      "source_location": "L24",
+      "source_location": "L26",
+      "weight": 1.0,
+      "_src": "artifacts_api_server_src_ai_provider_client_ts",
+      "_tgt": "ai_provider_client_readtimeoutms",
+      "source": "artifacts_api_server_src_ai_provider_client_ts",
+      "target": "ai_provider_client_readtimeoutms",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "artifacts/api-server/src/ai/provider-client.ts",
+      "source_location": "L36",
+      "weight": 1.0,
+      "_src": "artifacts_api_server_src_ai_provider_client_ts",
+      "_tgt": "ai_provider_client_createtimeoutsignal",
+      "source": "artifacts_api_server_src_ai_provider_client_ts",
+      "target": "ai_provider_client_createtimeoutsignal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "artifacts/api-server/src/ai/provider-client.ts",
+      "source_location": "L50",
+      "weight": 1.0,
+      "_src": "artifacts_api_server_src_ai_provider_client_ts",
+      "_tgt": "ai_provider_client_toproviderfetcherror",
+      "source": "artifacts_api_server_src_ai_provider_client_ts",
+      "target": "ai_provider_client_toproviderfetcherror",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "artifacts/api-server/src/ai/provider-client.ts",
+      "source_location": "L72",
       "weight": 1.0,
       "_src": "artifacts_api_server_src_ai_provider_client_ts",
       "_tgt": "ai_provider_client_normalizebaseurl",
@@ -6822,7 +6885,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/ai/provider-client.ts",
-      "source_location": "L44",
+      "source_location": "L92",
       "weight": 1.0,
       "_src": "artifacts_api_server_src_ai_provider_client_ts",
       "_tgt": "ai_provider_client_buildproviderurl",
@@ -6834,7 +6897,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/ai/provider-client.ts",
-      "source_location": "L48",
+      "source_location": "L96",
       "weight": 1.0,
       "_src": "artifacts_api_server_src_ai_provider_client_ts",
       "_tgt": "ai_provider_client_classifystatus",
@@ -6846,7 +6909,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/ai/provider-client.ts",
-      "source_location": "L64",
+      "source_location": "L112",
       "weight": 1.0,
       "_src": "artifacts_api_server_src_ai_provider_client_ts",
       "_tgt": "ai_provider_client_parseprovidererror",
@@ -6858,7 +6921,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/ai/provider-client.ts",
-      "source_location": "L77",
+      "source_location": "L125",
       "weight": 1.0,
       "_src": "artifacts_api_server_src_ai_provider_client_ts",
       "_tgt": "ai_provider_client_extractprovidererrormessage",
@@ -6870,7 +6933,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/ai/provider-client.ts",
-      "source_location": "L110",
+      "source_location": "L158",
       "weight": 1.0,
       "_src": "artifacts_api_server_src_ai_provider_client_ts",
       "_tgt": "ai_provider_client_shouldretrywithoutjsonmode",
@@ -6882,7 +6945,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/ai/provider-client.ts",
-      "source_location": "L126",
+      "source_location": "L174",
       "weight": 1.0,
       "_src": "artifacts_api_server_src_ai_provider_client_ts",
       "_tgt": "ai_provider_client_postchatcompletion",
@@ -6894,7 +6957,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/ai/provider-client.ts",
-      "source_location": "L153",
+      "source_location": "L203",
       "weight": 1.0,
       "_src": "artifacts_api_server_src_ai_provider_client_ts",
       "_tgt": "ai_provider_client_validateopenaikey",
@@ -6906,7 +6969,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/ai/provider-client.ts",
-      "source_location": "L179",
+      "source_location": "L240",
       "weight": 1.0,
       "_src": "artifacts_api_server_src_ai_provider_client_ts",
       "_tgt": "ai_provider_client_runopenaijson",
@@ -6954,7 +7017,79 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/ai/provider-client.ts",
-      "source_location": "L45",
+      "source_location": "L208",
+      "weight": 1.0,
+      "_src": "ai_provider_client_validateopenaikey",
+      "_tgt": "ai_provider_client_readtimeoutms",
+      "source": "ai_provider_client_readtimeoutms",
+      "target": "ai_provider_client_validateopenaikey",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "artifacts/api-server/src/ai/provider-client.ts",
+      "source_location": "L246",
+      "weight": 1.0,
+      "_src": "ai_provider_client_runopenaijson",
+      "_tgt": "ai_provider_client_readtimeoutms",
+      "source": "ai_provider_client_readtimeoutms",
+      "target": "ai_provider_client_runopenaijson",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "artifacts/api-server/src/ai/provider-client.ts",
+      "source_location": "L199",
+      "weight": 1.0,
+      "_src": "ai_provider_client_postchatcompletion",
+      "_tgt": "ai_provider_client_createtimeoutsignal",
+      "source": "ai_provider_client_createtimeoutsignal",
+      "target": "ai_provider_client_postchatcompletion",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "artifacts/api-server/src/ai/provider-client.ts",
+      "source_location": "L229",
+      "weight": 1.0,
+      "_src": "ai_provider_client_validateopenaikey",
+      "_tgt": "ai_provider_client_createtimeoutsignal",
+      "source": "ai_provider_client_createtimeoutsignal",
+      "target": "ai_provider_client_validateopenaikey",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "artifacts/api-server/src/ai/provider-client.ts",
+      "source_location": "L232",
+      "weight": 1.0,
+      "_src": "ai_provider_client_validateopenaikey",
+      "_tgt": "ai_provider_client_toproviderfetcherror",
+      "source": "ai_provider_client_toproviderfetcherror",
+      "target": "ai_provider_client_validateopenaikey",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "artifacts/api-server/src/ai/provider-client.ts",
+      "source_location": "L255",
+      "weight": 1.0,
+      "_src": "ai_provider_client_runopenaijson",
+      "_tgt": "ai_provider_client_toproviderfetcherror",
+      "source": "ai_provider_client_toproviderfetcherror",
+      "target": "ai_provider_client_runopenaijson",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "artifacts/api-server/src/ai/provider-client.ts",
+      "source_location": "L93",
       "weight": 1.0,
       "_src": "ai_provider_client_buildproviderurl",
       "_tgt": "ai_provider_client_normalizebaseurl",
@@ -6966,7 +7101,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/ai/provider-client.ts",
-      "source_location": "L143",
+      "source_location": "L192",
       "weight": 1.0,
       "_src": "ai_provider_client_postchatcompletion",
       "_tgt": "ai_provider_client_buildproviderurl",
@@ -6978,7 +7113,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/ai/provider-client.ts",
-      "source_location": "L158",
+      "source_location": "L215",
       "weight": 1.0,
       "_src": "ai_provider_client_validateopenaikey",
       "_tgt": "ai_provider_client_buildproviderurl",
@@ -6990,7 +7125,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/ai/provider-client.ts",
-      "source_location": "L74",
+      "source_location": "L122",
       "weight": 1.0,
       "_src": "ai_provider_client_parseprovidererror",
       "_tgt": "ai_provider_client_classifystatus",
@@ -7002,7 +7137,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/ai/provider-client.ts",
-      "source_location": "L69",
+      "source_location": "L117",
       "weight": 1.0,
       "_src": "ai_provider_client_parseprovidererror",
       "_tgt": "ai_provider_client_extractprovidererrormessage",
@@ -7014,7 +7149,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/ai/provider-client.ts",
-      "source_location": "L175",
+      "source_location": "L236",
       "weight": 1.0,
       "_src": "ai_provider_client_validateopenaikey",
       "_tgt": "ai_provider_client_parseprovidererror",
@@ -7026,7 +7161,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/ai/provider-client.ts",
-      "source_location": "L188",
+      "source_location": "L259",
       "weight": 1.0,
       "_src": "ai_provider_client_runopenaijson",
       "_tgt": "ai_provider_client_parseprovidererror",
@@ -7038,7 +7173,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/ai/provider-client.ts",
-      "source_location": "L189",
+      "source_location": "L260",
       "weight": 1.0,
       "_src": "ai_provider_client_runopenaijson",
       "_tgt": "ai_provider_client_shouldretrywithoutjsonmode",
@@ -7050,7 +7185,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/ai/provider-client.ts",
-      "source_location": "L185",
+      "source_location": "L253",
       "weight": 1.0,
       "_src": "ai_provider_client_runopenaijson",
       "_tgt": "ai_provider_client_postchatcompletion",
@@ -8586,7 +8721,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/routes/generation.ts",
-      "source_location": "L753",
+      "source_location": "L757",
       "weight": 1.0,
       "_src": "artifacts_api_server_src_routes_generation_ts",
       "_tgt": "routes_generation_handlestep",
@@ -8598,7 +8733,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/routes/generation.ts",
-      "source_location": "L800",
+      "source_location": "L804",
       "weight": 1.0,
       "_src": "artifacts_api_server_src_routes_generation_ts",
       "_tgt": "routes_generation_sendgenerationerror",
@@ -8610,7 +8745,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/routes/generation.ts",
-      "source_location": "L812",
+      "source_location": "L816",
       "weight": 1.0,
       "_src": "artifacts_api_server_src_routes_generation_ts",
       "_tgt": "routes_generation_haszodissues",
@@ -8910,7 +9045,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "artifacts/api-server/src/routes/generation.ts",
-      "source_location": "L742",
+      "source_location": "L746",
       "weight": 1.0,
       "_src": "routes_generation_getgenerationerrorstatus",
       "_tgt": "routes_generation_haszodissues",
