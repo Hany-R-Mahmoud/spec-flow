@@ -453,7 +453,7 @@ function WorkflowWorkspaceContent({ session }: { session: ProjectSession }) {
 
       dispatch({
         type: 'SET_PHASE',
-        payload: { sessionId: session.id, phase: phaseMap[step] },
+        payload: { sessionId: session.id, phase: phaseMap[step], status: 'complete' },
       });
       setActivePhase(phaseMap[step]);
       toast({

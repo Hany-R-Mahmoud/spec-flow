@@ -21,6 +21,7 @@ export class AiProviderError extends Error {
 
 const DEFAULT_AI_PROVIDER_BASE_URL = "https://api.openai.com/v1";
 const DEFAULT_AI_PROVIDER_TIMEOUT_MS = 180_000;
+const DEFAULT_VERCEL_AI_PROVIDER_TIMEOUT_MS = 45_000;
 const DEFAULT_AI_PROVIDER_VALIDATION_TIMEOUT_MS = 60_000;
 
 function readTimeoutMs(envName: string, fallback: number): number {
@@ -31,6 +32,24 @@ function readTimeoutMs(envName: string, fallback: number): number {
 
   const parsed = Number(raw);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+function readProviderTimeoutMs(): number {
+  const configuredTimeoutMs = readTimeoutMs(
+    "AI_PROVIDER_TIMEOUT_MS",
+    DEFAULT_AI_PROVIDER_TIMEOUT_MS,
+  );
+
+  if (!process.env.VERCEL) {
+    return configuredTimeoutMs;
+  }
+
+  const vercelTimeoutMs = readTimeoutMs(
+    "VERCEL_AI_PROVIDER_TIMEOUT_MS",
+    DEFAULT_VERCEL_AI_PROVIDER_TIMEOUT_MS,
+  );
+
+  return Math.min(configuredTimeoutMs, vercelTimeoutMs);
 }
 
 function createTimeoutSignal(timeoutMs: number): AbortSignal {
@@ -243,10 +262,7 @@ export async function runOpenAiJson(args: {
   baseUrl?: string;
   messages: LiveAiMessage[];
 }): Promise<LiveAiResult> {
-  const timeoutMs = readTimeoutMs(
-    "AI_PROVIDER_TIMEOUT_MS",
-    DEFAULT_AI_PROVIDER_TIMEOUT_MS,
-  );
+  const timeoutMs = readProviderTimeoutMs();
   let response: Response;
 
   try {

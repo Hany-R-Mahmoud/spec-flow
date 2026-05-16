@@ -89,7 +89,9 @@ export const workflowPrompts = {
     buildPrompt(session) {
       return [
         "Generate implementation-ready user stories from epics and PRD.",
-        "Each story must include acceptance criteria, edge cases, error handling, and implementation notes.",
+        "Generate at most 6 total stories and at most 2 stories per epic; prioritize the most important implementation path.",
+        "Keep each story concise: 2-4 acceptance criteria, 1-2 edge cases, and short notes.",
+        "Use Unknown / verify for missing facts instead of expanding with speculation.",
         summarizeSession(session),
       ].join("\n\n");
     },

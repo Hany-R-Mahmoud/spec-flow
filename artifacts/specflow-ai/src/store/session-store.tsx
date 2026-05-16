@@ -34,6 +34,7 @@ import type {
   GenerationStatus,
   GenerationStepState,
   Phase,
+  PhaseStatus,
   PRDSection,
   ProjectSession,
   Story,
@@ -60,7 +61,7 @@ type Action =
   | { type: 'SET_ACTIVE_SESSION'; payload: string }
   | { type: 'ADD_SESSION'; payload: ProjectSession }
   | { type: 'UPDATE_SESSION'; payload: Partial<ProjectSession> & { id: string } }
-  | { type: 'SET_PHASE'; payload: { sessionId: string; phase: Phase } }
+  | { type: 'SET_PHASE'; payload: { sessionId: string; phase: Phase; status?: PhaseStatus } }
   | { type: 'UPDATE_STORY'; payload: Story }
   | { type: 'UPDATE_CLARIFICATION'; payload: { id: string; answer: string; skipped?: boolean } }
   | { type: 'UPDATE_PRD_SECTION'; payload: { id: string; content: string; complete: boolean } };
@@ -151,6 +152,43 @@ function replaceSession(
   return sessions.map((session) =>
     session.id === updatedSession.id ? updatedSession : session,
   );
+}
+
+const PHASE_ORDER: Phase[] = [
+  'intake',
+  'clarification',
+  'prd',
+  'epics',
+  'stories',
+  'quality',
+  'devReview',
+  'export',
+];
+
+function derivePhaseProgress(
+  currentPhases: ProjectSession['phases'],
+  phase: Phase,
+  status: PhaseStatus = 'in-progress',
+): ProjectSession['phases'] {
+  const currentIndex = PHASE_ORDER.indexOf(phase);
+  if (currentIndex < 0) {
+    return currentPhases;
+  }
+
+  return PHASE_ORDER.reduce<ProjectSession['phases']>((next, item, index) => {
+    if (index < currentIndex) {
+      next[item] = 'complete';
+      return next;
+    }
+
+    if (index === currentIndex) {
+      next[item] = status;
+      return next;
+    }
+
+    next[item] = currentPhases[item];
+    return next;
+  }, { ...currentPhases });
 }
 
 function createGenerationState(
@@ -514,10 +552,11 @@ export function SessionProvider({ children }: { children: ReactNode }) {
           return;
         }
 
-        const phases = {
-          ...currentSession.phases,
-          [action.payload.phase]: 'in-progress' as const,
-        };
+        const phases = derivePhaseProgress(
+          currentSession.phases,
+          action.payload.phase,
+          action.payload.status,
+        );
 
         dispatch({
           type: 'UPDATE_SESSION',
