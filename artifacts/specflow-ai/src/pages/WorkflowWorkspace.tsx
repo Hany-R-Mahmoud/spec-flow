@@ -787,7 +787,7 @@ export function WorkflowWorkspace() {
             phase={activePhase}
             phaseStatus={session.phases[activePhase]}
             items={guidanceItems}
-            isLoading={guidanceLoading}
+            isLoading={guidanceLoading || Boolean(activeGenerationStep?.status === 'running')}
             loadingLabel={canGenerate ? 'AI is analyzing this step…' : 'Manual guidance is loading…'}
             completionCount={completionCount}
           />

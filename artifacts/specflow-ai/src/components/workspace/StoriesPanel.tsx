@@ -8,6 +8,7 @@ import { ReadinessScoreRing } from '@/components/shared/ReadinessScore';
 import { WarningList } from '@/components/shared/WarningBadge';
 import { ScoreBar } from '@/components/shared/ScoreBar';
 import { Button } from '@/components/ui/button';
+import { Spinner } from '@/components/ui/spinner';
 import { StepActionBar } from '@/components/workspace/StepActionBar';
 
 interface StoriesPanelProps {
@@ -332,11 +333,13 @@ export function StoriesPanel({
         })}
       </div>
 
-      <StepActionBar>
+      <StepActionBar isLoading={isGenerating} loadingLabel="Generating stories…">
         <Button size="sm" variant="outline" onClick={onGenerateStories} disabled={isGenerating || epics.length === 0}>
+          {isGenerating ? <Spinner className="h-3.5 w-3.5" /> : null}
           Regenerate Stories
         </Button>
         <Button size="sm" onClick={onGenerateQuality} disabled={isGenerating || stories.length === 0} data-testid="button-review-quality">
+          {isGenerating ? <Spinner className="h-3.5 w-3.5" /> : null}
           Review Quality
         </Button>
       </StepActionBar>

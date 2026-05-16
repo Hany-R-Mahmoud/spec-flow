@@ -4,6 +4,7 @@ import { ChevronDown, ChevronRight, AlertCircle } from 'lucide-react';
 import { ClarificationQuestion, GenerationStepState } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { Spinner } from '@/components/ui/spinner';
 import { useToast } from '@/hooks/use-toast';
 import { useSessionStore } from '@/store/session-store';
 import { StepActionBar } from '@/components/workspace/StepActionBar';
@@ -257,7 +258,7 @@ export function ClarificationPanel({
         })}
       </div>
 
-      <StepActionBar>
+      <StepActionBar isLoading={isGenerating} loadingLabel="Generating clarification questions…">
         {!allRequiredAnswered && (
           <span className="mr-auto text-xs text-[var(--color-danger)] flex items-center gap-1">
             <AlertCircle className="w-3.5 h-3.5" />
@@ -271,6 +272,7 @@ export function ClarificationPanel({
           disabled={isGenerating}
           data-testid="button-generate-clarification"
         >
+          {isGenerating ? <Spinner className="h-3.5 w-3.5" /> : null}
           {questions.length > 0 ? 'Regenerate Questions' : 'Generate Questions'}
         </Button>
         <Button
@@ -279,6 +281,7 @@ export function ClarificationPanel({
           disabled={!allRequiredAnswered || isGenerating}
           data-testid="button-generate-prd"
         >
+          {isGenerating ? <Spinner className="h-3.5 w-3.5" /> : null}
           Generate PRD
         </Button>
         <Button
@@ -288,6 +291,7 @@ export function ClarificationPanel({
           disabled={isGenerating}
           data-testid="button-save-clarifications"
         >
+          {isGenerating ? <Spinner className="h-3.5 w-3.5" /> : null}
           Save Answers
         </Button>
       </StepActionBar>

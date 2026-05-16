@@ -1,12 +1,15 @@
 import type { ReactNode } from 'react';
+import { Spinner } from '@/components/ui/spinner';
 import { cn } from '@/lib/utils';
 
 type StepActionBarProps = {
   children: ReactNode;
+  isLoading?: boolean;
+  loadingLabel?: string;
   className?: string;
 };
 
-export function StepActionBar({ children, className }: StepActionBarProps) {
+export function StepActionBar({ children, isLoading = false, loadingLabel, className }: StepActionBarProps) {
   return (
     <div
       className={cn(
@@ -14,7 +17,13 @@ export function StepActionBar({ children, className }: StepActionBarProps) {
         className,
       )}
     >
-      <div className="flex items-center justify-end gap-2 px-0">
+      {isLoading ? (
+        <div className="mb-2 flex items-center justify-end gap-2 px-0 text-xs text-muted-foreground">
+          <Spinner className="h-3.5 w-3.5" />
+          <span>{loadingLabel ?? 'AI is working…'}</span>
+        </div>
+      ) : null}
+      <div className="flex items-center justify-end gap-2 px-0" aria-busy={isLoading}>
         {children}
       </div>
     </div>

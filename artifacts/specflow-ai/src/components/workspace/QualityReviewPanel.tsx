@@ -6,6 +6,7 @@ import { PriorityBadge } from '@/components/shared/PriorityBadge';
 import { WarningList } from '@/components/shared/WarningBadge';
 import { ScoreBar } from '@/components/shared/ScoreBar';
 import { Button } from '@/components/ui/button';
+import { Spinner } from '@/components/ui/spinner';
 import { useToast } from '@/hooks/use-toast';
 import { useSessionStore } from '@/store/session-store';
 import { StepActionBar } from '@/components/workspace/StepActionBar';
@@ -255,11 +256,13 @@ export function QualityReviewPanel({
         </div>
       </div>
 
-      <StepActionBar>
+      <StepActionBar isLoading={isGenerating} loadingLabel="Refreshing quality scores…">
         <Button size="sm" variant="outline" onClick={onGenerateQuality} disabled={isGenerating || stories.length === 0}>
+          {isGenerating ? <Spinner className="h-3.5 w-3.5" /> : null}
           Refresh Scores
         </Button>
         <Button size="sm" onClick={onSendToDevReview} disabled={isGenerating || stories.length === 0} data-testid="button-send-all-review">
+          {isGenerating ? <Spinner className="h-3.5 w-3.5" /> : null}
           <Send className="w-3 h-3 mr-1.5" />
           Send All to Dev Review
         </Button>

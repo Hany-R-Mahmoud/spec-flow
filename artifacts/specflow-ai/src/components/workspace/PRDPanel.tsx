@@ -5,6 +5,7 @@ import { GenerationStepState, PRDSection } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { Spinner } from '@/components/ui/spinner';
 import { useToast } from '@/hooks/use-toast';
 import { useSessionStore } from '@/store/session-store';
 import { StepActionBar } from '@/components/workspace/StepActionBar';
@@ -220,8 +221,9 @@ export function PRDPanel({
           })}
       </div>
 
-      <StepActionBar>
+      <StepActionBar isLoading={isGenerating} loadingLabel="Generating PRD sections…">
         <Button size="sm" variant="outline" onClick={onGeneratePRD} disabled={isGenerating}>
+          {isGenerating ? <Spinner className="h-3.5 w-3.5" /> : null}
           Regenerate PRD
         </Button>
         <Button
@@ -230,6 +232,7 @@ export function PRDPanel({
           disabled={isGenerating || sections.length === 0}
           data-testid="button-generate-epics"
         >
+          {isGenerating ? <Spinner className="h-3.5 w-3.5" /> : null}
           Generate Epics
         </Button>
       </StepActionBar>

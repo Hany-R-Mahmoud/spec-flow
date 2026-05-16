@@ -4,6 +4,7 @@ import { Epic, GenerationStepState } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { PriorityBadge } from '@/components/shared/PriorityBadge';
 import { Button } from '@/components/ui/button';
+import { Spinner } from '@/components/ui/spinner';
 import { useToast } from '@/hooks/use-toast';
 import { StepActionBar } from '@/components/workspace/StepActionBar';
 
@@ -151,11 +152,13 @@ export function EpicsPanel({
         })}
       </div>
 
-      <StepActionBar>
+      <StepActionBar isLoading={isGenerating} loadingLabel="Generating epics…">
         <Button size="sm" variant="outline" onClick={onGenerateEpics} disabled={isGenerating}>
+          {isGenerating ? <Spinner className="h-3.5 w-3.5" /> : null}
           Regenerate Epics
         </Button>
         <Button size="sm" onClick={onGenerateStories} disabled={isGenerating || epics.length === 0} data-testid="button-generate-stories">
+          {isGenerating ? <Spinner className="h-3.5 w-3.5" /> : null}
           Generate Stories
         </Button>
       </StepActionBar>
