@@ -14,7 +14,7 @@ import { ExportPanel } from '@/components/workspace/ExportPanel';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import type { GuidanceItem } from '@/components/workspace/GuidancePanel';
-import type { ClarificationQuestion, GenerationStepState, PRDSection, Story } from '@/lib/types';
+import type { ClarificationQuestion, GenerationStepState, PRDSection, ProjectSession, Story } from '@/lib/types';
 import { type StepSkillPhase } from '@/lib/step-skills';
 import { useStepSkills, type StepSkill } from '@/lib/step-skills';
 import { getAiProviderUiState } from '@/lib/ai-capability';
@@ -241,21 +241,9 @@ export function WorkflowWorkspace() {
   const [, setLocation] = useLocation();
   const [, params] = useRoute('/workspace/:id');
   const sessionId = params?.id;
-  const { state, dispatch, runGeneration, saveWorkflowArtifacts, refreshAiCapability } = useSessionStore();
-  const { skillsByPhase } = useStepSkills();
-  const { toast } = useToast();
+  const { state, dispatch } = useSessionStore();
 
   const session = state.sessions.find(s => s.id === sessionId);
-  const aiCapability = state.aiCapability;
-  const providerUi = getAiProviderUiState(aiCapability);
-  const canGenerate = providerUi.isAiEnabled;
-  const canEditSkills = providerUi.canEditSkills;
-  const [activePhase, setActivePhase] = useState<Phase>(session?.currentPhase || 'clarification');
-  const [liveQuestions, setLiveQuestions] = useState<ClarificationQuestion[]>(session?.clarificationQuestions ?? []);
-  const [livePrdSections, setLivePrdSections] = useState<PRDSection[]>(session?.prdSections ?? []);
-  const [guidanceItems, setGuidanceItems] = useState<GuidanceItem[]>([]);
-  const [guidanceLoading, setGuidanceLoading] = useState(false);
-  const [pendingGenerationStep, setPendingGenerationStep] = useState<GenerationPhase | null>(null);
 
   useEffect(() => {
     if (!sessionId) {
@@ -264,21 +252,6 @@ export function WorkflowWorkspace() {
 
     dispatch({ type: 'SET_ACTIVE_SESSION', payload: sessionId });
   }, [sessionId]);
-
-  useEffect(() => {
-    if (session?.currentPhase) {
-      setActivePhase(session.currentPhase);
-    }
-  }, [session?.currentPhase]);
-
-  useEffect(() => {
-    void refreshAiCapability();
-  }, [refreshAiCapability, sessionId]);
-
-  useEffect(() => {
-    setLiveQuestions(session?.clarificationQuestions ?? []);
-    setLivePrdSections(session?.prdSections ?? []);
-  }, [session?.clarificationQuestions, session?.prdSections, session?.id]);
 
   if (state.isLoading) {
     return (
@@ -324,6 +297,40 @@ export function WorkflowWorkspace() {
       </div>
     );
   }
+
+  return <WorkflowWorkspaceContent session={session} />;
+}
+
+function WorkflowWorkspaceContent({ session }: { session: ProjectSession }) {
+  const [, setLocation] = useLocation();
+  const { state, dispatch, runGeneration, saveWorkflowArtifacts, refreshAiCapability } = useSessionStore();
+  const { skillsByPhase } = useStepSkills();
+  const { toast } = useToast();
+  const aiCapability = state.aiCapability;
+  const providerUi = getAiProviderUiState(aiCapability);
+  const canGenerate = providerUi.isAiEnabled;
+  const canEditSkills = providerUi.canEditSkills;
+  const [activePhase, setActivePhase] = useState<Phase>(session.currentPhase || 'clarification');
+  const [liveQuestions, setLiveQuestions] = useState<ClarificationQuestion[]>(session.clarificationQuestions ?? []);
+  const [livePrdSections, setLivePrdSections] = useState<PRDSection[]>(session.prdSections ?? []);
+  const [guidanceItems, setGuidanceItems] = useState<GuidanceItem[]>([]);
+  const [guidanceLoading, setGuidanceLoading] = useState(false);
+  const [pendingGenerationStep, setPendingGenerationStep] = useState<GenerationPhase | null>(null);
+
+  useEffect(() => {
+    if (session.currentPhase) {
+      setActivePhase(session.currentPhase);
+    }
+  }, [session.currentPhase]);
+
+  useEffect(() => {
+    void refreshAiCapability();
+  }, [refreshAiCapability, session.id]);
+
+  useEffect(() => {
+    setLiveQuestions(session.clarificationQuestions ?? []);
+    setLivePrdSections(session.prdSections ?? []);
+  }, [session.clarificationQuestions, session.prdSections, session.id]);
 
   const epics = state.epics.filter(e => e.sessionId === session.id);
   const stories = state.stories.filter(s => s.sessionId === session.id);
