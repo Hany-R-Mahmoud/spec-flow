@@ -682,12 +682,15 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         return null;
       }
 
-      const capability = await getAiCapability();
-      setState((current) => ({
-        ...current,
-        aiCapability: capability,
-        error: null,
-      }));
+      const capability = state.aiCapability;
+      if (!capability) {
+        const message = 'AI capability is not loaded yet. Try again in a moment.';
+        setState((current) => ({
+          ...current,
+          error: message,
+        }));
+        return null;
+      }
 
       if (!capability.canGenerate) {
         const message =
@@ -781,8 +784,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 
         throw new Error(message);
       }
-    },
-    [state.sessions],
+      },
+    [state.sessions, state.aiCapability],
   );
 
   const value = useMemo(

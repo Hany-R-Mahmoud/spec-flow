@@ -1,15 +1,13 @@
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
-import { AiLoadingState } from './AiLoadingState';
 
 type StepActionBarProps = {
   children: ReactNode;
   isLoading?: boolean;
-  loadingLabel?: string;
   className?: string;
 };
 
-export function StepActionBar({ children, isLoading = false, loadingLabel, className }: StepActionBarProps) {
+export function StepActionBar({ children, isLoading = false, className }: StepActionBarProps) {
   return (
     <div
       className={cn(
@@ -17,13 +15,6 @@ export function StepActionBar({ children, isLoading = false, loadingLabel, class
         className,
       )}
     >
-      {isLoading ? (
-        <AiLoadingState
-          compact
-          className="mb-2 ml-auto max-w-md"
-          label={loadingLabel ?? 'AI is working...'}
-        />
-      ) : null}
       <div
         className={cn(
           "flex items-center justify-end gap-2 px-0 transition-opacity",

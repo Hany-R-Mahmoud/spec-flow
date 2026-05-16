@@ -14,9 +14,7 @@ interface ClarificationPanelProps {
   generationStep: GenerationStepState;
   onGenerateClarification: () => void;
   onGeneratePRD: () => void;
-  onDraftChange?: (questions: ClarificationQuestion[]) => void;
   isAiBusy?: boolean;
-  aiBusyLabel?: string;
 }
 
 type ClarificationFormValues = {
@@ -32,9 +30,7 @@ export function ClarificationPanel({
   generationStep,
   onGenerateClarification,
   onGeneratePRD,
-  onDraftChange,
   isAiBusy = false,
-  aiBusyLabel,
 }: ClarificationPanelProps) {
   const { saveClarificationQuestions } = useSessionStore();
   const { toast } = useToast();
@@ -67,20 +63,6 @@ export function ClarificationPanel({
   }, [form, questions]);
 
   const watchedQuestions = useWatch({ control: form.control, name: 'questions' }) ?? [];
-
-  useEffect(() => {
-    if (!onDraftChange) {
-      return;
-    }
-
-    onDraftChange(
-      questions.map((question, index) => ({
-        ...question,
-        answer: watchedQuestions[index]?.answer ?? question.answer ?? '',
-        skipped: watchedQuestions[index]?.skipped ?? question.skipped ?? false,
-      })),
-    );
-  }, [onDraftChange, questions, watchedQuestions]);
 
   const groupedQuestions = useMemo(() => {
     return Array.from(new Set(questions.map((question) => question.group)));
@@ -153,9 +135,8 @@ export function ClarificationPanel({
         </div>
       </div>
 
-      {(generationStep.status !== 'idle' || generationStep.errorMessage) && (
+      {(generationStep.status === 'succeeded' || generationStep.status === 'failed' || generationStep.status === 'unavailable' || generationStep.errorMessage) && (
         <div className="rounded-md border border-border bg-card px-3 py-2 text-xs text-muted-foreground">
-          {generationStep.status === 'running' && <span>Generating clarification questions…</span>}
           {generationStep.status === 'succeeded' && (
             <span>Clarification questions generated and saved.</span>
           )}
@@ -262,7 +243,7 @@ export function ClarificationPanel({
         })}
       </div>
 
-      <StepActionBar isLoading={isGenerating} loadingLabel={aiBusyLabel ?? "Generating clarification questions..."}>
+      <StepActionBar isLoading={isGenerating}>
         {!allRequiredAnswered && (
           <span className="mr-auto text-xs text-[var(--color-danger)] flex items-center gap-1">
             <AlertCircle className="w-3.5 h-3.5" />

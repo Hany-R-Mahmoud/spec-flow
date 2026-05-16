@@ -2,7 +2,7 @@ import { AlertCircle, AlertTriangle, ArrowRight, CheckCircle, Lightbulb } from '
 import { Phase, PhaseStatus } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
-import { AiLoadingState } from './AiLoadingState';
+import { Spinner } from '@/components/ui/spinner';
 
 export interface GuidanceItem {
   type: 'error' | 'warning' | 'success' | 'action';
@@ -42,7 +42,7 @@ export function GuidancePanel({ phase, phaseStatus, items, isLoading = false, lo
   return (
     <div className={cn('flex flex-col h-full border-l border-border bg-card', className)}>
       <div className="px-4 py-3 border-b border-border">
-        <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">AI Guidance</div>
+        <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Workflow Guidance</div>
         <div className="text-xs text-secondary-foreground">{phaseDescriptions[phase]}</div>
       </div>
 
@@ -81,10 +81,10 @@ export function GuidancePanel({ phase, phaseStatus, items, isLoading = false, lo
       <div className="flex-1 overflow-y-auto">
         {isLoading ? (
           <div className="px-4 py-4 border-b border-border">
-            <AiLoadingState
-              label={loadingLabel ?? 'AI is analyzing this step...'}
-              description="Reading the current phase, workflow state, and step skills."
-            />
+            <div className="flex items-center gap-2 rounded-md border border-border bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
+              <Spinner className="h-3.5 w-3.5" />
+              <span>{loadingLabel ?? 'Updating guidance...'}</span>
+            </div>
             <div className="mt-4 space-y-2">
               <Skeleton className="h-10 w-full" />
               <Skeleton className="h-10 w-11/12" />

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation, useRoute } from 'wouter';
 import { useSessionStore } from '@/store/session-store';
 import { Phase } from '@/lib/types';
@@ -11,10 +11,9 @@ import { StoriesPanel } from '@/components/workspace/StoriesPanel';
 import { QualityReviewPanel } from '@/components/workspace/QualityReviewPanel';
 import { DeveloperReviewPanel } from '@/components/workspace/DeveloperReviewPanel';
 import { ExportPanel } from '@/components/workspace/ExportPanel';
-import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import type { GuidanceItem } from '@/components/workspace/GuidancePanel';
-import type { ClarificationQuestion, GenerationStepState, PRDSection, ProjectSession, Story } from '@/lib/types';
+import type { ClarificationQuestion, PRDSection, ProjectSession, Story } from '@/lib/types';
 import { type StepSkillPhase } from '@/lib/step-skills';
 import { useStepSkills, type StepSkill } from '@/lib/step-skills';
 import { getAiProviderUiState } from '@/lib/ai-capability';
@@ -32,14 +31,6 @@ type GuidanceActions = {
 
 type GenerationPhase = 'clarification' | 'prd' | 'epics' | 'stories' | 'quality';
 
-const generationLoadingLabels: Record<GenerationPhase, string> = {
-  clarification: 'Generating clarification questions...',
-  prd: 'Generating PRD sections...',
-  epics: 'Generating epics...',
-  stories: 'Generating user stories...',
-  quality: 'Refreshing quality scores...',
-};
-
 const generationFailureLabels: Record<GenerationPhase, string> = {
   clarification: 'clarification questions',
   prd: 'PRD sections',
@@ -55,11 +46,6 @@ function formatGenerationFailure(error: unknown): string {
   }
 
   return error.message.replace(/^HTTP \d+ [^:]+:\s*/, '').trim() || fallback;
-}
-
-function getSkillProvenance(promptVersion: string): string | null {
-  const match = promptVersion.match(/\+skill:(.+)$/);
-  return match?.[1] ?? null;
 }
 
 function resolveStepSkillPhase(phase: Phase): StepSkillPhase {
@@ -93,6 +79,40 @@ function toSkillSnapshot(skill: StepSkill): {
     source: skill.source,
     content: skill.content,
   };
+}
+
+function buildGuidanceSnapshot(
+  session: ProjectSession,
+  activePhase: Phase,
+  skillsByPhase: Record<string, StepSkill>,
+): string {
+  return JSON.stringify({
+    sessionId: session.id,
+    phase: activePhase,
+    phaseStatus: session.phases[activePhase],
+    session: {
+      name: session.name,
+      inputType: session.inputType,
+      outputDepth: session.outputDepth,
+      jiraKey: session.jiraKey,
+      targetUsers: session.targetUsers,
+      businessGoal: session.businessGoal,
+      knownConstraints: session.knownConstraints,
+      labels: session.labels,
+      rawInput: session.rawInput,
+    },
+    flowSummary: {
+      sessionId: session.id,
+      sessionName: session.name,
+      currentPhase: session.currentPhase,
+      phaseStatuses: session.phases,
+      clarificationQuestions: session.clarificationQuestions,
+      prdSections: session.prdSections,
+      epics: session.epics,
+      stories: session.stories,
+    },
+    stepSkills: Object.values(skillsByPhase).map(toSkillSnapshot),
+  });
 }
 
 function mapGuidanceItem(
@@ -311,11 +331,9 @@ function WorkflowWorkspaceContent({ session }: { session: ProjectSession }) {
   const canGenerate = providerUi.isAiEnabled;
   const canEditSkills = providerUi.canEditSkills;
   const [activePhase, setActivePhase] = useState<Phase>(session.currentPhase || 'clarification');
-  const [liveQuestions, setLiveQuestions] = useState<ClarificationQuestion[]>(session.clarificationQuestions ?? []);
-  const [livePrdSections, setLivePrdSections] = useState<PRDSection[]>(session.prdSections ?? []);
   const [guidanceItems, setGuidanceItems] = useState<GuidanceItem[]>([]);
   const [guidanceLoading, setGuidanceLoading] = useState(false);
-  const [pendingGenerationStep, setPendingGenerationStep] = useState<GenerationPhase | null>(null);
+  const guidanceCacheRef = useRef(new Map<string, GuidanceItem[]>());
 
   useEffect(() => {
     if (session.currentPhase) {
@@ -323,26 +341,18 @@ function WorkflowWorkspaceContent({ session }: { session: ProjectSession }) {
     }
   }, [session.currentPhase]);
 
-  useEffect(() => {
-    void refreshAiCapability();
-  }, [refreshAiCapability, session.id]);
-
-  useEffect(() => {
-    setLiveQuestions(session.clarificationQuestions ?? []);
-    setLivePrdSections(session.prdSections ?? []);
-  }, [session.clarificationQuestions, session.prdSections, session.id]);
-
   const epics = state.epics.filter(e => e.sessionId === session.id);
   const stories = state.stories.filter(s => s.sessionId === session.id);
   const questions = state.clarificationQuestions;
   const prdSections = state.prdSections;
-  const activeQuestions = activePhase === 'clarification' ? liveQuestions : questions;
-  const activePrdSections = activePhase === 'prd' ? livePrdSections : prdSections;
+  const isWorkflowGenerating = Object.values(session.generation).some(
+    (step) => step.status === 'running',
+  );
 
   const advancePhase = useCallback((nextPhase: Phase) => {
     setActivePhase(nextPhase);
     dispatch({ type: 'SET_PHASE', payload: { sessionId: session.id, phase: nextPhase } });
-    toast({ title: 'Phase advanced', description: `Now in ${nextPhase} phase.` });
+    toast({ title: 'Phase updated', description: `Current phase: ${nextPhase}.` });
   }, [dispatch, session.id, toast]);
 
   const handleSendStoryToReview = async (storyId: string) => {
@@ -505,11 +515,9 @@ function WorkflowWorkspaceContent({ session }: { session: ProjectSession }) {
   }, [advancePhase, canCompleteReview, completionBlocker, toast]);
 
   const handleGeneration = useCallback(async (step: GenerationPhase) => {
-    if (pendingGenerationStep) {
+    if (isWorkflowGenerating) {
       return;
     }
-
-    setPendingGenerationStep(step);
 
     try {
       const updatedSession = await runGeneration(session.id, step);
@@ -564,20 +572,16 @@ function WorkflowWorkspaceContent({ session }: { session: ProjectSession }) {
         title: `Could not generate ${generationFailureLabels[step]}`,
         description: formatGenerationFailure(error),
       });
-    } finally {
-      setPendingGenerationStep((current) => (current === step ? null : current));
     }
-  }, [advancePhase, pendingGenerationStep, refreshAiCapability, runGeneration, session.id, toast]);
+  }, [advancePhase, isWorkflowGenerating, refreshAiCapability, runGeneration, session.id, toast]);
 
   const handleEditSkill = useCallback((phase: StepSkillPhase) => {
     setLocation(`/settings?step-skill=${phase}`);
   }, [setLocation]);
 
-  useEffect(() => {
-    if (!session) {
-      return;
-    }
+  const guidanceSnapshotKey = buildGuidanceSnapshot(session, activePhase, skillsByPhase);
 
+  useEffect(() => {
     const callbacks = {
       onGeneratePRD: () => void handleGeneration('prd'),
       onGenerateEpics: () => void handleGeneration('epics'),
@@ -589,57 +593,69 @@ function WorkflowWorkspaceContent({ session }: { session: ProjectSession }) {
     };
 
     if (!canGenerate) {
-      setGuidanceItems(
-        buildGuidanceItems(activePhase, activeQuestions, activePrdSections, session.stories, callbacks),
-      );
+      setGuidanceItems(buildGuidanceItems(activePhase, questions, prdSections, session.stories, callbacks));
       setGuidanceLoading(false);
       return;
     }
 
+    const cachedGuidance = guidanceCacheRef.current.get(guidanceSnapshotKey);
+    if (cachedGuidance) {
+      setGuidanceItems(cachedGuidance);
+      setGuidanceLoading(false);
+      return;
+    }
+
+    const controller = new AbortController();
     let cancelled = false;
 
     const loadGuidance = async () => {
       setGuidanceLoading(true);
 
       try {
-        const response = await getWorkflowGuidance(session.id, {
-          phase: activePhase,
-          phaseStatus: session.phases[activePhase],
-          session: {
-            name: session.name,
-            inputType: session.inputType,
-            outputDepth: session.outputDepth,
-            jiraKey: session.jiraKey,
-            targetUsers: session.targetUsers,
-            businessGoal: session.businessGoal,
-            knownConstraints: session.knownConstraints,
-            labels: session.labels,
-            rawInput: session.rawInput,
+        const response = await getWorkflowGuidance(
+          session.id,
+          {
+            phase: activePhase,
+            phaseStatus: session.phases[activePhase],
+            session: {
+              name: session.name,
+              inputType: session.inputType,
+              outputDepth: session.outputDepth,
+              jiraKey: session.jiraKey,
+              targetUsers: session.targetUsers,
+              businessGoal: session.businessGoal,
+              knownConstraints: session.knownConstraints,
+              labels: session.labels,
+              rawInput: session.rawInput,
+            },
+            flowSummary: {
+              sessionId: session.id,
+              sessionName: session.name,
+              currentPhase: session.currentPhase,
+              phaseStatuses: session.phases,
+              clarificationQuestions: questions,
+              prdSections,
+              epics,
+              stories,
+            },
+            stepSkills: Object.values(skillsByPhase).map(toSkillSnapshot),
           },
-          flowSummary: {
-            sessionId: session.id,
-            sessionName: session.name,
-            currentPhase: session.currentPhase,
-            phaseStatuses: session.phases,
-            clarificationQuestions: activeQuestions,
-            prdSections: activePrdSections,
-            epics: session.epics,
-            stories: session.stories,
-          },
-          stepSkills: Object.values(skillsByPhase).map(toSkillSnapshot),
-        });
+          { signal: controller.signal },
+        );
 
-        if (cancelled) {
+        if (cancelled || controller.signal.aborted) {
           return;
         }
 
-        setGuidanceItems(response.items.map((item) => mapGuidanceItem(item, activePhase, callbacks)));
-      } catch {
-        if (!cancelled) {
-          setGuidanceItems(buildGuidanceItems(activePhase, activeQuestions, activePrdSections, session.stories, callbacks));
+        const nextItems = response.items.map((item) => mapGuidanceItem(item, activePhase, callbacks));
+        guidanceCacheRef.current.set(guidanceSnapshotKey, nextItems);
+        setGuidanceItems(nextItems);
+      } catch (error) {
+        if (!cancelled && !controller.signal.aborted) {
+          setGuidanceItems(buildGuidanceItems(activePhase, questions, prdSections, stories, callbacks));
         }
       } finally {
-        if (!cancelled) {
+        if (!cancelled && !controller.signal.aborted) {
           setGuidanceLoading(false);
         }
       }
@@ -649,29 +665,43 @@ function WorkflowWorkspaceContent({ session }: { session: ProjectSession }) {
 
     return () => {
       cancelled = true;
+      controller.abort();
     };
   }, [
+    guidanceSnapshotKey,
     activePhase,
     canGenerate,
     handleGeneration,
     handleCompleteReview,
     handleEditSkill,
-    session?.updatedAt,
-    session,
+    questions,
+    prdSections,
+    epics,
+    stories,
+    session.id,
+    session.currentPhase,
+    session.name,
+    session.inputType,
+    session.outputDepth,
+    session.jiraKey,
+    session.targetUsers,
+    session.businessGoal,
+    session.knownConstraints,
+    session.labels,
+    session.rawInput,
+    session.phases,
     skillsByPhase,
-    advancePhase,
-    activeQuestions,
-    activePrdSections,
+    session.stories,
   ]);
 
   const completionCount = (() => {
     if (activePhase === 'clarification') {
-      const answered = activeQuestions.filter(q => q.answer || q.skipped).length;
-      return { done: answered, total: activeQuestions.length };
+      const answered = questions.filter(q => q.answer || q.skipped).length;
+      return { done: answered, total: questions.length };
     }
     if (activePhase === 'prd') {
-      const completed = activePrdSections.filter(s => s.complete).length;
-      return { done: completed, total: activePrdSections.length };
+      const completed = prdSections.filter(s => s.complete).length;
+      return { done: completed, total: prdSections.length };
     }
     if (activePhase === 'stories') {
       const ready = stories.filter(s => s.readinessScore.total >= 75).length;
@@ -684,17 +714,19 @@ function WorkflowWorkspaceContent({ session }: { session: ProjectSession }) {
     return undefined;
   })();
 
-  const activeGenerationStep: GenerationStepState | null =
-    activePhase === 'clarification' ||
-    activePhase === 'prd' ||
-    activePhase === 'epics' ||
-    activePhase === 'stories' ||
-    activePhase === 'quality'
-      ? session.generation[activePhase as GenerationPhase]
-      : null;
-  const skillProvenance = activeGenerationStep
-    ? getSkillProvenance(activeGenerationStep.promptVersion)
-    : null;
+  const clarificationBusy =
+    session.generation.clarification.status === 'running' ||
+    session.generation.prd.status === 'running';
+  const prdBusy =
+    session.generation.prd.status === 'running' ||
+    session.generation.epics.status === 'running';
+  const epicsBusy =
+    session.generation.epics.status === 'running' ||
+    session.generation.stories.status === 'running';
+  const storiesBusy =
+    session.generation.stories.status === 'running' ||
+    session.generation.quality.status === 'running';
+  const qualityBusy = session.generation.quality.status === 'running';
 
   return (
     <div className="flex flex-col h-full -m-4 sm:-m-6 md:-m-8">
@@ -712,27 +744,6 @@ function WorkflowWorkspaceContent({ session }: { session: ProjectSession }) {
         {/* Main content */}
         <div className="flex-1 overflow-y-auto p-6">
           <div className="max-w-4xl mx-auto">
-            {activeGenerationStep ? (
-              <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-md border border-border bg-muted/30 px-3 py-2">
-                <div className="text-xs text-muted-foreground">
-                  {providerUi.isAiEnabled ? 'AI generation behavior' : providerUi.label}
-                  <span className="ml-2 font-mono text-foreground">
-                    {providerUi.isAiEnabled
-                      ? activeGenerationStep.promptVersion
-                      : providerUi.statusText}
-                  </span>
-                </div>
-                {providerUi.isAiEnabled && skillProvenance ? (
-                  <Badge variant="outline" className="text-[10px]">
-                    skill {skillProvenance}
-                  </Badge>
-                ) : null}
-                <Badge variant={providerUi.badgeVariant} className="text-[10px]">
-                  {providerUi.label}
-                </Badge>
-              </div>
-            ) : null}
-
             {activePhase === 'intake' && (
               <div className="text-center py-16">
                 <div className="text-sm font-medium text-foreground mb-2">Intake Complete</div>
@@ -749,13 +760,7 @@ function WorkflowWorkspaceContent({ session }: { session: ProjectSession }) {
               generationStep={session.generation.clarification}
               onGenerateClarification={() => void handleGeneration('clarification')}
               onGeneratePRD={() => void handleGeneration('prd')}
-              onDraftChange={setLiveQuestions}
-              isAiBusy={pendingGenerationStep === 'clarification' || pendingGenerationStep === 'prd'}
-              aiBusyLabel={
-                pendingGenerationStep === 'prd'
-                  ? generationLoadingLabels.prd
-                  : generationLoadingLabels.clarification
-              }
+              isAiBusy={clarificationBusy}
             />
             )}
 
@@ -765,13 +770,7 @@ function WorkflowWorkspaceContent({ session }: { session: ProjectSession }) {
               generationStep={session.generation.prd}
               onGeneratePRD={() => void handleGeneration('prd')}
               onGenerateEpics={() => void handleGeneration('epics')}
-              onDraftChange={setLivePrdSections}
-              isAiBusy={pendingGenerationStep === 'prd' || pendingGenerationStep === 'epics'}
-              aiBusyLabel={
-                pendingGenerationStep === 'epics'
-                  ? generationLoadingLabels.epics
-                  : generationLoadingLabels.prd
-              }
+              isAiBusy={prdBusy}
             />
             )}
 
@@ -781,12 +780,7 @@ function WorkflowWorkspaceContent({ session }: { session: ProjectSession }) {
               generationStep={session.generation.epics}
               onGenerateEpics={() => void handleGeneration('epics')}
               onGenerateStories={() => void handleGeneration('stories')}
-              isAiBusy={pendingGenerationStep === 'epics' || pendingGenerationStep === 'stories'}
-              aiBusyLabel={
-                pendingGenerationStep === 'stories'
-                  ? generationLoadingLabels.stories
-                  : generationLoadingLabels.epics
-              }
+              isAiBusy={epicsBusy}
             />
             )}
 
@@ -798,12 +792,7 @@ function WorkflowWorkspaceContent({ session }: { session: ProjectSession }) {
               generationStep={session.generation.stories}
               onGenerateStories={() => void handleGeneration('stories')}
               onGenerateQuality={() => void handleGeneration('quality')}
-              isAiBusy={pendingGenerationStep === 'stories' || pendingGenerationStep === 'quality'}
-              aiBusyLabel={
-                pendingGenerationStep === 'quality'
-                  ? generationLoadingLabels.quality
-                  : generationLoadingLabels.stories
-              }
+              isAiBusy={storiesBusy}
             />
             )}
 
@@ -813,8 +802,7 @@ function WorkflowWorkspaceContent({ session }: { session: ProjectSession }) {
               epics={epics}
               generationStep={session.generation.quality}
               onGenerateQuality={() => void handleGeneration('quality')}
-              isAiBusy={pendingGenerationStep === 'quality'}
-              aiBusyLabel={generationLoadingLabels.quality}
+              isAiBusy={qualityBusy}
               onSendToDevReview={async () => {
                 const queuedStories = stories.map((story) => ({
                   ...story,
@@ -861,8 +849,8 @@ function WorkflowWorkspaceContent({ session }: { session: ProjectSession }) {
             phase={activePhase}
             phaseStatus={session.phases[activePhase]}
             items={guidanceItems}
-            isLoading={guidanceLoading || Boolean(activeGenerationStep?.status === 'running') || Boolean(pendingGenerationStep)}
-            loadingLabel={pendingGenerationStep ? generationLoadingLabels[pendingGenerationStep] : canGenerate ? 'AI is analyzing this step...' : 'Manual guidance is loading...'}
+            isLoading={guidanceLoading}
+            loadingLabel={canGenerate ? 'Updating guidance...' : 'Showing manual guidance...'}
             completionCount={completionCount}
           />
         </div>

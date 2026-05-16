@@ -15,9 +15,7 @@ interface PRDPanelProps {
   generationStep: GenerationStepState;
   onGeneratePRD: () => void;
   onGenerateEpics: () => void;
-  onDraftChange?: (sections: PRDSection[]) => void;
   isAiBusy?: boolean;
-  aiBusyLabel?: string;
 }
 
 type PRDFormValues = {
@@ -29,9 +27,7 @@ export function PRDPanel({
   generationStep,
   onGeneratePRD,
   onGenerateEpics,
-  onDraftChange,
   isAiBusy = false,
-  aiBusyLabel,
 }: PRDPanelProps) {
   const { savePrdSections } = useSessionStore();
   const { toast } = useToast();
@@ -55,24 +51,6 @@ export function PRDPanel({
       form.reset({ content: '' });
     }
   }, [editingSection, form]);
-
-  useEffect(() => {
-    if (!onDraftChange) {
-      return;
-    }
-
-    onDraftChange(
-      sections.map((section) =>
-        section.id === editingId && editingSection
-          ? {
-              ...section,
-              content: contentDraft,
-              complete: contentDraft.trim().length > 0,
-            }
-          : section,
-      ),
-    );
-  }, [contentDraft, editingId, editingSection, onDraftChange, sections]);
 
   const startEdit = (section: PRDSection) => {
     setEditingId(section.id);
@@ -126,9 +104,8 @@ export function PRDPanel({
         </div>
       </div>
 
-      {(generationStep.status !== 'idle' || generationStep.errorMessage) && (
+      {(generationStep.status === 'succeeded' || generationStep.status === 'failed' || generationStep.status === 'unavailable' || generationStep.errorMessage) && (
         <div className="rounded-md border border-border bg-card px-3 py-2 text-xs text-muted-foreground">
-          {generationStep.status === 'running' && <span>Generating PRD sections…</span>}
           {generationStep.status === 'succeeded' && (
             <span>PRD sections generated and saved.</span>
           )}
@@ -225,7 +202,7 @@ export function PRDPanel({
           })}
       </div>
 
-      <StepActionBar isLoading={isGenerating} loadingLabel={aiBusyLabel ?? "Generating PRD sections..."}>
+      <StepActionBar isLoading={isGenerating}>
         <Button size="sm" variant="outline" onClick={onGeneratePRD} disabled={isGenerating}>
           {isGenerating ? <Spinner className="h-3.5 w-3.5" /> : null}
           Regenerate PRD

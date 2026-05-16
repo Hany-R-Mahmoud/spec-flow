@@ -19,7 +19,6 @@ interface QualityReviewPanelProps {
   onSendToDevReview: () => void;
   onSplitStory: (storyId: string) => void | Promise<void>;
   isAiBusy?: boolean;
-  aiBusyLabel?: string;
 }
 
 function scoreColor(value: number) {
@@ -37,7 +36,6 @@ export function QualityReviewPanel({
   onSendToDevReview,
   onSplitStory,
   isAiBusy = false,
-  aiBusyLabel,
 }: QualityReviewPanelProps) {
   const { toast } = useToast();
   const { dispatch } = useSessionStore();
@@ -102,9 +100,8 @@ export function QualityReviewPanel({
         </div>
       </div>
 
-      {(generationStep.status !== 'idle' || generationStep.errorMessage) && (
+      {(generationStep.status === 'succeeded' || generationStep.status === 'failed' || generationStep.status === 'unavailable' || generationStep.errorMessage) && (
         <div className="rounded-md border border-border bg-card px-3 py-2 text-xs text-muted-foreground">
-          {generationStep.status === 'running' && <span>Scoring stories and detecting warnings…</span>}
           {generationStep.status === 'succeeded' && (
             <span>Readiness scores refreshed from the API workflow.</span>
           )}
@@ -260,7 +257,7 @@ export function QualityReviewPanel({
         </div>
       </div>
 
-      <StepActionBar isLoading={isGenerating} loadingLabel={aiBusyLabel ?? "Refreshing quality scores..."}>
+      <StepActionBar isLoading={isGenerating}>
         <Button size="sm" variant="outline" onClick={onGenerateQuality} disabled={isGenerating || stories.length === 0}>
           {isGenerating ? <Spinner className="h-3.5 w-3.5" /> : null}
           Refresh Scores

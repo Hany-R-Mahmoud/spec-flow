@@ -24,9 +24,15 @@ export type AiGuidanceResponse = {
 export async function getWorkflowGuidance(
   sessionId: string,
   request: Record<string, unknown>,
+  options?: RequestInit,
 ): Promise<AiGuidanceResponse> {
   return customFetch<AiGuidanceResponse>(`/api/sessions/${sessionId}/guidance`, {
+    ...options,
     method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...options?.headers,
+    },
     body: JSON.stringify(request),
   });
 }

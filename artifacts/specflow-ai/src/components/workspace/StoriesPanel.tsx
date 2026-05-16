@@ -19,7 +19,6 @@ interface StoriesPanelProps {
   onGenerateStories: () => void;
   onGenerateQuality: () => void;
   isAiBusy?: boolean;
-  aiBusyLabel?: string;
 }
 
 function StoryCard({ story, onSendToReview }: { story: Story; onSendToReview: (storyId: string) => void }) {
@@ -258,7 +257,6 @@ export function StoriesPanel({
   onGenerateStories,
   onGenerateQuality,
   isAiBusy = false,
-  aiBusyLabel,
 }: StoriesPanelProps) {
   const [collapsedEpics, setCollapsedEpics] = useState<Set<string>>(new Set());
   const isGenerating = generationStep.status === 'running' || isAiBusy;
@@ -287,9 +285,8 @@ export function StoriesPanel({
         </div>
       </div>
 
-      {(generationStep.status !== 'idle' || generationStep.errorMessage) && (
+      {(generationStep.status === 'succeeded' || generationStep.status === 'failed' || generationStep.status === 'unavailable' || generationStep.errorMessage) && (
         <div className="rounded-md border border-border bg-card px-3 py-2 text-xs text-muted-foreground">
-          {generationStep.status === 'running' && <span>Generating stories…</span>}
           {generationStep.status === 'succeeded' && (
             <span>Stories generated and saved.</span>
           )}
@@ -337,7 +334,7 @@ export function StoriesPanel({
         })}
       </div>
 
-      <StepActionBar isLoading={isGenerating} loadingLabel={aiBusyLabel ?? "Generating stories..."}>
+      <StepActionBar isLoading={isGenerating}>
         <Button size="sm" variant="outline" onClick={onGenerateStories} disabled={isGenerating || epics.length === 0}>
           {isGenerating ? <Spinner className="h-3.5 w-3.5" /> : null}
           Regenerate Stories

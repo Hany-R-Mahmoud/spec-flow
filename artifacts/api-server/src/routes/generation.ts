@@ -109,6 +109,14 @@ type GuidanceRequestBody = {
   }>;
 };
 
+type GuidanceCacheEntry = {
+  expiresAt: number;
+  items: GuidanceItem[];
+};
+
+const guidanceCache = new Map<string, GuidanceCacheEntry>();
+const GUIDANCE_CACHE_TTL_MS = 60_000;
+
 type StepSkillSnapshot = {
   id: string;
   phase: string;
@@ -271,6 +279,24 @@ function buildFlowSummary(row: NonNullable<Awaited<ReturnType<typeof getSessionA
       ready: stories.filter((story) => story.readinessScore.total >= 90 || story.reviewStatus === "approved").length,
     },
   };
+}
+
+function buildGuidanceCacheKey(
+  workspaceId: string,
+  sessionId: string,
+  body: GuidanceRequestBody,
+  flowSummary: Record<string, unknown>,
+  sessionSnapshot: NonNullable<GuidanceRequestBody["session"]>,
+  stepSkills: NonNullable<GuidanceRequestBody["stepSkills"]>,
+): string {
+  return JSON.stringify({
+    workspaceId,
+    sessionId,
+    phase: body.phase,
+    session: sessionSnapshot,
+    flowSummary,
+    stepSkills,
+  });
 }
 
 function parseProviderJson(content: string): Record<string, unknown> {
@@ -883,6 +909,19 @@ router.post("/sessions/:sessionId/guidance", async (req, res) => {
       labels: existing.session.labels,
       rawInput: existing.session.rawInput,
     };
+    const cacheKey = buildGuidanceCacheKey(
+      auth.workspaceId,
+      req.params.sessionId,
+      body,
+      flowSummary,
+      sessionSnapshot,
+      stepSkills ?? [],
+    );
+    const cachedGuidance = guidanceCache.get(cacheKey);
+    if (cachedGuidance && cachedGuidance.expiresAt > Date.now()) {
+      res.json({ items: cachedGuidance.items });
+      return;
+    }
 
     const liveResult = await runOpenAiJson({
       apiKey: providerSecret.apiKey,
@@ -908,6 +947,10 @@ router.post("/sessions/:sessionId/guidance", async (req, res) => {
     });
 
     const items = parseGuidanceResponse(liveResult.content);
+    guidanceCache.set(cacheKey, {
+      expiresAt: Date.now() + GUIDANCE_CACHE_TTL_MS,
+      items,
+    });
     res.json({ items });
   } catch (error) {
     sendUnexpectedError(res, error);

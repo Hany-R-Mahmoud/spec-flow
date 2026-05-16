@@ -14,7 +14,6 @@ interface EpicsPanelProps {
   onGenerateEpics: () => void;
   onGenerateStories: () => void;
   isAiBusy?: boolean;
-  aiBusyLabel?: string;
 }
 
 export function EpicsPanel({
@@ -23,7 +22,6 @@ export function EpicsPanel({
   onGenerateEpics,
   onGenerateStories,
   isAiBusy = false,
-  aiBusyLabel,
 }: EpicsPanelProps) {
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set(['epic-1']));
   const { toast } = useToast();
@@ -52,9 +50,8 @@ export function EpicsPanel({
         </div>
       </div>
 
-      {(generationStep.status !== 'idle' || generationStep.errorMessage) && (
+      {(generationStep.status === 'succeeded' || generationStep.status === 'failed' || generationStep.status === 'unavailable' || generationStep.errorMessage) && (
         <div className="rounded-md border border-border bg-card px-3 py-2 text-xs text-muted-foreground">
-          {generationStep.status === 'running' && <span>Generating epics…</span>}
           {generationStep.status === 'succeeded' && (
             <span>Epics generated and saved.</span>
           )}
@@ -156,7 +153,7 @@ export function EpicsPanel({
         })}
       </div>
 
-      <StepActionBar isLoading={isGenerating} loadingLabel={aiBusyLabel ?? "Generating epics..."}>
+      <StepActionBar isLoading={isGenerating}>
         <Button size="sm" variant="outline" onClick={onGenerateEpics} disabled={isGenerating}>
           {isGenerating ? <Spinner className="h-3.5 w-3.5" /> : null}
           Regenerate Epics
