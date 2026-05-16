@@ -208,7 +208,7 @@ export function PRDPanel({
         <Button
           size="sm"
           onClick={onGenerateEpics}
-          disabled={isGenerating || sections.length === 0}
+          disabled={isGenerating}
           loading={isGenerating}
           data-testid="button-generate-epics"
         >

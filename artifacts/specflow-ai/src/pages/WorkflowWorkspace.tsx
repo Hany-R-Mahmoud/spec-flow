@@ -495,6 +495,10 @@ function WorkflowWorkspaceContent({ session }: { session: ProjectSession }) {
         quality: 'quality',
       } as const;
 
+      dispatch({
+        type: 'SET_PHASE',
+        payload: { sessionId: session.id, phase: phaseMap[step] },
+      });
       setActivePhase(phaseMap[step]);
       toast({
         title: step === 'quality' ? 'Quality refreshed' : 'Generation complete',
@@ -506,7 +510,7 @@ function WorkflowWorkspaceContent({ session }: { session: ProjectSession }) {
         description: formatGenerationFailure(error),
       });
     }
-  }, [activePhase, advancePhase, isWorkflowGenerating, refreshAiCapability, runGeneration, session.id, state.aiCapability, toast]);
+  }, [activePhase, advancePhase, dispatch, isWorkflowGenerating, refreshAiCapability, runGeneration, session.id, state.aiCapability, toast]);
 
   const guidanceItems: GuidanceItem[] = useMemo(() => {
     // Sidebar only handles navigation/phase transitions — never AI generation.

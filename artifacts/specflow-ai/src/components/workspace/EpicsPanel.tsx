@@ -156,7 +156,7 @@ export function EpicsPanel({
         <Button size="sm" variant="outline" onClick={onGenerateEpics} disabled={isGenerating} loading={isGenerating}>
           {isGenerating ? 'Regenerating…' : 'Regenerate Epics'}
         </Button>
-        <Button size="sm" onClick={onGenerateStories} disabled={isGenerating || epics.length === 0} loading={isGenerating} data-testid="button-generate-stories">
+        <Button size="sm" onClick={onGenerateStories} disabled={isGenerating} loading={isGenerating} data-testid="button-generate-stories">
           {isGenerating ? 'Generating Stories…' : 'Generate Stories'}
         </Button>
       </StepActionBar>

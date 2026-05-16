@@ -334,10 +334,10 @@ export function StoriesPanel({
       </div>
 
       <StepActionBar isLoading={isGenerating}>
-        <Button size="sm" variant="outline" onClick={onGenerateStories} disabled={isGenerating || epics.length === 0} loading={isGenerating}>
+        <Button size="sm" variant="outline" onClick={onGenerateStories} disabled={isGenerating} loading={isGenerating}>
           {isGenerating ? 'Regenerating…' : 'Regenerate Stories'}
         </Button>
-        <Button size="sm" onClick={onGenerateQuality} disabled={isGenerating || stories.length === 0} loading={isGenerating} data-testid="button-review-quality">
+        <Button size="sm" onClick={onGenerateQuality} disabled={isGenerating} loading={isGenerating} data-testid="button-review-quality">
           {isGenerating ? 'Reviewing…' : 'Review Quality'}
         </Button>
       </StepActionBar>

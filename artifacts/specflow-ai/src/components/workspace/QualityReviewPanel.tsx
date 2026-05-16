@@ -257,10 +257,10 @@ export function QualityReviewPanel({
       </div>
 
       <StepActionBar isLoading={isGenerating}>
-        <Button size="sm" variant="outline" onClick={onGenerateQuality} disabled={isGenerating || stories.length === 0} loading={isGenerating}>
+        <Button size="sm" variant="outline" onClick={onGenerateQuality} disabled={isGenerating} loading={isGenerating}>
           {isGenerating ? 'Refreshing…' : 'Refresh Scores'}
         </Button>
-        <Button size="sm" onClick={onSendToDevReview} disabled={isGenerating || stories.length === 0} loading={isGenerating} data-testid="button-send-all-review">
+        <Button size="sm" onClick={onSendToDevReview} disabled={isGenerating} loading={isGenerating} data-testid="button-send-all-review">
           <Send className="w-3 h-3 mr-1.5" />
           {isGenerating ? 'Processing…' : 'Send All to Dev Review'}
         </Button>
