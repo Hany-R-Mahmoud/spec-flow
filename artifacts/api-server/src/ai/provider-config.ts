@@ -134,7 +134,7 @@ export function getAiCapabilityFromConfig(
     provider: config,
     reason: canGenerate
       ? "AI generation is enabled for this workspace."
-      : "Connect and validate an AI provider endpoint and key to enable generation and custom skills.",
+      : "Manual mode active. Continue organizing, reviewing, and exporting without AI generation.",
   };
 }
 

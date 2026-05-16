@@ -29,6 +29,7 @@ type GuidanceActions = {
 };
 
 type GenerationPhase = 'clarification' | 'prd' | 'epics' | 'stories' | 'quality';
+type ManualNextPhase = Phase | null;
 
 const generationFailureLabels: Record<GenerationPhase, string> = {
   clarification: 'clarification questions',
@@ -47,12 +48,16 @@ function formatGenerationFailure(error: unknown): string {
   return error.message.replace(/^HTTP \d+ [^:]+:\s*/, '').trim() || fallback;
 }
 
-function getManualNextPhase(step: GenerationPhase): GenerationPhase {
-  if (step === 'clarification') {
-    return 'prd';
-  }
+const MANUAL_PHASE_FLOW: Record<GenerationPhase, ManualNextPhase> = {
+  clarification: 'prd',
+  prd: 'epics',
+  epics: 'stories',
+  stories: 'quality',
+  quality: 'devReview',
+};
 
-  return step;
+function getManualNextPhase(phase: GenerationPhase): ManualNextPhase {
+  return MANUAL_PHASE_FLOW[phase];
 }
 
 
@@ -439,6 +444,22 @@ function WorkflowWorkspaceContent({ session }: { session: ProjectSession }) {
       return;
     }
 
+    const capability = state.aiCapability;
+    if (!capability?.canGenerate) {
+      const nextPhase = getManualNextPhase(activePhase);
+      if (nextPhase) {
+        advancePhase(nextPhase);
+      }
+
+      toast({
+        title: 'Manual mode',
+        description: nextPhase
+          ? `Moved to ${nextPhase}. Continued without AI generation.`
+          : 'Continued without AI generation.',
+      });
+      return;
+    }
+
     try {
       const updatedSession = await runGeneration(session.id, step);
 
@@ -454,7 +475,10 @@ function WorkflowWorkspaceContent({ session }: { session: ProjectSession }) {
           return;
         }
 
-        advancePhase(getManualNextPhase(step));
+        const nextPhase = getManualNextPhase(activePhase);
+        if (nextPhase) {
+          advancePhase(nextPhase);
+        }
 
         toast({
           title: latestProviderUi.label,
@@ -482,7 +506,7 @@ function WorkflowWorkspaceContent({ session }: { session: ProjectSession }) {
         description: formatGenerationFailure(error),
       });
     }
-  }, [advancePhase, isWorkflowGenerating, refreshAiCapability, runGeneration, session.id, toast]);
+  }, [activePhase, advancePhase, isWorkflowGenerating, refreshAiCapability, runGeneration, session.id, state.aiCapability, toast]);
 
   const guidanceItems: GuidanceItem[] = useMemo(() => {
     // Sidebar only handles navigation/phase transitions — never AI generation.
