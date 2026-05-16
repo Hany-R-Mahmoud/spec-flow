@@ -40,8 +40,8 @@ import {
 import { requireAuthContext } from "./auth.js";
 
 const router: IRouter = Router();
-const GENERATION_LIMIT = 30;
-const GENERATION_WINDOW_MS = 60 * 60 * 1000;
+const GENERATION_LIMIT = 20;
+const GENERATION_WINDOW_MS = 15 * 60 * 1000;
 
 type GenerationRouteStep =
   | "clarification"
@@ -773,8 +773,13 @@ function handleStep(step: GenerationRouteStep) {
         return;
       }
 
-      if (!consumeRateLimit(`generation:${auth.workspaceId}`, GENERATION_LIMIT, GENERATION_WINDOW_MS)) {
-        sendError(res, 429, "Too many generation requests. Try again later.");
+      if (!consumeRateLimit(`generation:${auth.workspaceId}:${step}`, GENERATION_LIMIT, GENERATION_WINDOW_MS)) {
+        res.setHeader("Retry-After", String(Math.ceil(GENERATION_WINDOW_MS / 1000)));
+        sendError(
+          res,
+          429,
+          `Too many ${step} generation requests. Wait about 15 minutes, then retry.`,
+        );
         return;
       }
 
