@@ -71,6 +71,6 @@ export function getAiProviderUiState(capability: AiCapability | null | undefined
     label: 'Manual mode',
     badgeVariant: 'outline',
     statusText: 'no saved provider key',
-    helperText: 'Add and validate a provider key and endpoint to enable AI generation and custom step skills.',
+    helperText: 'Manual mode active. Continue organizing, reviewing, and exporting without AI generation.',
   };
 }

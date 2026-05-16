@@ -47,6 +47,14 @@ function formatGenerationFailure(error: unknown): string {
   return error.message.replace(/^HTTP \d+ [^:]+:\s*/, '').trim() || fallback;
 }
 
+function getManualNextPhase(step: GenerationPhase): GenerationPhase {
+  if (step === 'clarification') {
+    return 'prd';
+  }
+
+  return step;
+}
+
 
 
 function buildGuidanceItems(
@@ -446,18 +454,7 @@ function WorkflowWorkspaceContent({ session }: { session: ProjectSession }) {
           return;
         }
 
-        if (step !== 'clarification') {
-          const nextPhase =
-            step === 'prd'
-              ? 'prd'
-              : step === 'epics'
-                ? 'epics'
-                : step === 'stories'
-                  ? 'stories'
-                  : 'quality';
-
-          advancePhase(nextPhase);
-        }
+        advancePhase(getManualNextPhase(step));
 
         toast({
           title: latestProviderUi.label,

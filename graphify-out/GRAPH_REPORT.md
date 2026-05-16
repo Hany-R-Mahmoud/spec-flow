@@ -1,11 +1,11 @@
 # Graph Report - spec-flow  (2026-05-16)
 
 ## Corpus Check
-- 268 files · ~227,659 words
+- 271 files · ~235,818 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 704 nodes · 864 edges · 35 communities detected
+- 706 nodes · 863 edges · 35 communities detected
 - Extraction: 87% EXTRACTED · 13% INFERRED · 0% AMBIGUOUS · INFERRED: 110 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
@@ -23,8 +23,8 @@
 - [[_COMMUNITY_Community 10|Community 10]]
 - [[_COMMUNITY_Community 11|Community 11]]
 - [[_COMMUNITY_Community 12|Community 12]]
-- [[_COMMUNITY_Community 13|Community 13]]
 - [[_COMMUNITY_Community 14|Community 14]]
+- [[_COMMUNITY_Community 16|Community 16]]
 - [[_COMMUNITY_Community 17|Community 17]]
 - [[_COMMUNITY_Community 18|Community 18]]
 - [[_COMMUNITY_Community 19|Community 19]]
@@ -47,54 +47,54 @@
 - [[_COMMUNITY_Community 40|Community 40]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `customFetch()` - 40 edges
+1. `customFetch()` - 41 edges
 2. `runGeneration()` - 24 edges
-3. `toast()` - 18 edges
+3. `toast()` - 17 edges
 4. `assertWorkspaceId()` - 13 edges
-5. `dispatch()` - 9 edges
-6. `download()` - 8 edges
-7. `parseErrorBody()` - 8 edges
-8. `loadApiServerConfig()` - 7 edges
-9. `validateOpenAiKey()` - 7 edges
-10. `runOpenAiJson()` - 7 edges
+5. `download()` - 8 edges
+6. `parseErrorBody()` - 8 edges
+7. `loadApiServerConfig()` - 7 edges
+8. `validateOpenAiKey()` - 7 edges
+9. `runOpenAiJson()` - 7 edges
+10. `generatePrdSections()` - 7 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `ensureWorkspaceSchema()` --calls--> `getPool()`  [INFERRED]
   artifacts/api-server/src/server.ts → lib/db/src/index.ts
+- `requireDatabase()` --calls--> `isDatabaseConfigured()`  [INFERRED]
+  artifacts/api-server/src/routes/persistence.ts → lib/db/src/index.ts
+- `onSubmit()` --calls--> `createSession()`  [INFERRED]
+  artifacts/specflow-ai/src/pages/NewBreakdown.tsx → lib/api-client-react/src/generated/api.ts
 - `runGeneration()` --calls--> `generateEpics()`  [INFERRED]
   artifacts/api-server/src/routes/generation.ts → lib/api-client-react/src/generated/api.ts
 - `runGeneration()` --calls--> `generateStories()`  [INFERRED]
   artifacts/api-server/src/routes/generation.ts → lib/api-client-react/src/generated/api.ts
-- `requireDatabase()` --calls--> `isDatabaseConfigured()`  [INFERRED]
-  artifacts/api-server/src/routes/persistence.ts → lib/db/src/index.ts
-- `requireDatabase()` --calls--> `getDb()`  [INFERRED]
-  artifacts/api-server/src/routes/persistence.ts → lib/db/src/index.ts
 
 ## Communities
 
 ### Community 0 - "Community 0"
 Cohesion: 0.03
-Nodes (119): createExportPackage(), createProject(), exportToGitHub(), exportToJira(), generateClarification(), generateEpics(), generatePrd(), generateQuality() (+111 more)
+Nodes (117): createExportPackage(), createProject(), createSession(), exportToGitHub(), exportToJira(), generateClarification(), generatePrd(), generateQuality() (+109 more)
 
 ### Community 1 - "Community 1"
-Cohesion: 0.07
-Nodes (46): getGenerationRuntime(), buildInputSnapshotHash(), GenerationRouteError, getGenerationErrorStatus(), getOutputContract(), hasZodIssues(), markGenerationState(), normalizeProviderJsonContent() (+38 more)
+Cohesion: 0.04
+Nodes (36): deleteAiProvider(), getDeleteAiProviderUrl(), getRotateAiProviderUrl(), getUpdateAiProviderUrl(), getValidateAiProviderUrl(), rotateAiProvider(), updateAiProvider(), validateAiProvider() (+28 more)
 
 ### Community 2 - "Community 2"
-Cohesion: 0.05
-Nodes (31): createSession(), deleteAiProvider(), getCreateSessionUrl(), getDeleteAiProviderUrl(), getRotateAiProviderUrl(), getUpdateAiProviderUrl(), getValidateAiProviderUrl(), rotateAiProvider() (+23 more)
+Cohesion: 0.06
+Nodes (46): getGenerationRuntime(), generateEpics(), generateStories(), getGenerateEpicsUrl(), getGenerateStoriesUrl(), buildInputSnapshotHash(), GenerationRouteError, getGenerationErrorStatus() (+38 more)
 
 ### Community 3 - "Community 3"
-Cohesion: 0.15
-Nodes (22): ApiError, applyBaseUrl(), buildErrorMessage(), customFetch(), getMediaType(), getStringField(), hasNoBody(), inferResponseType() (+14 more)
+Cohesion: 0.12
+Nodes (24): ApiError, applyBaseUrl(), buildErrorMessage(), customFetch(), getMediaType(), getStringField(), hasNoBody(), inferResponseType() (+16 more)
 
 ### Community 4 - "Community 4"
-Cohesion: 0.1
-Nodes (12): getAiProviderUiState(), emptyState(), getStepSkillSnapshotForPhase(), parseStoredState(), useStepSkills(), buildGuidanceItems(), handleSendStoryToReview(), handleSplitStory() (+4 more)
-
-### Community 5 - "Community 5"
 Cohesion: 0.18
 Nodes (8): sendAiProviderRouteError(), getWorkspaceAuthContext(), requireAuthContext(), requireMutableWorkspaceContext(), hasZodIssues(), sendError(), sendUnexpectedError(), sendGenerationError()
+
+### Community 5 - "Community 5"
+Cohesion: 0.19
+Nodes (15): defaultAiProviderConfig(), getAiProviderConfigRow(), getAiProviderSecret(), isAiProviderStorageMissingError(), markAiProviderValidation(), normalizeAiProviderBaseUrl(), recordAuditEvent(), saveAiProviderConfig() (+7 more)
 
 ### Community 6 - "Community 6"
 Cohesion: 0.24
@@ -109,22 +109,18 @@ Cohesion: 0.28
 Nodes (13): AiProviderError, buildProviderUrl(), classifyStatus(), createTimeoutSignal(), extractProviderErrorMessage(), normalizeBaseUrl(), parseProviderError(), postChatCompletion() (+5 more)
 
 ### Community 9 - "Community 9"
-Cohesion: 0.31
-Nodes (10): defaultAiProviderConfig(), getAiProviderConfigRow(), getAiProviderSecret(), isAiProviderStorageMissingError(), markAiProviderValidation(), normalizeAiProviderBaseUrl(), recordAuditEvent(), saveAiProviderConfig() (+2 more)
-
-### Community 10 - "Community 10"
 Cohesion: 0.38
 Nodes (10): analyzeAdaptiveIntake(), buildAdaptiveArtifacts(), buildAdaptivePhasePatch(), extractAcceptanceCriteria(), extractSectionContent(), extractStoryLines(), getRecommendedPhase(), hasPrdSignals() (+2 more)
 
-### Community 11 - "Community 11"
+### Community 10 - "Community 10"
 Cohesion: 0.27
 Nodes (7): createMetaSelector(), ensureLinkTag(), ensureMetaTag(), getRouteMetadata(), syncDocumentMetadata(), getCanonicalUrl(), isPreviewDeployment()
 
-### Community 12 - "Community 12"
+### Community 11 - "Community 11"
 Cohesion: 0.27
 Nodes (8): getExportPackage(), getGetExportPackageUrl(), buildCsv(), buildJson(), buildMarkdown(), download(), slugifyFilename(), triggerFileDownload()
 
-### Community 13 - "Community 13"
+### Community 12 - "Community 12"
 Cohesion: 0.46
 Nodes (6): cn(), handleKeyDown(), SidebarMenu(), SidebarMenuButton(), SidebarMenuItem(), useSidebar()
 
@@ -132,13 +128,17 @@ Nodes (6): cn(), handleKeyDown(), SidebarMenu(), SidebarMenuButton(), SidebarMen
 Cohesion: 0.48
 Nodes (5): Pagination(), PaginationEllipsis(), PaginationLink(), PaginationNext(), PaginationPrevious()
 
-### Community 17 - "Community 17"
+### Community 16 - "Community 16"
 Cohesion: 0.8
 Nodes (3): getApp(), handler(), loadServerModule()
 
-### Community 18 - "Community 18"
+### Community 17 - "Community 17"
 Cohesion: 0.6
 Nodes (3): cn(), ItemGroup(), ItemSeparator()
+
+### Community 18 - "Community 18"
+Cohesion: 0.6
+Nodes (3): emptyState(), getStepSkillSnapshotForPhase(), parseStoredState()
 
 ### Community 19 - "Community 19"
 Cohesion: 0.67
@@ -253,17 +253,17 @@ Nodes (2): appPath(), joinAppPath()
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `runGeneration()` connect `Community 1` to `Community 8`, `Community 9`, `Community 0`, `Community 7`?**
-  _High betweenness centrality (0.150) - this node is a cross-community bridge._
-- **Why does `customFetch()` connect `Community 3` to `Community 0`, `Community 2`, `Community 4`, `Community 12`?**
-  _High betweenness centrality (0.089) - this node is a cross-community bridge._
-- **Why does `generateEpics()` connect `Community 0` to `Community 1`, `Community 3`?**
-  _High betweenness centrality (0.070) - this node is a cross-community bridge._
-- **Are the 31 inferred relationships involving `customFetch()` (e.g. with `getWorkflowGuidance()` and `healthCheck()`) actually correct?**
-  _`customFetch()` has 31 INFERRED edges - model-reasoned connections that need verification._
+- **Why does `runGeneration()` connect `Community 2` to `Community 8`, `Community 5`, `Community 7`?**
+  _High betweenness centrality (0.152) - this node is a cross-community bridge._
+- **Why does `customFetch()` connect `Community 3` to `Community 0`, `Community 1`, `Community 2`, `Community 11`?**
+  _High betweenness centrality (0.081) - this node is a cross-community bridge._
+- **Why does `generateEpics()` connect `Community 2` to `Community 0`, `Community 3`?**
+  _High betweenness centrality (0.071) - this node is a cross-community bridge._
+- **Are the 32 inferred relationships involving `customFetch()` (e.g. with `getWorkflowGuidance()` and `deleteSession()`) actually correct?**
+  _`customFetch()` has 32 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 16 inferred relationships involving `runGeneration()` (e.g. with `requireDatabase()` and `getSessionArtifactsRecord()`) actually correct?**
   _`runGeneration()` has 16 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 14 inferred relationships involving `toast()` (e.g. with `copy()` and `download()`) actually correct?**
-  _`toast()` has 14 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 5 inferred relationships involving `dispatch()` (e.g. with `openSession()` and `markReady()`) actually correct?**
-  _`dispatch()` has 5 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 13 inferred relationships involving `toast()` (e.g. with `copy()` and `download()`) actually correct?**
+  _`toast()` has 13 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 2 inferred relationships involving `download()` (e.g. with `getExportPackage()` and `toast()`) actually correct?**
+  _`download()` has 2 INFERRED edges - model-reasoned connections that need verification._

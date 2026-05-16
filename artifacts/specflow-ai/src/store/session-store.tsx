@@ -753,11 +753,28 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       if (!capability.canGenerate) {
         const message =
           capability.reason ??
-          'Connect and validate an AI provider key before running generation.';
-        setState((current) => ({
-          ...current,
-          error: message,
-        }));
+          'Manual mode active. Continue with the next phase when ready.';
+
+        setState((current) =>
+          deriveState(
+            patchSessionById(current.sessions, sessionId, (session) => ({
+              ...session,
+              generation: patchGeneration(session.generation ?? createGenerationState('live'), step, {
+                status: 'unavailable',
+                mode: 'unavailable',
+                errorMessage: message,
+                updatedAt: new Date().toISOString(),
+              }),
+            })),
+            current.activeSessionId,
+            current.settings,
+            current.aiCapability,
+            current.exportPackages,
+            false,
+            null,
+            current.dataSource,
+          ),
+        );
         return null;
       }
 
