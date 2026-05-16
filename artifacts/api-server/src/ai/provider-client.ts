@@ -81,11 +81,21 @@ export async function validateOpenAiKey(args: {
   model: string;
   baseUrl?: string;
 }): Promise<void> {
-  const response = await fetch(buildProviderUrl(args.baseUrl, `models/${encodeURIComponent(args.model)}`), {
-    method: "GET",
+  const response = await fetch(buildProviderUrl(args.baseUrl, "chat/completions"), {
+    method: "POST",
     headers: {
       Authorization: `Bearer ${args.apiKey}`,
+      "Content-Type": "application/json",
     },
+    body: JSON.stringify({
+      model: args.model,
+      messages: [
+        { role: "system", content: "Reply with one word." },
+        { role: "user", content: "ok" },
+      ],
+      max_tokens: 1,
+      temperature: 0,
+    }),
   });
 
   if (!response.ok) {
