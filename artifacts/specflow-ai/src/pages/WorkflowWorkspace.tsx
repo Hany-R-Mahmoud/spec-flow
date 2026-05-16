@@ -109,9 +109,6 @@ function buildGuidanceItems(
     items.push({ type: 'success', message: '4 epics generated from PRD requirements' });
     items.push({ type: 'action', message: 'Review epic scope and business objectives' });
     items.push({ type: 'action', message: 'Copy epic descriptions to Jira as needed' });
-    if (actions.onGenerateStories) {
-      items.push({ type: 'action', message: 'Generate Stories', onAction: actions.onGenerateStories });
-    }
   }
 
   if (phase === 'stories') {
@@ -618,7 +615,7 @@ function WorkflowWorkspaceContent({ session }: { session: ProjectSession }) {
               epics={epics}
               generationStep={session.generation.epics}
               onGenerateEpics={() => void handleGeneration('epics')}
-              onGenerateStories={() => void handleGeneration('stories')}
+              onOpenStories={() => advancePhase('stories')}
               isAiBusy={epicsBusy}
               onCancel={handleCancel}
             />

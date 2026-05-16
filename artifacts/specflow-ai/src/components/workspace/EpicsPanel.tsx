@@ -12,7 +12,7 @@ interface EpicsPanelProps {
   epics: Epic[];
   generationStep: GenerationStepState;
   onGenerateEpics: () => void;
-  onGenerateStories: () => void;
+  onOpenStories: () => void;
   isAiBusy?: boolean;
   onCancel?: () => void;
 }
@@ -21,7 +21,7 @@ export function EpicsPanel({
   epics,
   generationStep,
   onGenerateEpics,
-  onGenerateStories,
+  onOpenStories,
   isAiBusy = false,
   onCancel,
 }: EpicsPanelProps) {
@@ -156,8 +156,8 @@ export function EpicsPanel({
         <Button size="sm" variant="outline" onClick={onGenerateEpics} disabled={isGenerating} loading={isGenerating}>
           {isGenerating ? 'Regenerating…' : 'Regenerate Epics'}
         </Button>
-        <Button size="sm" onClick={onGenerateStories} disabled={isGenerating} loading={isGenerating} data-testid="button-generate-stories">
-          {isGenerating ? 'Generating Stories…' : 'Generate Stories'}
+        <Button size="sm" onClick={onOpenStories} disabled={isGenerating} data-testid="button-open-stories-phase">
+          Go to Stories
         </Button>
       </StepActionBar>
     </div>
