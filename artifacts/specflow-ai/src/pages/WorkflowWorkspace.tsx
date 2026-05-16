@@ -20,17 +20,11 @@ import { StepSkillSidebar } from '@/components/workspace/StepSkillSidebar';
 import { getAiProviderUiState } from '@/lib/ai-capability';
 
 type GuidanceActions = {
-  onGeneratePRD: () => void;
-  onGenerateEpics: () => void;
-  onGenerateStories: () => void;
-  onGenerateQuality: () => void;
   onSendToDevReview: () => void;
   onCompleteReview: () => void;
 };
 
 type GenerationPhase = 'clarification' | 'prd' | 'epics' | 'stories' | 'quality';
-type ManualNextPhase = Phase | null;
-
 const generationFailureLabels: Record<GenerationPhase, string> = {
   clarification: 'clarification questions',
   prd: 'PRD sections',
@@ -47,20 +41,6 @@ function formatGenerationFailure(error: unknown): string {
 
   return error.message.replace(/^HTTP \d+ [^:]+:\s*/, '').trim() || fallback;
 }
-
-const MANUAL_PHASE_FLOW: Record<GenerationPhase, ManualNextPhase> = {
-  clarification: 'prd',
-  prd: 'epics',
-  epics: 'stories',
-  stories: 'quality',
-  quality: 'devReview',
-};
-
-function getManualNextPhase(phase: GenerationPhase): ManualNextPhase {
-  return MANUAL_PHASE_FLOW[phase];
-}
-
-
 
 function buildGuidanceItems(
   phase: Phase,
@@ -81,12 +61,9 @@ function buildGuidanceItems(
       items.push({ type: 'warning', message: `${skipped.length} question${skipped.length > 1 ? 's' : ''} skipped — may reduce quality` });
     }
     if (unanswered.length === 0) {
-      items.push({ type: 'success', message: 'All required questions answered. Ready to generate PRD.' });
-      if (actions.onGeneratePRD) {
-        items.push({ type: 'action', message: 'Generate PRD', onAction: actions.onGeneratePRD });
-      }
+      items.push({ type: 'success', message: 'All required questions answered. Ready to continue to PRD.' });
     }
-    items.push({ type: 'action', message: 'Answer remaining questions before generating PRD' });
+    items.push({ type: 'action', message: 'Answer remaining questions before continuing to PRD' });
     items.push({ type: 'action', message: 'Expand each section to see grouped questions' });
   }
 
@@ -96,10 +73,7 @@ function buildGuidanceItems(
       items.push({ type: 'warning', message: `${incomplete.length} PRD section${incomplete.length > 1 ? 's' : ''} incomplete` });
     }
     if (incomplete.length === 0) {
-      items.push({ type: 'success', message: 'All PRD sections complete. Ready to generate epics.' });
-      if (actions.onGenerateEpics) {
-        items.push({ type: 'action', message: 'Generate Epics', onAction: actions.onGenerateEpics });
-      }
+      items.push({ type: 'success', message: 'All PRD sections complete. Ready to continue to epics.' });
     }
     items.push({ type: 'action', message: 'Review each PRD section for accuracy' });
     items.push({ type: 'action', message: 'Edit sections by clicking "Edit" on any card' });
@@ -126,9 +100,6 @@ function buildGuidanceItems(
     }
     items.push({ type: 'action', message: 'Expand stories to review acceptance criteria' });
     items.push({ type: 'action', message: 'Address quality warnings before export' });
-    if (actions.onGenerateQuality) {
-      items.push({ type: 'action', message: 'Refresh Quality Scores', onAction: actions.onGenerateQuality });
-    }
   }
 
   if (phase === 'quality') {
@@ -443,16 +414,9 @@ function WorkflowWorkspaceContent({ session }: { session: ProjectSession }) {
 
     const capability = state.aiCapability;
     if (!capability?.canGenerate) {
-      const nextPhase = getManualNextPhase(activePhase);
-      if (nextPhase) {
-        advancePhase(nextPhase);
-      }
-
       toast({
         title: 'Manual mode',
-        description: nextPhase
-          ? `Moved to ${nextPhase}. Continued without AI generation.`
-          : 'Continued without AI generation.',
+        description: `AI generation is unavailable. Stayed on ${step} so you can continue manually.`,
       });
       return;
     }
@@ -472,14 +436,9 @@ function WorkflowWorkspaceContent({ session }: { session: ProjectSession }) {
           return;
         }
 
-        const nextPhase = getManualNextPhase(activePhase);
-        if (nextPhase) {
-          advancePhase(nextPhase);
-        }
-
         toast({
           title: latestProviderUi.label,
-          description: `${latestCapability?.reason ?? latestProviderUi.helperText} Continued without AI generation.`,
+          description: `${latestCapability?.reason ?? latestProviderUi.helperText} Stayed on ${step}.`,
         });
         return;
       }
@@ -507,7 +466,7 @@ function WorkflowWorkspaceContent({ session }: { session: ProjectSession }) {
         description: formatGenerationFailure(error),
       });
     }
-  }, [activePhase, advancePhase, dispatch, isWorkflowGenerating, refreshAiCapability, runGeneration, session.id, state.aiCapability, toast]);
+  }, [dispatch, isWorkflowGenerating, refreshAiCapability, runGeneration, session.id, state.aiCapability, toast]);
 
   const guidanceItems: GuidanceItem[] = useMemo(() => {
     // Sidebar only handles navigation/phase transitions — never AI generation.
@@ -593,7 +552,7 @@ function WorkflowWorkspaceContent({ session }: { session: ProjectSession }) {
               questions={questions}
               generationStep={session.generation.clarification}
               onGenerateClarification={() => void handleGeneration('clarification')}
-              onGeneratePRD={() => void handleGeneration('prd')}
+              onOpenPRD={() => advancePhase('prd')}
               isAiBusy={clarificationBusy}
               onCancel={handleCancel}
             />
@@ -604,7 +563,7 @@ function WorkflowWorkspaceContent({ session }: { session: ProjectSession }) {
               sections={prdSections}
               generationStep={session.generation.prd}
               onGeneratePRD={() => void handleGeneration('prd')}
-              onGenerateEpics={() => void handleGeneration('epics')}
+              onOpenEpics={() => advancePhase('epics')}
               isAiBusy={prdBusy}
               onCancel={handleCancel}
             />
@@ -628,7 +587,7 @@ function WorkflowWorkspaceContent({ session }: { session: ProjectSession }) {
               onSendToReview={handleSendStoryToReview}
               generationStep={session.generation.stories}
               onGenerateStories={() => void handleGeneration('stories')}
-              onGenerateQuality={() => void handleGeneration('quality')}
+              onOpenQuality={() => advancePhase('quality')}
               isAiBusy={storiesBusy}
               onCancel={handleCancel}
             />

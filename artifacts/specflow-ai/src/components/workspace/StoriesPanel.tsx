@@ -17,7 +17,7 @@ interface StoriesPanelProps {
   onSendToReview: (storyId: string) => void;
   generationStep: GenerationStepState;
   onGenerateStories: () => void;
-  onGenerateQuality: () => void;
+  onOpenQuality: () => void;
   isAiBusy?: boolean;
   onCancel?: () => void;
 }
@@ -256,7 +256,7 @@ export function StoriesPanel({
   onSendToReview,
   generationStep,
   onGenerateStories,
-  onGenerateQuality,
+  onOpenQuality,
   isAiBusy = false,
   onCancel,
 }: StoriesPanelProps) {
@@ -334,11 +334,11 @@ export function StoriesPanel({
       </div>
 
       <StepActionBar isLoading={isGenerating}>
-        <Button size="sm" variant="outline" onClick={onGenerateStories} disabled={isGenerating} loading={isGenerating}>
-          {isGenerating ? 'Regenerating…' : 'Regenerate Stories'}
+        <Button size="sm" onClick={onGenerateStories} disabled={isGenerating} loading={isGenerating}>
+          {isGenerating ? 'Generating Stories…' : stories.length > 0 ? 'Regenerate Stories' : 'Generate Stories'}
         </Button>
-        <Button size="sm" onClick={onGenerateQuality} disabled={isGenerating} loading={isGenerating} data-testid="button-review-quality">
-          {isGenerating ? 'Reviewing…' : 'Review Quality'}
+        <Button size="sm" variant="outline" onClick={onOpenQuality} disabled={isGenerating} data-testid="button-open-quality-phase">
+          Go to Quality
         </Button>
       </StepActionBar>
     </div>

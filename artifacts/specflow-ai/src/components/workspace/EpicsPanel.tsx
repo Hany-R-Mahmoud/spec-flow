@@ -28,6 +28,7 @@ export function EpicsPanel({
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set(['epic-1']));
   const { toast } = useToast();
   const isGenerating = generationStep.status === 'running' || isAiBusy;
+  const hasEpics = epics.length > 0;
 
   const toggle = (id: string) => {
     setExpandedIds(prev => {
@@ -153,10 +154,10 @@ export function EpicsPanel({
       </div>
 
       <StepActionBar isLoading={isGenerating}>
-        <Button size="sm" variant="outline" onClick={onGenerateEpics} disabled={isGenerating} loading={isGenerating}>
-          {isGenerating ? 'Regenerating…' : 'Regenerate Epics'}
+        <Button size="sm" onClick={onGenerateEpics} disabled={isGenerating} loading={isGenerating}>
+          {isGenerating ? 'Generating Epics…' : hasEpics ? 'Regenerate Epics' : 'Generate Epics'}
         </Button>
-        <Button size="sm" onClick={onOpenStories} disabled={isGenerating} data-testid="button-open-stories-phase">
+        <Button size="sm" variant="outline" onClick={onOpenStories} disabled={isGenerating} data-testid="button-open-stories-phase">
           Go to Stories
         </Button>
       </StepActionBar>

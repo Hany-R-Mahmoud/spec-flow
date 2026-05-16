@@ -13,7 +13,7 @@ interface ClarificationPanelProps {
   questions: ClarificationQuestion[];
   generationStep: GenerationStepState;
   onGenerateClarification: () => void;
-  onGeneratePRD: () => void;
+  onOpenPRD: () => void;
   isAiBusy?: boolean;
   onCancel?: () => void;
 }
@@ -30,7 +30,7 @@ export function ClarificationPanel({
   questions,
   generationStep,
   onGenerateClarification,
-  onGeneratePRD,
+  onOpenPRD,
   isAiBusy = false,
   onCancel,
 }: ClarificationPanelProps) {
@@ -106,7 +106,7 @@ export function ClarificationPanel({
     return savedSession;
   });
 
-  const handleGeneratePRD = form.handleSubmit(async (values) => {
+  const handleOpenPRD = form.handleSubmit(async (values) => {
     const nextQuestions = questions.map((question, index) => ({
       ...question,
       answer: values.questions[index]?.answer ?? '',
@@ -117,12 +117,12 @@ export function ClarificationPanel({
     if (!savedSession) {
       toast({
         title: 'Save failed',
-        description: 'Could not save clarification answers before PRD generation.',
+        description: 'Could not save clarification answers before moving to PRD.',
       });
       return;
     }
 
-    onGeneratePRD();
+    onOpenPRD();
   });
 
   return (
@@ -251,7 +251,6 @@ export function ClarificationPanel({
         )}
         <Button
           size="sm"
-          variant="outline"
           onClick={onGenerateClarification}
           disabled={isGenerating}
           loading={isGenerating}
@@ -261,12 +260,12 @@ export function ClarificationPanel({
         </Button>
         <Button
           size="sm"
-          onClick={handleGeneratePRD}
+          variant="outline"
+          onClick={handleOpenPRD}
           disabled={!allRequiredAnswered || isGenerating}
-          loading={isGenerating && allRequiredAnswered}
-          data-testid="button-generate-prd"
+          data-testid="button-open-prd-phase"
         >
-          {isGenerating ? 'Generating PRD…' : 'Generate PRD'}
+          Go to PRD
         </Button>
         <Button
           size="sm"

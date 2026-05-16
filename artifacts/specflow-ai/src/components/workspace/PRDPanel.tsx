@@ -14,7 +14,7 @@ interface PRDPanelProps {
   sections: PRDSection[];
   generationStep: GenerationStepState;
   onGeneratePRD: () => void;
-  onGenerateEpics: () => void;
+  onOpenEpics: () => void;
   isAiBusy?: boolean;
   onCancel?: () => void;
 }
@@ -27,7 +27,7 @@ export function PRDPanel({
   sections,
   generationStep,
   onGeneratePRD,
-  onGenerateEpics,
+  onOpenEpics,
   isAiBusy = false,
   onCancel,
 }: PRDPanelProps) {
@@ -43,6 +43,7 @@ export function PRDPanel({
   });
 
   const completedCount = sections.filter((section) => section.complete).length;
+  const hasPrdContent = sections.some((section) => section.content.trim().length > 0);
   const editingSection = sections.find((section) => section.id === editingId) ?? null;
   const contentDraft = useWatch({ control: form.control, name: 'content' }) ?? '';
 
@@ -202,17 +203,17 @@ export function PRDPanel({
       </div>
 
       <StepActionBar isLoading={isGenerating}>
-        <Button size="sm" variant="outline" onClick={onGeneratePRD} disabled={isGenerating} loading={isGenerating}>
-          {isGenerating ? 'Regenerating…' : 'Regenerate PRD'}
+        <Button size="sm" onClick={onGeneratePRD} disabled={isGenerating} loading={isGenerating}>
+          {isGenerating ? 'Generating PRD…' : hasPrdContent ? 'Regenerate PRD' : 'Generate PRD'}
         </Button>
         <Button
           size="sm"
-          onClick={onGenerateEpics}
+          variant="outline"
+          onClick={onOpenEpics}
           disabled={isGenerating}
-          loading={isGenerating}
-          data-testid="button-generate-epics"
+          data-testid="button-open-epics-phase"
         >
-          {isGenerating ? 'Generating Epics…' : 'Generate Epics'}
+          Go to Epics
         </Button>
       </StepActionBar>
     </div>
