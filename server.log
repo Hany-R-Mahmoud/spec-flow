@@ -406,3 +406,6 @@
 {"time": "2026-05-16 23:32:46.078362+03:00", "level": "DEBUG", "message": "TOKEN_ESTIMATE: our=28222 provider=28457 diff=+235", "module": "providers.openai_compat", "function": "_stream_response_impl", "line": 430, "request_id": "req_6cec53a8b938"}
 {"time": "2026-05-16 23:32:46.078467+03:00", "level": "DEBUG", "message": "SSE_EVENT: event_type=message_delta serialized_bytes=170", "module": "core.anthropic.sse", "function": "_format_event", "line": 191, "request_id": "req_6cec53a8b938"}
 {"time": "2026-05-16 23:32:46.078541+03:00", "level": "DEBUG", "message": "SSE_EVENT: event_type=message_stop serialized_bytes=52", "module": "core.anthropic.sse", "function": "_format_event", "line": 191, "request_id": "req_6cec53a8b938"}
+{"time": "2026-05-19 12:16:38.475666+03:00", "level": "INFO", "message": "Shutdown requested, cleaning up...", "module": "api.runtime", "function": "shutdown", "line": 134}
+{"time": "2026-05-19 12:16:38.492503+03:00", "level": "WARNING", "message": "Shutdown step failed: provider_registry.cleanup: exc_type=AttributeError", "module": "api.runtime", "function": "best_effort", "line": 47}
+{"time": "2026-05-19 12:16:38.506651+03:00", "level": "INFO", "message": "Server shut down cleanly", "module": "api.runtime", "function": "shutdown", "line": 154}

@@ -1,3 +1,32 @@
+---
+ijfw_version: 1.3.2
+ijfw_schema: 1
+type: software
+primary_type: software
+secondary_types: []
+confidence: 0.906
+detected_at: 2026-06-20T00:29:34.794Z
+signals:
+  - kind: manifest
+    weight: 0.9
+    manifests: [package.json, package.json, package.json, package.json, package.json, package.json]
+  - kind: dir_design
+    weight: 0.4
+    name: design
+  - kind: file_extension_ratio
+    weight: 0.7
+    domain: software
+    ratio: 0.986
+    count: 1637
+  - kind: filename_pattern
+    weight: 0.2
+    domain: content
+    name: post-merge.sh
+  - kind: filename_pattern
+    weight: 0.3
+    domain: design
+    name: wireframe-prototype.md
+---
 ## Project Summary
 
 SpecFlow AI turns rough product input into breakdowns, structured stories,
@@ -80,3 +109,11 @@ If `graphify-out/wiki/index.md` exists, use it before raw file scans.
 For cross-module relationship questions, prefer `graphify query`, `graphify
 path`, or `graphify explain`.
 After modifying code files, run `graphify update .`.
+
+<!-- IJFW-MEMORY-START -->
+Project memory at .ijfw/memory/. Call `ijfw_memory_prelude` for full context.
+<!-- IJFW-MEMORY-END -->
+
+<!-- IJFW-AGENTS-START -->
+No project agents yet. Run `ijfw team` to set them up.
+<!-- IJFW-AGENTS-END -->
