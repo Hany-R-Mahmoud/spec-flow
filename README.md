@@ -273,3 +273,11 @@ SpecFlow AI currently combines:
 
 SpecFlow AI live site:
 [https://spec-flow-ai.vercel.app/](https://spec-flow-ai.vercel.app/)
+
+## Apex Yard portfolio snapshot
+
+- Status: showcase
+- Category: Tools
+- Source of truth: [docs/portfolio.json](docs/portfolio.json)
+
+This section is maintained from repository evidence and should be updated with docs/portfolio.json when the project changes.

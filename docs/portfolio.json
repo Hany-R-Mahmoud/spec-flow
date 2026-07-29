@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "slug": "spec-flow",
+  "title": {
+    "en": "workspace",
+    "ar": "workspace"
+  },
+  "summary": {
+    "en": "<div align=\"center\"> <img src=\"./artifacts/specflow-ai/public/favicon.svg\" alt=\"SpecFlow AI logo\" width=\"88\" /> <h1>SpecFlow AI</h1> <p><strong>From rough idea to review-ready stories.</strong></p> <p> SpecFlow AI turns scattered product input into a guided workflow for breakdown",
+    "ar": "<div align=\"center\"> <img src=\"./artifacts/specflow-ai/public/favicon.svg\" alt=\"SpecFlow AI logo\" width=\"88\" /> <h1>SpecFlow AI</h1> <p><strong>From rough idea to review-ready stories.</strong></p> <p> SpecFlow AI turns scattered product input into a guided workflow for breakdown"
+  },
+  "status": "showcase",
+  "portfolio": true,
+  "category": "Tools",
+  "tech_stack": [
+    "TypeScript"
+  ],
+  "features": [
+    {
+      "en": "Public landing experience for explaining the product and routing users into the app",
+      "ar": "Public landing experience for explaining the product and routing users into the app"
+    },
+    {
+      "en": "Authenticated web app for running breakdown workflows",
+      "ar": "Authenticated web app for running breakdown workflows"
+    },
+    {
+      "en": "Express API server for auth-scoped application behavior",
+      "ar": "Express API server for auth-scoped application behavior"
+    },
+    {
+      "en": "Shared API contracts and generated client packages",
+      "ar": "Shared API contracts and generated client packages"
+    },
+    {
+      "en": "Shared database schema package for the Supabase-hosted Postgres runtime",
+      "ar": "Shared database schema package for the Supabase-hosted Postgres runtime"
+    },
+    {
+      "en": "Repo-owned docs in `docs/`",
+      "ar": "Repo-owned docs in `docs/`"
+    }
+  ],
+  "progress": {
+    "en": "Classified as showcase-ready by Apex Yard; this snapshot reflects the current repository evidence.",
+    "ar": "Classified as showcase-ready by Apex Yard; this snapshot reflects the current repository evidence."
+  },
+  "issues": [
+    {
+      "en": "No test command is declared in package.json.",
+      "ar": "No test command is declared in package.json."
+    },
+    {
+      "en": "No conventional test directory was detected.",
+      "ar": "No conventional test directory was detected."
+    }
+  ],
+  "suggestions": [
+    {
+      "en": "Add a focused automated test command for the highest-risk behavior.",
+      "ar": "Add a focused automated test command for the highest-risk behavior."
+    },
+    {
+      "en": "Add reviewed screenshots and a fuller case study when visual evidence is available.",
+      "ar": "Add reviewed screenshots and a fuller case study when visual evidence is available."
+    }
+  ],
+  "commands": {
+    "install": "pnpm install",
+    "dev": "pnpm run dev",
+    "build": "pnpm run build"
+  },
+  "repository": {
+    "branch": "main",
+    "sync": "github",
+    "github": "https://github.com/Hany-R-Mahmoud/spec-flow"
+  },
+  "source": {
+    "workspace": "workspace/spec-flow",
+    "last_reviewed": "2026-07-29"
+  }
+}

@@ -117,3 +117,8 @@ Project memory at .ijfw/memory/. Call `ijfw_memory_prelude` for full context.
 <!-- IJFW-AGENTS-START -->
 No project agents yet. Run `ijfw team` to set them up.
 <!-- IJFW-AGENTS-END -->
+
+## Apex Yard documentation
+
+Read README.md and docs/portfolio.json before changing this project.
+Keep portfolio facts source-backed, update the structured document when the repository changes, and write Unknown / verify instead of guessing.
