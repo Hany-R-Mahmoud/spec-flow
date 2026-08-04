@@ -23,6 +23,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ThemeModeToggle } from "@/components/shared/ThemeModeToggle";
 import { cn } from "@/lib/utils";
+import StandaloneVisitorCounter from "@/components/StandaloneVisitorCounter";
 
 type RevealProps = {
   children: React.ReactNode;
@@ -828,6 +829,7 @@ export function LandingPage() {
             </div>
           </div>
         </div>
+        <StandaloneVisitorCounter />
       </footer>
     </div>
   );
