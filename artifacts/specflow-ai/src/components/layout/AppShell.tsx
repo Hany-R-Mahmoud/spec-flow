@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
+import StandaloneVisitorCounter from '../StandaloneVisitorCounter';
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -37,6 +38,7 @@ export function AppShell({ children }: AppShellProps) {
           </div>
         </main>
       </div>
+      <StandaloneVisitorCounter />
     </div>
   );
 }
